@@ -13,6 +13,8 @@ import {
     Input,
     InputRightElement,
     Image,
+    Tooltip,
+    useToast,
 } from "@chakra-ui/react";
 import {
     SearchIcon,
@@ -22,28 +24,43 @@ import {
     CloseIcon,
 } from "@chakra-ui/icons";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as Reactlink } from "react-router-dom";
 import LightLogo from "../Uitlites/OpenWeather-Logo-Light.png";
 import DarkLogo from "../Uitlites/OpenWeather-Logo-Dark.png";
 
 export default function Navbar() {
     const { colorMode, toggleColorMode } = useColorMode();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [searchQuery, setSearchQuery] = useState("");
-    // const navigate = useNavigate();
+    const toast = useToast();
+    const navigate = useNavigate();
+    const [search, setSearch] = useState("");
+
+    const handleChange = (e) => {
+        setSearch(e.target.value);
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
-        // navigate(`/search?query=${searchQuery}`);
-        setSearchQuery("");
-    };
-
-    const handleChange = (e) => {
-        setSearchQuery(e.target.value);
+        navigate("/weather/search/" + search);
+        toast({
+            title: "Searching for " + search + " ...",
+            description: "",
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+            position: "top",
+        });
+        setSearch("");
     };
 
     return (
-        <Box bg={useColorModeValue("gray.100", "gray.900")} px={8}>
+        <Box
+            zIndex={1000}
+            position={"sticky"}
+            w={"100vw"}
+            overflow={"hidden"}
+            bg={useColorModeValue("gray.100", "gray.900")}
+            px={8}>
             <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
                 <IconButton
                     size={"md"}
@@ -53,30 +70,48 @@ export default function Navbar() {
                     onClick={isOpen ? onClose : onOpen}
                 />
                 <HStack width={"30%"} spacing={8} alignItems={"center"}>
-                    <Image
-                        style={{
-                            width: "30%",
-                            margin: "0px",
-                        }}
-                        src={colorMode === "light" ? LightLogo : DarkLogo}
-                        alt="logo"
-                    />
+                    <HStack spacing={2} width={"40%"}>
+                        <Reactlink to="/">
+                            <Image
+                                style={{
+                                    width: "80%",
+                                    margin: "0px",
+                                }}
+                                src={
+                                    colorMode === "light" ? LightLogo : DarkLogo
+                                }
+                                alt="logo"
+                            />
+                        </Reactlink>
+                    </HStack>
 
                     <HStack
                         as={"nav"}
                         spacing={2}
+                        width={"50%"}
                         display={{ base: "none", md: "flex" }}>
-                        <Link
-                            px={2}
-                            py={1}
-                            rounded={"md"}
-                            _hover={{
-                                textDecoration: "none",
-                                bg: useColorModeValue("gray.200", "gray.700"),
-                            }}
-                            href="">
-                            Search
-                        </Link>
+                        <Tooltip
+                            hasArrow
+                            label="Go to search page"
+                            bg="gray.300"
+                            color="black">
+                            <Reactlink to="/weather/search">
+                                <Link
+                                    px={2}
+                                    py={1}
+                                    rounded={"md"}
+                                    _hover={{
+                                        textDecoration: "none",
+                                        bg: useColorModeValue(
+                                            "gray.200",
+                                            "gray.700"
+                                        ),
+                                    }}
+                                    href="">
+                                    Search
+                                </Link>
+                            </Reactlink>
+                        </Tooltip>
                     </HStack>
                 </HStack>
                 <HStack
@@ -109,15 +144,21 @@ export default function Navbar() {
 
                                 bg: useColorModeValue("gray.200", "gray.700"),
                             }}
-                            value={searchQuery}
+                            value={search}
                             onChange={handleChange}
                         />
                         <InputRightElement>
-                            <Button
-                                style={{ backgroundColor: "transparent" }}
-                                onClick={handleSearch}>
-                                <SearchIcon />
-                            </Button>
+                            <Tooltip
+                                hasArrow
+                                label="Search Now"
+                                bg="gray.300"
+                                color="black">
+                                <Button
+                                    style={{ backgroundColor: "transparent" }}
+                                    onClick={handleSearch}>
+                                    <SearchIcon />
+                                </Button>
+                            </Tooltip>
                         </InputRightElement>
                     </InputGroup>
                 </HStack>
@@ -125,12 +166,18 @@ export default function Navbar() {
                     width={"30%"}
                     alignItems={"end"}
                     justifyContent={"flex-end"}>
-                    <Button
-                        onClick={toggleColorMode}
-                        p={0}
-                        borderRadius={"full"}>
-                        {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-                    </Button>
+                    <Tooltip
+                        hasArrow
+                        label="Switch color mode"
+                        bg="gray.300"
+                        color="black">
+                        <Button
+                            onClick={toggleColorMode}
+                            p={0}
+                            borderRadius={"full"}>
+                            {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+                        </Button>
+                    </Tooltip>
                 </HStack>
             </Flex>
 
@@ -156,7 +203,7 @@ export default function Navbar() {
                                     outline: "none",
                                     backgroundColor: "#EDF2F7",
                                 }}
-                                value={searchQuery}
+                                value={search}
                                 onChange={handleChange}
                             />
                             <InputRightElement>

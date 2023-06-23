@@ -1,9 +1,16 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import Empty from "../Components/Empty";
+import { useLocation } from "react-router-dom";
 
 const Search = () => {
-  return (
-    <div>Search</div>
-  )
-}
+    const location = useLocation();
 
-export default Search
+
+    return (
+        <div>
+            <Empty />
+        </div>
+    );
+};
+
+export default Search;
