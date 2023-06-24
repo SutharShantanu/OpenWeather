@@ -16,7 +16,7 @@ import {
     TiWeatherCloudy,
 } from "react-icons/ti";
 
-const Feature = ({ text, icon, iconBg }) => {
+export const Feature = ({ text, icon, iconBg }) => {
     return (
         <Stack direction={"row"} align={"center"}>
             <Flex
@@ -35,7 +35,11 @@ const Feature = ({ text, icon, iconBg }) => {
 
 export default function Homepage() {
     return (
-        <Container maxW={"5xl"} py={12} paddingTop={0}>
+        <Container
+            maxW={"5xl"}
+            py={12}
+            paddingTop={0}
+            marginTop={{ base: "10px", md: "50px" }}>
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
                 <Stack spacing={4}>
                     <Text
