@@ -23,7 +23,7 @@ const Search = () => {
                 });
         }
     }, [locationParam]);
-    // console.log(locationParam);
+    console.log(searchResult);
 
     return (
         <div>

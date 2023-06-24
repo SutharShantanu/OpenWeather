@@ -16,6 +16,7 @@ import {
     Tfoot,
     Tbody,
     Td,
+    Badge,
 } from "@chakra-ui/react";
 import { WiHumidity, WiThermometer, WiStrongWind } from "react-icons/wi";
 
@@ -82,7 +83,7 @@ const TestimonialAvatar = ({ icon, name, title }) => {
         <Flex align={"center"} mb={8} direction={"column"}>
             <Icon as={icon} boxSize={8} color="gray.600" mb={2} />
             <Stack spacing={-1} align={"center"}>
-                <Text fontSize={"xl"} fontWeight={600}>
+                <Text color={"#323234"} fontSize={"xl"} fontWeight={600}>
                     {name}
                 </Text>
                 <Text
@@ -96,7 +97,7 @@ const TestimonialAvatar = ({ icon, name, title }) => {
 };
 
 export default function Result({ location, ...data }) {
-    const {
+    let {
         cloud_pct,
         temp,
         feels_like,
@@ -109,14 +110,36 @@ export default function Result({ location, ...data }) {
         sunset,
     } = data;
 
-    const capitalizedLocation =
-        location.charAt(0).toUpperCase() + location.slice(1);
+    var capitalizedLocation = "";
+
+    if (location) {
+        capitalizedLocation =
+            location.charAt(0).toUpperCase() + location.slice(1);
+    }
+
+    const date1 = new Date(sunrise * 1000);
+    const sunriseTime = date1.toLocaleTimeString(undefined, {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+    });
+    console.log(sunriseTime);
+
+    const date2 = new Date(sunset * 1000);
+    const sunsetTime = date2.toLocaleTimeString(undefined, {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+    });
 
     return (
-        <Box bg={useColorModeValue("white", "gray.700")}>
+        <Box bg={useColorModeValue("white", "gray.700")} mb={8}>
             <Container maxW={"7xl"} py={16} as={Stack} spacing={12}>
                 <Stack spacing={0} align={"center"}>
-                    <Heading as={"h1"} size={{ base: "xl", md: "4xl" }}>
+                    <Heading
+                        color={"#323234"}
+                        as={"h1"}
+                        size={{ base: "xl", md: "4xl" }}>
                         Weather for {capitalizedLocation}
                     </Heading>
                     <Text
@@ -130,28 +153,6 @@ export default function Result({ location, ...data }) {
                     spacing={{ base: 10, md: 4, lg: 10 }}>
                     <Testimonial>
                         <TestimonialAvatar
-                            icon={WiThermometer}
-                            name={"TEMPERATURE"}
-                        />
-
-                        <TestimonialContent>
-                            <TestimonialHeading></TestimonialHeading>
-                            <TestimonialText>
-                                <Text fontSize="3xl">{temp}°C</Text>
-                                <Text fontSize="md">
-                                    Feels Like {feels_like}°C
-                                </Text>
-                                <Text fontSize="md">
-                                    Min. Temprature {min_temp}°C
-                                </Text>
-                                <Text fontSize="md">
-                                    Max. Temprature {max_temp}°C
-                                </Text>
-                            </TestimonialText>
-                        </TestimonialContent>
-                    </Testimonial>
-                    <Testimonial>
-                        <TestimonialAvatar
                             icon={WiHumidity}
                             name={"HUMIDITY INFO"}
                         />
@@ -160,12 +161,34 @@ export default function Result({ location, ...data }) {
                             <TestimonialHeading></TestimonialHeading>
                             <TestimonialText>
                                 <Text fontSize="3xl">{humidity}%</Text>
-                                <Text fontSize="md">
+                                <Text fontSize="md" color={"gray.500"}>
                                     Wind Degree {wind_degrees}°
                                 </Text>
-                                <Text fontSize="md"></Text>
-                                <Text fontSize="md">
+                                <Text fontSize="md" color={"gray.500"}></Text>
+                                <Text fontSize="md" color={"gray.500"}>
                                     Cloud Coverage {cloud_pct}%
+                                </Text>
+                            </TestimonialText>
+                        </TestimonialContent>
+                    </Testimonial>
+                    <Testimonial>
+                        <TestimonialAvatar
+                            icon={WiThermometer}
+                            name={"TEMPERATURE"}
+                        />
+
+                        <TestimonialContent>
+                            <TestimonialHeading></TestimonialHeading>
+                            <TestimonialText>
+                                <Text fontSize="3xl">{temp}°C</Text>
+                                <Text fontSize="md" color={"gray.500"}>
+                                    Feels Like {feels_like}°C
+                                </Text>
+                                <Text fontSize="md" color={"gray.500"}>
+                                    Min. Temprature {min_temp}°C
+                                </Text>
+                                <Text fontSize="md" color={"gray.500"}>
+                                    Max. Temprature {max_temp}°C
                                 </Text>
                             </TestimonialText>
                         </TestimonialContent>
@@ -178,57 +201,62 @@ export default function Result({ location, ...data }) {
                         <TestimonialContent>
                             <TestimonialHeading></TestimonialHeading>
                             <TestimonialText>
-                                <Text fontSize="3xl">{wind_speed}km/hr</Text>
-                                <Text fontSize="md">
-                                    Wind Speed {wind_speed}
+                                <Text fontSize="3xl">{wind_speed}km</Text>
+
+                                <Text fontSize="md" color={"gray.500"}>
+                                    Sunrise Time {sunriseTime}
                                 </Text>
-                                <Text fontSize="md">
-                                    Sunrise Time {sunrise}
+                                <Text fontSize="md" color={"gray.500"}>
+                                    Sunset Time {sunsetTime}
                                 </Text>
-                                <Text fontSize="md">Sunset Time {sunset}</Text>
                             </TestimonialText>
                         </TestimonialContent>
                     </Testimonial>
                 </Stack>
-                <Heading as={"h5"} size={{ base: "md", md: "xl" }}>
-                    Weather stats for top searched Ctit
+                <Heading
+                    color={"#323234"}
+                    as={"h5"}
+                    size={{ base: "md", md: "xl" }}>
+                    Weather stats for top Cities
                 </Heading>
-                <TableContainer>
+                <TableContainer
+                    borderRadius="xl"
+                    borderWidth="1px"
+                    borderColor="gray.200">
                     <Table variant="striped" colorScheme="gray">
                         <TableCaption>
-                            Imperial to metric conversion factors
+                            <Badge
+                                variant="subtle"
+                                fontSize="sm"
+                                rounded={"lg"}
+                                fontWeight={100}
+                                colorScheme="purple">
+                                Updated {new Date().toLocaleString()}
+                            </Badge>
                         </TableCaption>
+
                         <Thead>
                             <Tr>
-                                <Th>To convert</Th>
-                                <Th>into</Th>
-                                <Th isNumeric>multiply by</Th>
+                                <Th>City</Th>
+                                <Th>Temperature</Th>
+                                <Th>Sunrise</Th>
+                                <Th>Sunset</Th>
+                                <Th>Humidity</Th>
                             </Tr>
                         </Thead>
                         <Tbody>
                             <Tr>
                                 <Td>inches</Td>
                                 <Td>millimetres (mm)</Td>
-                                <Td isNumeric>25.4</Td>
-                            </Tr>
-                            <Tr>
-                                <Td>feet</Td>
-                                <Td>centimetres (cm)</Td>
-                                <Td isNumeric>30.48</Td>
-                            </Tr>
-                            <Tr>
-                                <Td>yards</Td>
-                                <Td>metres (m)</Td>
-                                <Td isNumeric>0.91444</Td>
+                                <Td>milli (mm)</Td>
+                                <Td>metres (mm)</Td>
+                                <Td>25.4</Td>
                             </Tr>
                         </Tbody>
-                        <Tfoot>
-                            <Tr>
-                                <Th>To convert</Th>
-                                <Th>into</Th>
-                                <Th isNumeric>multiply by</Th>
-                            </Tr>
-                        </Tfoot>
+                        {/* <Tfoot>
+
+                            <Text fontSize={"sm"}></Text>
+                        </Tfoot> */}
                     </Table>
                 </TableContainer>
             </Container>
