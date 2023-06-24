@@ -41,26 +41,28 @@ export default function Navbar() {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        navigate("/weather/search/" + search);
+        let lower = search;
+        lower = lower.toLowerCase();
         toast({
-            title: "Searching for " + search + " ...",
+            title: "Searching weather results for " + search + " ...",
             description: "",
             status: "success",
             duration: 2000,
             isClosable: true,
             position: "top",
         });
-        setSearch("");
+        navigate("/weather/search?location=" + lower);
     };
 
     return (
         <Box
             zIndex={1000}
             position={"sticky"}
-            w={"100vw"}
-            overflow={"hidden"}
+            top={0}
             bg={useColorModeValue("gray.100", "gray.900")}
-            px={8}>
+            px={8}
+            maxW="100%"
+            overflowX="hidden">
             <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
                 <IconButton
                     size={"md"}
@@ -128,7 +130,6 @@ export default function Navbar() {
                                     "gray.500",
                                     "gray.700"
                                 )}`,
-
                                 transition: "border-color 0.2s",
                             }}
                             _hover={{
@@ -141,7 +142,6 @@ export default function Navbar() {
                                     "gray.500",
                                     "gray.700"
                                 )}`,
-
                                 bg: useColorModeValue("gray.200", "gray.700"),
                             }}
                             value={search}

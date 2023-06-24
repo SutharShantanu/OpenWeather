@@ -1,13 +1,13 @@
 import "./App.css";
 import Footer from "./Components/Footer";
 import Navbar from "./Components/Navbar";
-import Wrapper from "./Routes/Wrapper";
+import AllRoutes from "./Routes/AllRoutes";
 
 function App() {
     return (
         <div className="App">
             <Navbar />
-            <Wrapper />
+            <AllRoutes />
             <Footer />
         </div>
     );
