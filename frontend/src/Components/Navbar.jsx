@@ -1,13 +1,10 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import {
     Box,
     Flex,
     IconButton,
     Button,
     useDisclosure,
-    useColorModeValue,
     Stack,
-    useColorMode,
     HStack,
     Link,
     InputGroup,
@@ -17,6 +14,7 @@ import {
     Tooltip,
     useToast,
     Spinner,
+    useColorMode,
 } from "@chakra-ui/react";
 import {
     SearchIcon,
@@ -26,12 +24,12 @@ import {
     CloseIcon,
 } from "@chakra-ui/icons";
 import { useState } from "react";
-import { useNavigate, Link as Reactlink } from "react-router-dom";
+import axios from "axios";
+import { useNavigate, Link as ReactLink } from "react-router-dom";
 import LightLogo from "../Uitlites/OpenWeather-Logo-Light.png";
 import DarkLogo from "../Uitlites/OpenWeather-Logo-Dark.png";
 
 export default function Navbar() {
-    const { colorMode, toggleColorMode } = useColorMode();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [isButLoading, setIsButLoading] = useState(false);
     const toast = useToast();
@@ -42,31 +40,84 @@ export default function Navbar() {
         setSearch(e.target.value);
     };
 
+    const handleKeyPress = (e) => {
+        if (e.key === "Enter") {
+            handleSearch(e);
+        }
+    };
+
     const handleSearch = (e) => {
         e.preventDefault();
-        let lower = search;
-        lower = lower.toLowerCase();
-        setIsButLoading(true);
-        setTimeout(() => {
-            setIsButLoading(false);
+
+        if (!search) {
             toast({
-                title: "Searching weather results for " + search + " ...",
-                description: "",
-                status: "success",
+                title: "Please enter a location to search",
+                status: "error",
                 duration: 2000,
                 isClosable: true,
                 position: "top",
             });
-            navigate("/weather/search?location=" + lower);
+            return;
+        }
+
+        let lower = search.toLowerCase();
+        setIsButLoading(true);
+
+        setTimeout(() => {
+            axios
+                .get(`http://localhost:4500/weather/search/${lower}`)
+                .then((res) => {
+                    const responseStatusCode = res.status;
+                    const responseMessage = res.data.message;
+                    setIsButLoading(false);
+
+                    if (
+                        responseStatusCode === 500 &&
+                        responseMessage === "Internal Server Error"
+                    ) {
+                        toast({
+                            title: "Please enter a valid city name",
+                            status: "warning",
+                            duration: 2000,
+                            isClosable: true,
+                            position: "top",
+                        });
+                        return;
+                    }
+
+                    toast({
+                        title: "Found weather for " + search + " ...",
+                        description: "",
+                        status: "success",
+                        duration: 2000,
+                        isClosable: true,
+                        position: "top",
+                    });
+                    navigate("/weather/search?location=" + lower);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    setIsButLoading(false);
+                    toast({
+                        title: "Please enter a valid city name !",
+                        status: "error",
+                        duration: 2000,
+                        isClosable: true,
+                        position: "top",
+                    });
+                });
         }, 2000);
     };
+
+    const { colorMode, toggleColorMode } = useColorMode();
+    const logo = colorMode === "light" ? LightLogo : DarkLogo;
 
     return (
         <Box
             zIndex={1000}
             position={"sticky"}
             top={0}
-            bg={useColorModeValue("gray.100", "gray.900")}
+            bg={colorMode === "light" ? "gray.100" : "gray.900"}
             px={8}
             maxW="100%"
             overflowX="hidden">
@@ -80,18 +131,16 @@ export default function Navbar() {
                 />
                 <HStack width={"30%"} spacing={8} alignItems={"center"}>
                     <HStack spacing={2} width={"40%"}>
-                        <Reactlink to="/">
+                        <ReactLink to="/">
                             <Image
                                 style={{
                                     width: "80%",
                                     margin: "0px",
                                 }}
-                                src={
-                                    colorMode === "light" ? LightLogo : DarkLogo
-                                }
+                                src={logo}
                                 alt="logo"
                             />
-                        </Reactlink>
+                        </ReactLink>
                     </HStack>
 
                     <HStack
@@ -104,22 +153,22 @@ export default function Navbar() {
                             label="Go to search page"
                             bg="gray.300"
                             color="#323234">
-                            <Reactlink to="/weather/search">
+                            <ReactLink to="/weather/search">
                                 <Link
                                     px={2}
                                     py={1}
                                     rounded={"md"}
                                     _hover={{
                                         textDecoration: "none",
-                                        bg: useColorModeValue(
-                                            "gray.200",
-                                            "gray.700"
-                                        ),
+                                        bg:
+                                            colorMode === "light"
+                                                ? "gray.200"
+                                                : "gray.700",
                                     }}
                                     href="">
                                     Search
                                 </Link>
-                            </Reactlink>
+                            </ReactLink>
                         </Tooltip>
                     </HStack>
                 </HStack>
@@ -133,26 +182,35 @@ export default function Navbar() {
                             type="search"
                             placeholder="Search Weather here ☁️"
                             style={{
-                                border: `1px solid ${useColorModeValue(
-                                    "gray.500",
-                                    "gray.700"
-                                )}`,
+                                border: `1px solid ${
+                                    colorMode === "light"
+                                        ? "gray.500"
+                                        : "gray.700"
+                                }`,
                                 width: "95%",
                                 transition: "border-color 0.2s",
                             }}
                             _hover={{
                                 textDecoration: "none",
-                                bg: useColorModeValue("gray.200", "gray.700"),
+                                bg:
+                                    colorMode === "light"
+                                        ? "gray.200"
+                                        : "gray.700",
                             }}
                             _focusVisible={{
                                 outline: "none",
-                                border: `1px solid ${useColorModeValue(
-                                    "gray.500",
-                                    "gray.700"
-                                )}`,
-                                bg: useColorModeValue("gray.200", "gray.700"),
+                                border: `1px solid ${
+                                    colorMode === "light"
+                                        ? "gray.500"
+                                        : "gray.700"
+                                }`,
+                                bg:
+                                    colorMode === "light"
+                                        ? "gray.200"
+                                        : "gray.700",
                             }}
                             value={search}
+                            onKeyPress={handleKeyPress}
                             onChange={handleChange}
                         />
 
@@ -171,8 +229,8 @@ export default function Navbar() {
                                             thickness="2px"
                                             speed="0.50s"
                                             emptyColor="gray.200"
-                                            color="black"
-                                            size="md"
+                                            color="#323234"
+                                            size="sm"
                                         />
                                     )}
                                 </Button>
@@ -199,7 +257,7 @@ export default function Navbar() {
                 </HStack>
             </Flex>
 
-            {isOpen ? (
+            {isOpen && (
                 <Box pb={4} display={{ md: "none" }}>
                     <Stack as={"nav"} spacing={4}>
                         <Tooltip
@@ -207,52 +265,54 @@ export default function Navbar() {
                             label="Go to search page"
                             bg="gray.300"
                             color="#323234">
-                            <Reactlink to="/weather/search">
+                            <ReactLink to="/weather/search">
                                 <Link
                                     px={2}
                                     py={1}
                                     rounded={"md"}
                                     _hover={{
                                         textDecoration: "none",
-                                        bg: useColorModeValue(
-                                            "gray.200",
-                                            "gray.700"
-                                        ),
+                                        bg:
+                                            colorMode === "light"
+                                                ? "gray.200"
+                                                : "gray.700",
                                     }}
                                     href="">
                                     Search
                                 </Link>
-                            </Reactlink>
+                            </ReactLink>
                         </Tooltip>
                         <InputGroup w={"100%"}>
                             <Input
                                 type="search"
                                 placeholder="Search Weather here ☁️"
                                 style={{
-                                    border: `1px solid ${useColorModeValue(
-                                        "gray.500",
-                                        "gray.700"
-                                    )}`,
+                                    border: `1px solid ${
+                                        colorMode === "light"
+                                            ? "gray.500"
+                                            : "gray.700"
+                                    }`,
                                     width: "95%",
                                     transition: "border-color 0.2s",
                                 }}
                                 _hover={{
                                     textDecoration: "none",
-                                    bg: useColorModeValue(
-                                        "gray.200",
-                                        "gray.700"
-                                    ),
+                                    bg:
+                                        colorMode === "light"
+                                            ? "gray.200"
+                                            : "gray.700",
                                 }}
                                 _focusVisible={{
                                     outline: "none",
-                                    border: `1px solid ${useColorModeValue(
-                                        "gray.500",
-                                        "gray.700"
-                                    )}`,
-                                    bg: useColorModeValue(
-                                        "gray.200",
-                                        "gray.700"
-                                    ),
+                                    border: `1px solid ${
+                                        colorMode === "light"
+                                            ? "gray.500"
+                                            : "gray.700"
+                                    }`,
+                                    bg:
+                                        colorMode === "light"
+                                            ? "gray.200"
+                                            : "gray.700",
                                 }}
                                 value={search}
                                 onChange={handleChange}
@@ -275,8 +335,8 @@ export default function Navbar() {
                                                 thickness="2px"
                                                 speed="0.50s"
                                                 emptyColor="gray.200"
-                                                color="black"
-                                                size="md"
+                                                color="#323234"
+                                                size="sm"
                                             />
                                         )}
                                     </Button>
@@ -285,7 +345,7 @@ export default function Navbar() {
                         </InputGroup>
                     </Stack>
                 </Box>
-            ) : null}
+            )}
         </Box>
     );
 }
