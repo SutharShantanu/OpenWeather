@@ -42,7 +42,7 @@ export default function Footer() {
             width="100%"
             position={"fixed"}
             bottom={0}
-            mt={8} // Add margin top to push content up
+            mt={8}
         >
             <Container
                 as={Stack}
@@ -52,7 +52,7 @@ export default function Footer() {
                 spacing={4}
                 justify={{ base: "center", md: "space-between" }}
                 align={{ base: "center", md: "center" }}>
-                <Text>® 2023 Shantanu. All rights reserved</Text>
+                <Text>© 2023 Shantanu. All rights reserved</Text>
                 <Stack direction={"row"} spacing={6}>
                     <SocialButton
                         label={"GitHub"}
