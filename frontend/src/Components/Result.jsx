@@ -14,22 +14,27 @@ import {
     Thead,
     Tr,
     Th,
-    Tfoot,
     Tbody,
     Td,
     Badge,
-    Skeleton,
     Image,
+    SkeletonCircle,
+    SkeletonText,
+    Tfoot,
 } from "@chakra-ui/react";
 import {
-    WiDaySunny,
-    WiCloud,
-    WiRain,
-    WiSnow,
     WiHumidity,
     WiThermometer,
     WiStrongWind,
+    WiDaySunny,
+    WiSunset,
+    WiSunrise,
+    WiBarometer,
+    WiWindDeg,
 } from "react-icons/wi";
+import { CiLocationOn } from "react-icons/ci";
+import { TbWorldLatitude, TbWorldLongitude } from "react-icons/tb";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 
 const Testimonial = ({ children }) => {
     return (
@@ -44,8 +49,10 @@ const TestimonialContent = ({ children }) => {
         <Stack
             bg={useColorModeValue("white", "gray.800")}
             boxShadow="rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px"
-            p={8}
-            minH={"30vh"}
+            py={8}
+            px={0}
+            minH={"25vh"}
+            maxH={"42vh"}
             rounded={"xl"}
             align={"center"}
             pos={"relative"}
@@ -70,22 +77,16 @@ const TestimonialContent = ({ children }) => {
     );
 };
 
-const TestimonialHeading = ({ children }) => {
-    return (
-        <Heading as={"h3"} fontSize={"xl"}>
-            {children}
-        </Heading>
-    );
-};
-
 const TestimonialText = ({ children }) => {
     return (
-        <Text
+        <Box
+            w={"50%"}
+            m={"auto"}
             textAlign={"center"}
             color={useColorModeValue("gray.600", "gray.400")}
             fontSize={"sm"}>
             {children}
-        </Text>
+        </Box>
     );
 };
 
@@ -118,7 +119,7 @@ const TimeString = (timestamp) => {
     return timeString;
 };
 
-function getWeatherIconCode(weatherId) {
+function getWeatherIconCode(weatherId, isDarkMode) {
     switch (weatherId) {
         case 200:
         case 201:
@@ -130,7 +131,7 @@ function getWeatherIconCode(weatherId) {
         case 230:
         case 231:
         case 232:
-            return "11d"; // Thunderstorm
+            return isDarkMode ? "11n" : "11d";
 
         case 300:
         case 301:
@@ -141,7 +142,7 @@ function getWeatherIconCode(weatherId) {
         case 313:
         case 314:
         case 321:
-            return "09d"; // Drizzle
+            return isDarkMode ? "09n" : "09d";
 
         case 500:
         case 501:
@@ -152,7 +153,7 @@ function getWeatherIconCode(weatherId) {
         case 521:
         case 522:
         case 531:
-            return "10d"; // Rain
+            return isDarkMode ? "10n" : "10d";
 
         case 600:
         case 601:
@@ -165,7 +166,7 @@ function getWeatherIconCode(weatherId) {
         case 620:
         case 621:
         case 622:
-            return "13d"; // Snow
+            return isDarkMode ? "13n" : "13d";
 
         case 701:
         case 711:
@@ -177,29 +178,45 @@ function getWeatherIconCode(weatherId) {
         case 762:
         case 771:
         case 781:
-            return "50d"; // Atmosphere
+            return isDarkMode ? "50n" : "50d";
 
         case 800:
-            return "01d"; // Clear
+            return isDarkMode ? "01n" : "01d";
 
         case 801:
-            return "02d"; // Few clouds
+            return isDarkMode ? "02n" : "02d";
 
         case 802:
-            return "03d"; // Scattered clouds
+            return isDarkMode ? "03n" : "03d";
 
         case 803:
         case 804:
-            return "04d"; // Broken/overcast clouds
+            return isDarkMode ? "04n" : "04d";
 
         default:
-            return ""; // Unknown condition, return an empty string or a default icon
+            return "";
     }
 }
 
-export default function Result({ location, ...data }) {
-    const [isLoading, setIsLoading] = useState(true);
+function SkeletonComponent() {
+    return (
+        <Box bg="white" w={{ base: "100%", md: "30%" }} m={"auto"}>
+            <SkeletonCircle mb="4" size="10" m="auto" />
+            <Box mt="6" padding="6" boxShadow="lg" bg="white" borderRadius="xl">
+                <SkeletonText
+                    mt="4"
+                    noOfLines={3}
+                    spacing="6"
+                    skeletonHeight="8"
+                />
+            </Box>
+        </Box>
+    );
+}
 
+export default function Result({ location, data, citiesData }) {
+    const [isLoading, setIsLoading] = useState(true);
+    console.log(citiesData);
     let {
         coord,
         weather,
@@ -213,19 +230,19 @@ export default function Result({ location, ...data }) {
         name,
     } = data;
 
-    var capitalizedLocation = "";
-
-    if (location) {
-        capitalizedLocation =
-            location.charAt(0).toUpperCase() + location.slice(1);
-    }
-
     const sunriseTime = TimeString(sys.sunrise);
     const sunsetTime = TimeString(sys.sunset);
     dt = TimeString(dt);
 
-    const weatherIconCode = getWeatherIconCode(weather[0].id);
+    const isDarkMode = useColorModeValue(false, true);
+    const weatherIconCode = getWeatherIconCode(weather[0].id, isDarkMode);
     const weatherIconURL = `https://openweathermap.org/img/wn/${weatherIconCode}.png`;
+
+    const timezoneHours = Math.floor(Math.abs(timezone) / 3600);
+    const timezoneMinutes = Math.floor((Math.abs(timezone) % 3600) / 60);
+    const timezoneSign = timezone >= 0 ? "+" : "-";
+
+    timezone = `${timezoneSign}${timezoneHours}:${timezoneMinutes} GMT`;
 
     useEffect(() => {
         setIsLoading(true);
@@ -237,155 +254,48 @@ export default function Result({ location, ...data }) {
     return (
         <Box bg={useColorModeValue("white", "gray.700")} mb={8}>
             <Container maxW={"7xl"} py={16} as={Stack} spacing={12}>
-                <Stack spacing={0} align={"center"}>
-                    <Heading as={"h1"} size={{ base: "xl", md: "4xl" }}>
-                        Weather for {capitalizedLocation}
-                    </Heading>
-                    <Text
-                        fontSize={{ base: "xl", md: "2xl" }}
-                        color={"gray.500"}>
-                        The weather you can trust, always
-                    </Text>
-                </Stack>
+                {isLoading ? (
+                    <Stack spacing={0} align={"center"}>
+                        <Box bg="white" minH={"23vh"} m={"auto"} w={"100%"}>
+                            <SkeletonText
+                                mt="2"
+                                noOfLines={1}
+                                spacing="4"
+                                w={{ base: "90%", md: "45%" }}
+                                m="auto"
+                                skeletonHeight="16"
+                            />
+                            <SkeletonText
+                                w={{ base: "75%", md: "30%" }}
+                                m="auto"
+                                mt="4"
+                                noOfLines={1}
+                                spacing="4"
+                                skeletonHeight="4"
+                            />
+                        </Box>
+                    </Stack>
+                ) : (
+                    <Stack spacing={0} align={"center"}>
+                        <Heading as={"h1"} size={{ base: "xl", md: "4xl" }}>
+                            Weather for {name}
+                        </Heading>
+                        <Text
+                            fontSize={{ base: "xl", md: "2xl" }}
+                            color={"gray.500"}>
+                            The weather you can trust, always
+                        </Text>
+                    </Stack>
+                )}
 
-                <Stack
-                    direction={{ base: "column", md: "row" }}
-                    spacing={{ base: 10, md: 4, lg: 10 }}>
-                    <Testimonial>
-                        <TestimonialAvatar
-                            icon={WiHumidity}
-                            name={"HUMIDITY INFO"}
-                        />
-                        <TestimonialContent>
-                            <TestimonialHeading>Weather</TestimonialHeading>
-                            <TestimonialText>
-                                <Text fontSize="3xl">{weather[0].main}</Text>
-                                <Image
-                                    src={weatherIconURL}
-                                    alt="Weather Icon"
-                                />
-
-                                <Text fontSize="md" color={"gray.500"}>
-                                    Condition {weather[0].description}
-                                </Text>
-                                <Text fontSize="md" color={"gray.500"}>
-                                    ID {weather[0].id}
-                                </Text>
-                            </TestimonialText>
-                        </TestimonialContent>
-                    </Testimonial>
-                    <Testimonial>
-                        <TestimonialAvatar
-                            icon={WiThermometer}
-                            name={"TEMPERATURE"}
-                        />
-                        <TestimonialContent>
-                            <TestimonialHeading>Temperature</TestimonialHeading>
-                            <TestimonialText>
-                                <Text fontSize="3xl">{main.temp}°C</Text>
-                                <Text fontSize="md" color={"gray.500"}>
-                                    Feels Like {main.feels_like}°C
-                                </Text>
-                                <Text fontSize="md" color={"gray.500"}>
-                                    Min. Temperature {main.temp_min}°C
-                                </Text>
-                                <Text fontSize="md" color={"gray.500"}>
-                                    Max. Temperature {main.temp_max}°C
-                                </Text>
-                            </TestimonialText>
-                        </TestimonialContent>
-                    </Testimonial>
-                    <Testimonial>
-                        <TestimonialAvatar
-                            icon={WiStrongWind}
-                            name={"WIND INFO"}
-                        />
-                        <TestimonialContent>
-                            <TestimonialHeading>Humidity</TestimonialHeading>
-                            <TestimonialText>
-                                <Text fontSize="3xl">{clouds.all}%</Text>
-                                <Text fontSize="md" color={"gray.500"}>
-                                    Sunrise Time {sunriseTime}
-                                </Text>
-                                <Text fontSize="md" color={"gray.500"}>
-                                    Sunset Time {sunsetTime}
-                                </Text>
-                            </TestimonialText>
-                        </TestimonialContent>
-                    </Testimonial>
-                </Stack>
                 {isLoading ? (
                     <Stack
+                        w={"100%"}
                         direction={{ base: "column", md: "row" }}
                         spacing={{ base: 10, md: 4, lg: 10 }}>
-                        <Skeleton width={{ base: "80%", md: "30%" }} m={"auto"}>
-                            <Testimonial>
-                                <TestimonialAvatar
-                                    icon={WiHumidity}
-                                    name={"HUMIDITY INFO"}
-                                />
-                                <TestimonialContent>
-                                    <TestimonialHeading></TestimonialHeading>
-                                    <TestimonialText>
-                                        <Text fontSize="3xl">
-                                            {WiHumidity}%
-                                        </Text>
-                                        <Text fontSize="md" color={"gray.500"}>
-                                            Wind Degree {}°
-                                        </Text>
-                                        <Text
-                                            fontSize="md"
-                                            color={"gray.500"}></Text>
-                                        <Text fontSize="md" color={"gray.500"}>
-                                            Cloud Coverage {}%
-                                        </Text>
-                                    </TestimonialText>
-                                </TestimonialContent>
-                            </Testimonial>
-                        </Skeleton>
-                        <Skeleton width={{ base: "80%", md: "30%" }} m={"auto"}>
-                            <Testimonial>
-                                <TestimonialAvatar
-                                    icon={WiThermometer}
-                                    name={"TEMPERATURE"}
-                                />
-                                <TestimonialContent>
-                                    <TestimonialHeading></TestimonialHeading>
-                                    <TestimonialText>
-                                        <Text fontSize="3xl">{}°C</Text>
-                                        <Text fontSize="md" color={"gray.500"}>
-                                            Feels Like {}°C
-                                        </Text>
-                                        <Text fontSize="md" color={"gray.500"}>
-                                            Min. Temprature {}°C
-                                        </Text>
-                                        <Text fontSize="md" color={"gray.500"}>
-                                            Max. Temprature {}°C
-                                        </Text>
-                                    </TestimonialText>
-                                </TestimonialContent>
-                            </Testimonial>
-                        </Skeleton>
-                        <Skeleton width={{ base: "80%", md: "30%" }} m={"auto"}>
-                            <Testimonial>
-                                <TestimonialAvatar
-                                    icon={WiStrongWind}
-                                    name={"WIND INFO"}
-                                />
-                                <TestimonialContent>
-                                    <TestimonialHeading></TestimonialHeading>
-                                    <TestimonialText>
-                                        <Text fontSize="3xl">{}km</Text>
-                                        <Text fontSize="md" color={"gray.500"}>
-                                            Sunrise Time {sunriseTime}
-                                        </Text>
-                                        <Text fontSize="md" color={"gray.500"}>
-                                            Sunset Time {sunsetTime}
-                                        </Text>
-                                    </TestimonialText>
-                                </TestimonialContent>
-                            </Testimonial>
-                        </Skeleton>
+                        <SkeletonComponent />
+                        <SkeletonComponent />
+                        <SkeletonComponent />
                     </Stack>
                 ) : (
                     <Stack
@@ -393,20 +303,31 @@ export default function Result({ location, ...data }) {
                         spacing={{ base: 10, md: 4, lg: 10 }}>
                         <Testimonial>
                             <TestimonialAvatar
-                                icon={WiHumidity}
-                                name={"HUMIDITY INFO"}
+                                icon={WiDaySunny}
+                                name={"WEATHER"}
                             />
                             <TestimonialContent>
-                                <TestimonialHeading>
-                                    Wind Info
-                                </TestimonialHeading>
                                 <TestimonialText>
-                                    <Text fontSize="3xl">{wind.speed}mt/s</Text>
-                                    <Text fontSize="md" color={"gray.500"}>
-                                        Wind Degree {wind.deg}°
+                                    <Flex
+                                        alignItems="center"
+                                        direction={{
+                                            base: "column",
+                                            md: "row",
+                                        }}>
+                                        <Text fontSize="3xl" mr={4} w="60%">
+                                            {weather[0].main}
+                                        </Text>
+                                        <Image
+                                            src={weatherIconURL}
+                                            w="40%"
+                                            alt="Weather Icon"
+                                        />
+                                    </Flex>
+                                    <Text fontSize="md" color="gray.500">
+                                        Condition: {weather[0].description}
                                     </Text>
                                     <Text fontSize="md" color={"gray.500"}>
-                                        Wind Gusts {wind.gust}mt/s
+                                        Id {weather[0].id}
                                     </Text>
                                 </TestimonialText>
                             </TestimonialContent>
@@ -417,91 +338,269 @@ export default function Result({ location, ...data }) {
                                 name={"TEMPERATURE"}
                             />
                             <TestimonialContent>
-                                <TestimonialHeading>
-                                    Temperature
-                                </TestimonialHeading>
                                 <TestimonialText>
                                     <Text fontSize="3xl">
                                         {(main.temp - 273.15).toFixed(2)}°C
                                     </Text>
                                     <Text fontSize="md" color={"gray.500"}>
-                                        Feels Like
+                                        Feels Like&nbsp;
                                         {(main.feels_like - 273.15).toFixed(2)}
                                         °C
                                     </Text>
+                                    <Flex alignItems="center" w="100%" m="auto">
+                                        <Text
+                                            fontSize="md"
+                                            color={"gray.500"}
+                                            w="50%">
+                                            Min.{" "}
+                                            <ChevronDownIcon color="orange" />
+                                            &nbsp;
+                                            {(main.temp_min - 273.15).toFixed(
+                                                2
+                                            )}
+                                            °C
+                                        </Text>
+                                        <Text
+                                            fontSize="md"
+                                            color={"gray.500"}
+                                            w="50%">
+                                            Max. <ChevronUpIcon color="red" />
+                                            &nbsp;
+                                            {(main.temp_max - 273.15).toFixed(
+                                                2
+                                            )}
+                                            °C
+                                        </Text>
+                                    </Flex>
+                                </TestimonialText>
+                            </TestimonialContent>
+                        </Testimonial>
+                        <Testimonial>
+                            <TestimonialAvatar
+                                icon={CiLocationOn}
+                                name={"LOCATION"}
+                            />
+                            <TestimonialContent>
+                                <TestimonialText>
+                                    <Text fontSize="3xl">{sys.country}</Text>
                                     <Text fontSize="md" color={"gray.500"}>
-                                        Min. Temperature
-                                        {(main.temp_min - 273.15).toFixed(2)}°C
+                                        Time Zone {timezone}
+                                    </Text>
+                                    <Flex alignItems="center" m="auto" w="100%">
+                                        <Text
+                                            fontSize="md"
+                                            color={"gray.500"}
+                                            w="50%">
+                                            <TbWorldLongitude
+                                                style={{
+                                                    margin: "auto",
+                                                    fontSize: "25px",
+                                                }}
+                                            />
+                                            {coord.lon}
+                                        </Text>
+                                        <Text
+                                            fontSize="md"
+                                            color={"gray.500"}
+                                            w="50%">
+                                            <TbWorldLatitude
+                                                style={{
+                                                    margin: "auto",
+                                                    fontSize: "25px",
+                                                }}
+                                            />
+                                            {coord.lat}
+                                        </Text>
+                                    </Flex>
+                                </TestimonialText>
+                            </TestimonialContent>
+                        </Testimonial>
+                    </Stack>
+                )}
+                {isLoading ? (
+                    <Stack
+                        w={"100%"}
+                        direction={{ base: "column", md: "row" }}
+                        spacing={{ base: 10, md: 4, lg: 10 }}>
+                        <SkeletonComponent />
+                        <SkeletonComponent />
+                        <SkeletonComponent />
+                    </Stack>
+                ) : (
+                    <Stack
+                        direction={{ base: "column", md: "row" }}
+                        spacing={{ base: 10, md: 4, lg: 10 }}>
+                        <Testimonial>
+                            <TestimonialAvatar
+                                name={"WIND INFO"}
+                                icon={WiStrongWind}
+                            />
+                            <TestimonialContent>
+                                <TestimonialText>
+                                    <Text fontSize="3xl">
+                                        {wind.speed}&nbsp;mt/s
                                     </Text>
                                     <Text fontSize="md" color={"gray.500"}>
-                                        Max. Temperature
-                                        {(main.temp_max - 273.15).toFixed(2)}°C
+                                        Degree {wind.deg}°
+                                    </Text>
+                                    <Text fontSize="md" color={"gray.500"}>
+                                        Gusts {wind.gust} mt/s
                                     </Text>
                                 </TestimonialText>
                             </TestimonialContent>
                         </Testimonial>
                         <Testimonial>
                             <TestimonialAvatar
-                                icon={WiStrongWind}
-                                name={"WIND INFO"}
+                                icon={WiBarometer}
+                                name={"Sea levels"}
                             />
                             <TestimonialContent>
-                                <TestimonialHeading>
-                                    Humidity
-                                </TestimonialHeading>
                                 <TestimonialText>
-                                    <Text fontSize="3xl">{clouds.all}%</Text>
-                                    <Text fontSize="md" color={"gray.500"}>
-                                        Sunrise Time {sunriseTime}
+                                    <Text fontSize="3xl">
+                                        {main.pressure}&nbsp;hPa
+                                    </Text>
+                                    <Text fontSize="md" color="gray.500">
+                                        Level {main.sea_level} hPa
+                                    </Text>
+                                    <Text fontSize="md" color="gray.500">
+                                        Grnd {main.grnd_level} hPa
+                                    </Text>
+                                </TestimonialText>
+                            </TestimonialContent>
+                        </Testimonial>
+                        <Testimonial>
+                            <TestimonialAvatar
+                                icon={WiHumidity}
+                                name={"HUMIDITY INFO"}
+                            />
+                            <TestimonialContent>
+                                <TestimonialText>
+                                    <Text fontSize="3xl">
+                                        {main.humidity}&nbsp;%
                                     </Text>
                                     <Text fontSize="md" color={"gray.500"}>
-                                        Sunset Time {sunsetTime}
+                                        Clouds&nbsp;{clouds.all}%
                                     </Text>
+                                    <Text fontSize="md" color={"gray.500"}>
+                                        Visiblity&nbsp;{visibility}m
+                                    </Text>
+                                    <Flex alignItems="center" m="auto" w="100%">
+                                        <Text
+                                            fontSize="md"
+                                            color={"gray.500"}
+                                            w="50%">
+                                            <WiSunrise
+                                                style={{
+                                                    margin: "auto",
+                                                    fontSize: "25px",
+                                                }}
+                                            />
+                                            {sunriseTime}
+                                        </Text>
+                                        <Text
+                                            fontSize="md"
+                                            color={"gray.500"}
+                                            w="50%">
+                                            <WiSunset
+                                                style={{
+                                                    margin: "auto",
+                                                    fontSize: "25px",
+                                                }}
+                                            />
+                                            {sunsetTime}
+                                        </Text>
+                                    </Flex>
                                 </TestimonialText>
                             </TestimonialContent>
                         </Testimonial>
                     </Stack>
                 )}
-                <TableContainer
-                    borderRadius="xl"
-                    borderWidth="1px"
-                    borderColor="gray.200">
-                    <Table variant="striped" colorScheme="gray">
-                        <TableCaption>
-                            <Badge
-                                variant="subtle"
-                                fontSize="sm"
-                                rounded={"lg"}
-                                fontWeight={100}
-                                colorScheme="purple">
-                                Updated {dt}
-                            </Badge>
-                        </TableCaption>
-
-                        <Thead>
-                            <Tr>
-                                <Th>City</Th>
-                                <Th>Temperature</Th>
-                                <Th>Sunrise</Th>
-                                <Th>Sunset</Th>
-                                <Th>Humidity</Th>
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            <Tr>
-                                <Td>inches</Td>
-                                <Td>millimetres (mm)</Td>
-                                <Td>milli (mm)</Td>
-                                <Td>metres (mm)</Td>
-                                <Td>25.4</Td>
-                            </Tr>
-                        </Tbody>
-                        {/* <Tfoot>
-
-                            <Text fontSize={"sm"}></Text>
-                        </Tfoot> */}
-                    </Table>
-                </TableContainer>
+                {isLoading ? (
+                    <TableContainer
+                        borderRadius="xl"
+                        borderWidth="1px"
+                        mb={6}
+                        p={4}
+                        borderColor="gray.200">
+                        <Box bg="white" minH={"23vh"} m={"auto"} w={"100%"}>
+                            <SkeletonText
+                                mt="2"
+                                noOfLines={1}
+                                spacing="4"
+                                w={{ base: "90%", md: "100%" }}
+                                m="auto"
+                                skeletonHeight="12"
+                            />
+                            <SkeletonText
+                                w={{ base: "75%", md: "100%" }}
+                                m="auto"
+                                mt="4"
+                                noOfLines={5}
+                                spacing="4"
+                                skeletonHeight="6"
+                            />
+                            <SkeletonText
+                                w={{ base: "30%", md: "10%" }}
+                                m="auto"
+                                mt="2"
+                                noOfLines={1}
+                                spacing="4"
+                                skeletonHeight="4"
+                            />
+                        </Box>
+                    </TableContainer>
+                ) : (
+                    <TableContainer
+                        borderRadius="xl"
+                        borderWidth="1px"
+                        mb={6}
+                        borderColor="gray.200">
+                        <Table variant="striped" colorScheme="gray">
+                            <TableCaption>
+                                <Badge
+                                    variant="subtle"
+                                    fontSize="sm"
+                                    rounded={"lg"}
+                                    fontWeight={100}
+                                    colorScheme="purple">
+                                    Updated {dt}
+                                </Badge>
+                            </TableCaption>
+                            <Thead>
+                                <Tr>
+                                    <Th>City</Th>
+                                    <Th>Temperature</Th>
+                                    <Th>Weather</Th>
+                                    <Th>Clouds</Th>
+                                    <Th>Humidity</Th>
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {citiesData
+                                    ? citiesData.map((ele) => {
+                                          return (
+                                              <Tr>
+                                                  <Td>{ele.name}</Td>
+                                                  <Td>
+                                                      {(
+                                                          ele.main.temp - 273.15
+                                                      ).toFixed(2)}
+                                                      °C
+                                                  </Td>
+                                                  <Td>{ele.weather[0].main}</Td>
+                                                  <Td>{ele.clouds.all}%</Td>
+                                                  <Td>{ele.main.humidity}%</Td>
+                                              </Tr>
+                                          );
+                                      })
+                                    : null}
+                            </Tbody>
+                            <Tfoot>
+                                <Text fontSize={"sm"}></Text>
+                            </Tfoot>
+                        </Table>
+                    </TableContainer>
+                )}
             </Container>
         </Box>
     );
