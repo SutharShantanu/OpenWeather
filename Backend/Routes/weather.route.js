@@ -9,8 +9,40 @@ weatherRouter.get("/", (req, res) => {
 });
 
 const apiKey = "a48c0fc9d509efeebac0377dcb785b10";
+const citiesToFetch = ["Delhi", "Kolkata", "Chennai", "Mumbai", "Bengaluru"];
 
-weatherRouter.get("/search/:location", (req, res) => {
+const fetchAndSaveWeatherData = async () => {
+    try {
+        const fetchPromises = citiesToFetch.map((city) => {
+            const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
+            const headers = {
+                Authorization: "Bearer " + apiKey,
+            };
+
+            return axios.get(apiUrl, { headers });
+        });
+
+        const responses = await Promise.all(fetchPromises);
+        const weatherDataArray = responses.map((response) => response.data);
+        await Promise.all(
+            weatherDataArray.map((weatherData) =>
+                cities.findOneAndUpdate(
+                    { name: weatherData.name },
+                    weatherData,
+                    { upsert: true }
+                )
+            )
+        );
+        // console.log("Weather data for specific cities updated successfully!");
+    } catch (error) {
+        console.error(
+            "Error updating weather data for specific cities:",
+            error
+        );
+    }
+};
+
+weatherRouter.get("/search/:location", async (req, res) => {
     const { location } = req.params;
 
     const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}`;
@@ -25,9 +57,9 @@ weatherRouter.get("/search/:location", (req, res) => {
             res.status(200).send(weatherData);
         })
         .catch((error) => {
-            console.error(error);
-            res.status(500).send("Internal server error");
+            res.status(500).send("Internal server error", error);
         });
+    fetchAndSaveWeatherData();
 });
 
 weatherRouter.get("/cities", async (req, res) => {
@@ -35,7 +67,6 @@ weatherRouter.get("/cities", async (req, res) => {
         const data = await cities.find({});
         res.status(200).json(data);
     } catch (error) {
-        console.error(error);
         res.status(400).send("Internal server error", error);
     }
 });

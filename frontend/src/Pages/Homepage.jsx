@@ -39,7 +39,9 @@ export default function Homepage() {
             maxW={"5xl"}
             py={12}
             paddingTop={0}
-            marginTop={{ base: "10px", md: "50px" }}>
+            marginTop={{ base: "10px", md: "50px" }}
+            marginBottom={{ base: "50px", md: "0px" }}
+        >
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
                 <Stack spacing={4}>
                     <Text
