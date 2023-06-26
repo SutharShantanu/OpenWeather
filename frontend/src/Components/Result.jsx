@@ -21,6 +21,7 @@ import {
     SkeletonCircle,
     SkeletonText,
     Tfoot,
+    Highlight,
 } from "@chakra-ui/react";
 import {
     WiHumidity,
@@ -216,7 +217,7 @@ function SkeletonComponent() {
 
 export default function Result({ location, data, citiesData }) {
     const [isLoading, setIsLoading] = useState(true);
-    console.log(citiesData);
+    // console.log(citiesData);
     let {
         coord,
         weather,
@@ -278,7 +279,17 @@ export default function Result({ location, data, citiesData }) {
                 ) : (
                     <Stack spacing={0} align={"center"}>
                         <Heading as={"h1"} size={{ base: "xl", md: "4xl" }}>
-                            Weather for {name}
+                            Weather for&nbsp;
+                            <Highlight
+                                query={name}
+                                styles={{
+                                    px: "2",
+                                    py: "1",
+                                    rounded: "2xl",
+                                    bg: "orange.200",
+                                }}>
+                                {name}
+                            </Highlight>
                         </Heading>
                         <Text
                             fontSize={{ base: "xl", md: "2xl" }}
@@ -579,7 +590,19 @@ export default function Result({ location, data, citiesData }) {
                                 {citiesData
                                     ? citiesData.map((ele) => {
                                           return (
-                                              <Tr>
+                                              <Tr
+                                                  style={
+                                                      {
+                                                      }
+                                                  }
+                                                  _hover={{
+                                                      boxShadow:
+                                                          "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                                      zIndex: 1,
+                                                      borderRadius: "xl",
+                                                      transition:
+                                                          "all 0.3s ease-in-out",
+                                                  }}>
                                                   <Td>{ele.name}</Td>
                                                   <Td>
                                                       {(
