@@ -127,16 +127,15 @@ export default function Navbar() {
                     icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
                     aria-label={"Open Menu"}
                     display={{ md: "none" }}
+                    width={{ base: "10%", md: "0%" }}
                     onClick={isOpen ? onClose : onOpen}
                 />
                 <HStack width={"30%"} spacing={8} alignItems={"center"}>
-                    <HStack spacing={2} width={"40%"}>
+                    <HStack spacing={2} width={{ base: "100%", md: "50%" }}>
                         <ReactLink to="/">
                             <Image
-                                style={{
-                                    width: "80%",
-                                    margin: "0px",
-                                }}
+                                width={{ base: "100%", md: "80%" }}
+                                margin={{ base: "0px", md: "0px" }}
                                 src={logo}
                                 alt="logo"
                             />
@@ -239,7 +238,7 @@ export default function Navbar() {
                     </InputGroup>
                 </HStack>
                 <HStack
-                    width={"30%"}
+                    width={{ base: "10%", md: "30%" }}
                     alignItems={"end"}
                     justifyContent={"flex-end"}>
                     <Tooltip
