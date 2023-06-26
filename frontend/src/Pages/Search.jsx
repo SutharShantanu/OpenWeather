@@ -7,6 +7,7 @@ import Result from "../Components/Result";
 const Search = () => {
     const location = useLocation();
     const [searchResult, setSearchResult] = useState(null);
+    const [citiesData, setCitiesData] = useState(null);
     const searchParams = new URLSearchParams(location.search);
     const locationParam = searchParams.get("location");
     useEffect(() => {
@@ -23,13 +24,35 @@ const Search = () => {
                 });
         }
     }, [locationParam]);
-    console.log(searchResult);
+
+    // console.log(searchResult);
+
+    useEffect(() => {
+        if (locationParam) {
+            axios
+                .get(`http://localhost:4500/weather/cities`)
+                .then((res) => {
+                    const data = res.data;
+                    setCitiesData(data);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    setCitiesData(null);
+                });
+        }
+    }, [locationParam]);
+
+    // console.log(citiesData);
 
     return (
         <div>
             {searchResult ? (
                 <div>
-                    <Result location={locationParam} {...searchResult} />
+                    <Result
+                        location={locationParam}
+                        data={searchResult}
+                        citiesData={citiesData}
+                    />
                 </div>
             ) : (
                 <Empty />
