@@ -1,22 +1,21 @@
 const express = require("express");
 const axios = require("axios");
 const cities = require("../Models/cities.model");
-
+require("dotenv").config();
 const weatherRouter = express.Router();
 
 weatherRouter.get("/", (req, res) => {
     res.send("Welcome to the weather application!");
 });
 
-const apiKey = "a48c0fc9d509efeebac0377dcb785b10";
 const citiesToFetch = ["Delhi", "Kolkata", "Chennai", "Mumbai", "Bengaluru"];
 
 const fetchAndSaveWeatherData = async () => {
     try {
         const fetchPromises = citiesToFetch.map((city) => {
-            const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
+            const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.apiKey}`;
             const headers = {
-                Authorization: "Bearer " + apiKey,
+                Authorization: "Bearer " + process.env.apiKey,
             };
 
             return axios.get(apiUrl, { headers });
@@ -45,9 +44,9 @@ const fetchAndSaveWeatherData = async () => {
 weatherRouter.get("/search/:location", async (req, res) => {
     const { location } = req.params;
 
-    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}`;
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${process.env.apiKey}`;
     const headers = {
-        Authorization: "Bearer " + apiKey,
+        Authorization: "Bearer " + process.env.apiKey,
     };
 
     axios

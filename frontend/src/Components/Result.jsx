@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useState, useEffect } from "react";
 import {
     Box,
@@ -201,9 +202,17 @@ function getWeatherIconCode(weatherId, isDarkMode) {
 
 function SkeletonComponent() {
     return (
-        <Box bg="white" w={{ base: "100%", md: "30%" }} m={"auto"}>
+        <Box
+            bg={useColorModeValue("white", "gray.700")}
+            w={{ base: "100%", md: "30%" }}
+            m={"auto"}>
             <SkeletonCircle mb="4" size="10" m="auto" />
-            <Box mt="6" padding="6" boxShadow="lg" bg="white" borderRadius="xl">
+            <Box
+                mt="6"
+                padding="6"
+                boxShadow="lg"
+                bg={useColorModeValue("white", "gray.700")}
+                borderRadius="xl">
                 <SkeletonText
                     mt="4"
                     noOfLines={3}
@@ -257,7 +266,11 @@ export default function Result({ location, data, citiesData }) {
             <Container maxW={"7xl"} py={16} as={Stack} spacing={12}>
                 {isLoading ? (
                     <Stack spacing={0} align={"center"}>
-                        <Box bg="white" minH={"23vh"} m={"auto"} w={"100%"}>
+                        <Box
+                            bg={useColorModeValue("white", "gray.700")}
+                            minH={"23vh"}
+                            m={"auto"}
+                            w={"100%"}>
                             <SkeletonText
                                 mt="2"
                                 noOfLines={1}
@@ -325,7 +338,13 @@ export default function Result({ location, data, citiesData }) {
                                             base: "column",
                                             md: "row",
                                         }}>
-                                        <Text fontSize="3xl" mr={4} w="60%">
+                                        <Text
+                                            fontSize="3xl"
+                                            mr={{
+                                                base: 0,
+                                                md: 4,
+                                            }}
+                                            w="60%">
                                             {weather[0].main}
                                         </Text>
                                         <Image
@@ -527,13 +546,18 @@ export default function Result({ location, data, citiesData }) {
                     </Stack>
                 )}
                 {isLoading ? (
-                    <TableContainer
-                        borderRadius="xl"
-                        borderWidth="1px"
-                        mb={6}
-                        p={4}
-                        borderColor="gray.200">
-                        <Box bg="white" minH={"23vh"} m={"auto"} w={"100%"}>
+                    <TableContainer mb={6} p={2}>
+                        <Box
+                            borderRadius="xl"
+                            borderWidth="2px"
+                            borderColor={isDarkMode ? "gray.600" : "white"}
+                            bg={useColorModeValue("white", "gray.700")}
+                            minH={"23vh"}
+                            m={"auto"}
+                            rounded={"xl"}
+                            p={6}
+                            boxShadow={"lg"}
+                            w={"100%"}>
                             <SkeletonText
                                 mt="2"
                                 noOfLines={1}
@@ -563,10 +587,18 @@ export default function Result({ location, data, citiesData }) {
                 ) : (
                     <TableContainer
                         borderRadius="xl"
-                        borderWidth="1px"
+                        borderWidth="2px"
                         mb={6}
-                        borderColor="gray.200">
-                        <Table variant="striped" colorScheme="gray">
+                        p={4}
+                        bg={useColorModeValue("white", "gray.800")}
+                        style={{
+                            borderColor: `${
+                                isDarkMode ? "gray.600" : "gray.200"
+                            }`,
+                        }}>
+                        <Table
+                            variant="striped"
+                            colorScheme={isDarkMode ? "purple" : "gray"}>
                             <TableCaption>
                                 <Badge
                                     variant="subtle"
@@ -590,19 +622,7 @@ export default function Result({ location, data, citiesData }) {
                                 {citiesData
                                     ? citiesData.map((ele) => {
                                           return (
-                                              <Tr
-                                                  style={
-                                                      {
-                                                      }
-                                                  }
-                                                  _hover={{
-                                                      boxShadow:
-                                                          "0 2px 4px rgba(0, 0, 0, 0.2)",
-                                                      zIndex: 1,
-                                                      borderRadius: "xl",
-                                                      transition:
-                                                          "all 0.3s ease-in-out",
-                                                  }}>
+                                              <Tr>
                                                   <Td>{ele.name}</Td>
                                                   <Td>
                                                       {(
