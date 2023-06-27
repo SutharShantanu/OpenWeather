@@ -65,7 +65,9 @@ export default function Navbar() {
 
         setTimeout(() => {
             axios
-                .get(`http://localhost:4500/weather/search/${lower}`)
+                .get(
+                    `https://openweatherbackend.cyclic.app/weather/search/${lower}`
+                )
                 .then((res) => {
                     const responseStatusCode = res.status;
                     const responseMessage = res.data.message;
