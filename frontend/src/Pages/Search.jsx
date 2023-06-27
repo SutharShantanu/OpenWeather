@@ -13,7 +13,9 @@ const Search = () => {
     useEffect(() => {
         if (locationParam) {
             axios
-                .get(`http://localhost:4500/weather/search/${locationParam}`)
+                .get(
+                    `https://openweatherbackend.cyclic.app/weather/search/${locationParam}`
+                )
                 .then((res) => {
                     const weatherData = res.data;
                     setSearchResult(weatherData);
@@ -30,7 +32,7 @@ const Search = () => {
     useEffect(() => {
         if (locationParam) {
             axios
-                .get(`http://localhost:4500/weather/cities`)
+                .get(`https://openweatherbackend.cyclic.app/weather/cities`)
                 .then((res) => {
                     const data = res.data;
                     setCitiesData(data);

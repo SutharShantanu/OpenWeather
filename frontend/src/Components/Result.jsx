@@ -550,13 +550,13 @@ export default function Result({ location, data, citiesData }) {
                         <Box
                             borderRadius="xl"
                             borderWidth="2px"
-                            borderColor={isDarkMode ? "gray.600" : "white"}
+                            borderColor={isDarkMode ? "gray.700" : "white"}
                             bg={useColorModeValue("white", "gray.700")}
                             minH={"23vh"}
                             m={"auto"}
                             rounded={"xl"}
                             p={6}
-                            boxShadow={"lg"}
+                            boxShadow={"xl"}
                             w={"100%"}>
                             <SkeletonText
                                 mt="2"
@@ -587,18 +587,19 @@ export default function Result({ location, data, citiesData }) {
                 ) : (
                     <TableContainer
                         borderRadius="xl"
-                        borderWidth="2px"
+                        borderWidth="1px"
                         mb={6}
                         p={4}
+                        boxShadow={"lg"}
                         bg={useColorModeValue("white", "gray.800")}
                         style={{
                             borderColor: `${
-                                isDarkMode ? "gray.600" : "gray.200"
+                                isDarkMode ? "gray.700" : "gray.200"
                             }`,
                         }}>
                         <Table
                             variant="striped"
-                            colorScheme={isDarkMode ? "purple" : "gray"}>
+                            colorScheme={isDarkMode ? "gray" : "gray"}>
                             <TableCaption>
                                 <Badge
                                     variant="subtle"
@@ -611,11 +612,11 @@ export default function Result({ location, data, citiesData }) {
                             </TableCaption>
                             <Thead>
                                 <Tr>
-                                    <Th>City</Th>
-                                    <Th>Temperature</Th>
-                                    <Th>Weather</Th>
-                                    <Th>Clouds</Th>
-                                    <Th>Humidity</Th>
+                                    <Th py={6}>City</Th>
+                                    <Th py={6}>Temperature</Th>
+                                    <Th py={6}>Weather</Th>
+                                    <Th py={6}>Clouds</Th>
+                                    <Th py={6}>Humidity</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
