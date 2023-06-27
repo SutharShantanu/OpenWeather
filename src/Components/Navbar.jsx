@@ -123,14 +123,21 @@ export default function Navbar() {
       overflowX="hidden"
     >
       <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-        <IconButton
-          size={"md"}
-          icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-          aria-label={"Open Menu"}
-          display={{ md: "none" }}
-          width={{ base: "10%", md: "0%" }}
-          onClick={isOpen ? onClose : onOpen}
-        />
+        <Tooltip
+          hasArrow
+          label={isOpen ? "Close" : "Menu"}
+          bg="gray.300"
+          color="#323234"
+        >
+          <IconButton
+            size={"md"}
+            icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+            aria-label={"Open Menu"}
+            display={{ md: "none" }}
+            width={{ base: "10%", md: "0%" }}
+            onClick={isOpen ? onClose : onOpen}
+          />
+        </Tooltip>
         <HStack width={"30%"} spacing={8} alignItems={"center"}>
           <HStack spacing={2} width={{ base: "100%", md: "50%" }}>
             <ReactLink to="/">
@@ -252,29 +259,7 @@ export default function Navbar() {
       {isOpen && (
         <Box pb={4} display={{ md: "none" }}>
           <Stack as={"nav"} spacing={4}>
-            {/* <Tooltip
-                            hasArrow
-                            label="Go to search page"
-                            bg="gray.300"
-                            color="#323234">
-                            <ReactLink to="/weather/search">
-                                <Link
-                                    px={2}
-                                    py={1}
-                                    rounded={"md"}
-                                    _hover={{
-                                        textDecoration: "none",
-                                        bg:
-                                            colorMode === "light"
-                                                ? "gray.200"
-                                                : "gray.700",
-                                    }}
-                                    href="">
-                                    Search
-                                </Link>
-                            </ReactLink>
-                        </Tooltip> */}
-            <InputGroup w={"100%"}>
+            <InputGroup>
               <Input
                 type="search"
                 placeholder="Search Weather here ☁️"
@@ -282,7 +267,6 @@ export default function Navbar() {
                   border: `1px solid ${
                     colorMode === "light" ? "gray.500" : "gray.700"
                   }`,
-                  width: "95%",
                   transition: "border-color 0.2s"
                 }}
                 _hover={{
@@ -301,7 +285,7 @@ export default function Navbar() {
                 onChange={handleChange}
               />
 
-              <InputRightElement width={"20%"}>
+              <InputRightElement>
                 <Tooltip
                   hasArrow
                   label="Search Now"
