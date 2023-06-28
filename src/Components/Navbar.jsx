@@ -123,21 +123,14 @@ export default function Navbar() {
       overflowX="hidden"
     >
       <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-        <Tooltip
-          hasArrow
-          label={isOpen ? "Close" : "Menu"}
-          bg="gray.300"
-          color="#323234"
-        >
-          <IconButton
-            size={"md"}
-            icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-            aria-label={"Open Menu"}
-            display={{ md: "none" }}
-            width={{ base: "10%", md: "0%" }}
-            onClick={isOpen ? onClose : onOpen}
-          />
-        </Tooltip>
+        <IconButton
+          size={"md"}
+          icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+          aria-label={"Open Menu"}
+          display={{ md: "none" }}
+          width={{ base: "10%", md: "0%" }}
+          onClick={isOpen ? onClose : onOpen}
+        />
         <HStack width={"30%"} spacing={8} alignItems={"center"}>
           <HStack spacing={2} width={{ base: "100%", md: "50%" }}>
             <ReactLink to="/">
@@ -286,30 +279,23 @@ export default function Navbar() {
               />
 
               <InputRightElement width={"7%"}>
-                <Tooltip
-                  hasArrow
-                  label="Search Now"
-                  bg="gray.300"
-                  color="#323234"
+                <Button
+                  style={{
+                    backgroundColor: "transparent"
+                  }}
+                  onClick={handleSearch}
                 >
-                  <Button
-                    style={{
-                      backgroundColor: "transparent"
-                    }}
-                    onClick={handleSearch}
-                  >
-                    {!isButLoading && <SearchIcon />}
-                    {isButLoading && (
-                      <Spinner
-                        thickness="2px"
-                        speed="0.50s"
-                        emptyColor="gray.200"
-                        color="#323234"
-                        size="xs"
-                      />
-                    )}
-                  </Button>
-                </Tooltip>
+                  {!isButLoading && <SearchIcon />}
+                  {isButLoading && (
+                    <Spinner
+                      thickness="2px"
+                      speed="0.50s"
+                      emptyColor="gray.200"
+                      color="#323234"
+                      size="xs"
+                    />
+                  )}
+                </Button>
               </InputRightElement>
             </InputGroup>
           </Stack>
