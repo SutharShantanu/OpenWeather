@@ -193,7 +193,7 @@ export default function Navbar() {
                 border: `1px solid ${
                   colorMode === "light" ? "gray.500" : "gray.700"
                 }`,
-                width: "95%",
+                // width: "90%",
                 transition: "border-color 0.2s"
               }}
               _hover={{
@@ -212,7 +212,7 @@ export default function Navbar() {
               onChange={handleChange}
             />
 
-            <InputRightElement width={"20%"}>
+            <InputRightElement width={"11%"}>
               <Tooltip
                 hasArrow
                 label="Search Now"
@@ -230,7 +230,7 @@ export default function Navbar() {
                       speed="0.50s"
                       emptyColor="gray.200"
                       color="#323234"
-                      size="sm"
+                      size="xs"
                     />
                   )}
                 </Button>
@@ -285,7 +285,7 @@ export default function Navbar() {
                 onChange={handleChange}
               />
 
-              <InputRightElement>
+              <InputRightElement width={"7%"}>
                 <Tooltip
                   hasArrow
                   label="Search Now"
@@ -305,7 +305,7 @@ export default function Navbar() {
                         speed="0.50s"
                         emptyColor="gray.200"
                         color="#323234"
-                        size="sm"
+                        size="xs"
                       />
                     )}
                   </Button>
