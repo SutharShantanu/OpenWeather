@@ -8,6 +8,7 @@ import {
   HStack,
   Link,
   InputGroup,
+  Collapse,
   Input,
   InputRightElement,
   Image,
@@ -30,7 +31,7 @@ import LightLogo from "../Uitlites/OpenWeather-Logo-Light.png";
 import DarkLogo from "../Uitlites/OpenWeather-Logo-Dark.png";
 
 export default function Navbar() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onToggle } = useDisclosure();
   const [isButLoading, setIsButLoading] = useState(false);
   const toast = useToast();
   const navigate = useNavigate();
@@ -129,7 +130,7 @@ export default function Navbar() {
           aria-label={"Open Menu"}
           display={{ md: "none" }}
           width={{ base: "10%", md: "0%" }}
-          onClick={isOpen ? onClose : onOpen}
+          onClick={onToggle}
         />
         <HStack width={"30%"} spacing={8} alignItems={"center"}>
           <HStack spacing={2} width={{ base: "100%", md: "50%" }}>
@@ -173,7 +174,7 @@ export default function Navbar() {
           </HStack>
         </HStack>
         <HStack
-          as={"nav"}
+          
           spacing={2}
           display={{ base: "none", md: "flex" }}
           width={"30%"}
@@ -249,9 +250,10 @@ export default function Navbar() {
         </HStack>
       </Flex>
 
-      {isOpen && (
+      <Collapse in={isOpen} animateOpacity>
+
         <Box pb={4} display={{ md: "none" }}>
-          <Stack as={"nav"} spacing={4}>
+          <Stack spacing={4}>
             <InputGroup>
               <Input
                 type="search"
@@ -300,7 +302,8 @@ export default function Navbar() {
             </InputGroup>
           </Stack>
         </Box>
-      )}
+        </Collapse>
+
     </Box>
   );
 }
