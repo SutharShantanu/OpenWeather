@@ -101,6 +101,9 @@ If you'd like to contribute to this project, feel free to submit a pull request 
 
 Overall, this OpenWeather project is a valuable resource for accessing accurate and detailed weather information. While there may be some current limitations in terms of responsiveness, the team is actively working to address these issues and ensure a seamless experience across all devices. With its comprehensive current weather data, Top-5 cities forecast, location search functionality, night mode, and sea weather data, this project offers a professional and user-centric approach to weather information. Users can rely on this project to stay informed and make well-informed decisions based on the provided weather insights.
 
+<!--![OpenWeather](https://github.com/SutharShantanu/OpenWeather/assets/110021464/3e84e827-adc6-49f1-b0f8-8daab194094a)-->
+
+
 ## FAQ
 Is this website fully Responsive?
 
