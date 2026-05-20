@@ -1,65 +1,91 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { HeaderControls } from "@/components/weather-widgets/header-controls";
+import { PinnedLocations } from "@/components/weather-widgets/pinned-locations";
+import { WeatherParticles } from "@/components/weather-widgets/weather-particles";
+
+export default function HomePage() {
+  const router = useRouter();
+  const [pinnedCities, setPinnedCities] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const savedPins = localStorage.getItem("weather-pinned-cities-v1");
+    if (savedPins) {
+      try {
+        const parsed = JSON.parse(savedPins);
+        if (Array.isArray(parsed)) {
+          setPinnedCities(parsed);
+        }
+      } catch (e) {}
+    } else {
+      const defaultPins = ["London", "New York", "Tokyo"];
+      setPinnedCities(defaultPins);
+      localStorage.setItem("weather-pinned-cities-v1", JSON.stringify(defaultPins));
+    }
+  }, []);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-background text-text-primary flex flex-col items-center justify-start p-4 md:p-8 transition-colors duration-300 relative overflow-hidden">
+      <WeatherParticles condition="CLOUDY" />
+
+      <div className="relative z-10 w-full max-w-7xl flex flex-col">
+        <HeaderControls
+          onSearch={(query) => router.push(`/search?q=${encodeURIComponent(query)}`)}
+          onLocate={() => router.push("/weather/current")}
+          onOpenMap={() => router.push("/weather/london")}
+          isLoading={false}
+          dataSource="LIVE_API"
+          isEditingLayout={false}
+          onToggleEditLayout={() => {}}
+          onResetLayout={() => {}}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+
+        <div className="flex flex-col items-center text-center mt-12 mb-16 max-w-3xl mx-auto">
+          <h1 className="font-doto text-4xl md:text-6xl font-black tracking-tighter mb-4 text-text-primary">
+            NOTHING WEATHER
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="font-mono text-sm text-text-secondary uppercase">
+            ENTER A CITY OR SELECT A PINNED LOCATION TO INITIALIZE THE METEOROLOGICAL CONSOLE.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {mounted && (
+          <div className="w-full">
+            <PinnedLocations
+              pinnedCities={pinnedCities}
+              activeCity=""
+              unit="C"
+              onSelectCity={(c) => router.push(`/weather/${encodeURIComponent(c.toLowerCase())}`)}
+              onUnpinCity={(cityToUnpin) => {
+                setPinnedCities((prev) => {
+                  const next = prev.filter(
+                    (c) => c.toLowerCase().trim() !== cityToUnpin.toLowerCase().trim()
+                  );
+                  localStorage.setItem("weather-pinned-cities-v1", JSON.stringify(next));
+                  return next;
+                });
+              }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          </div>
+        )}
+
+        <footer className="w-full flex flex-col md:flex-row gap-4 items-center justify-between border-t border-border-subtle pt-6 pb-12 mt-24 text-text-disabled font-mono text-[9px]">
+          <div className="flex flex-col gap-1 items-center md:items-start">
+            <span>NOTHING TECHNOLOGY WEATHER OS INSTRUMENT BOARD v2.5.0</span>
+            <span>HARDWARE STATIONS REGISTERED WITH GLOBAL WEATHER INDEX</span>
+          </div>
+          <div className="flex flex-col gap-1 items-center md:items-end">
+            <span>ALL SYSTEM CALIBRATIONS STABLE. PRESSURE BARO 1ATM.</span>
+            <span>
+              © {new Date().getFullYear()} NOTHING OS WEATHER. ALL RIGHTS RESERVED.
+            </span>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }

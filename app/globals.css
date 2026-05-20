@@ -1,26 +1,241 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Fonts mapping */
+  --font-doto: var(--font-doto);
+  --font-grotesk: var(--font-raleway-dots), sans-serif;
+  --font-mono: var(--font-raleway-dots), monospace;
+  --font-sans: var(--font-raleway-dots), sans-serif;
+
+  /* Nothing OS Color Tokens */
+  --color-black: var(--black);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border-subtle: var(--border);
+  --color-border-visible: var(--border-visible);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-primary: var(--text-primary);
+  --color-text-display: var(--text-display);
+  --color-accent: var(--accent);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-interactive: var(--interactive);
+
+  /* Fallback shadcn mappings to keep components compiling */
+  --color-background: var(--black);
+  --color-foreground: var(--text-primary);
+  --color-border: var(--border);
+  --color-input: var(--border-visible);
+  --color-ring: var(--border-visible);
+  --color-primary: var(--text-display);
+  --color-primary-foreground: var(--black);
+  --color-muted: var(--surface-raised);
+  --color-muted-foreground: var(--text-secondary);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text-primary);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text-primary);
+
+  /* Sizing / Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+  --radius-3xl: 32px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Unified Premium Theme: Instrument Panel Light/Dark Glassmorphism */
+:root {
+  --black: #F4F4F4; /* Light off-white background */
+  --surface: rgba(255, 255, 255, 0.45); /* Elegant translucent white panels */
+  --surface-raised: rgba(255, 255, 255, 0.82);
+  --border: rgba(0, 0, 0, 0.05); /* Very subtle dark lines for light mode */
+  --border-visible: rgba(0, 0, 0, 0.12);
+  --text-disabled: #8E8E93;
+  --text-secondary: #5A5A5F;
+  --text-primary: #1C1C1E;
+  --text-display: #000000;
+  
+  --accent: #E51A24; /* Keep the classic Nothing-Red! */
+  --accent-subtle: rgba(229, 26, 36, 0.08);
+  --success: #10B981;
+  --warning: #F5A623;
+  --error: #E51A24;
+  --info: #00B4D8;
+  --interactive: #007AFF;
+}
+
+/* Force dark class properties to inherit unified dark theme */
+.dark {
+  --black: #000000;
+  --surface: rgba(0, 0, 0, 0.45);
+  --surface-raised: rgba(18, 18, 18, 0.65);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-visible: rgba(255, 255, 255, 0.18);
+  --text-disabled: #555555;
+  --text-secondary: #A0A0A0;
+  --text-primary: #E2E2E2;
+  --text-display: #FFFFFF;
+  
+  --accent: #E51A24;
+  --accent-subtle: rgba(229, 26, 36, 0.15);
+  --success: #3ECF8E;
+  --warning: #F5A623;
+  --error: #E51A24;
+  --info: #00B4D8;
+  --interactive: #5B9BF6;
+}
+
+@layer base {
+  *, ::before, ::after {
+    font-family: var(--font-raleway-dots), sans-serif;
+    -webkit-text-stroke: 0.35px currentColor;
+    text-shadow: 0.15px 0.15px 0px currentColor;
+    letter-spacing: 0.02em;
+    @apply border-border-subtle outline-border-visible/50;
+    transition-property: background-color, border-color, text-decoration-color, fill, stroke;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  h1, h2, h3, h4, h5, h6, th, b, strong, .font-bold {
+    -webkit-text-stroke: 0.55px currentColor;
+    text-shadow: 0.25px 0.25px 0px currentColor;
+  }
+  body {
+    background-color: var(--black);
+    color: var(--text-primary);
+    @apply min-h-screen selection:bg-accent/20 selection:text-text-display;
+  }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply h-full scroll-smooth;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom Nothing OS Styling Utilities */
+.font-doto, .font-doto *, [data-font="doto"], [data-font="doto"] * {
+  font-family: var(--font-doto), monospace !important;
+  font-variation-settings: 'ROND' 100 !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+  letter-spacing: normal !important;
+}
+
+.dot-grid {
+  background-image: radial-gradient(circle, var(--text-disabled) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+.dot-grid-subtle {
+  background-image: radial-gradient(circle, var(--border-visible) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+/* Red Pulsing LED light */
+.active-led {
+  box-shadow: 0 0 8px var(--accent);
+  animation: red-dot-pulse 2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+@keyframes red-dot-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 6px rgba(215, 25, 33, 0.6);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.85);
+    box-shadow: 0 0 1px rgba(215, 25, 33, 0.1);
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-visible);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-disabled);
+}
+
+/* ==========================================================================
+   Premium UI Glassmorphism & Neon Glow Utilities
+   ========================================================================== */
+
+.glass-panel {
+  background: var(--surface) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid var(--border-visible) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06) !important;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dark .glass-panel {
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6) !important;
+}
+
+.glass-panel:hover {
+  border-color: var(--text-disabled) !important;
+}
+
+/* Neon Glow utilities */
+.glow-cyan {
+  box-shadow: 0 0 25px rgba(91, 155, 246, 0.1) !important;
+}
+.glow-cyan:hover {
+  box-shadow: 0 0 35px rgba(91, 155, 246, 0.2) !important;
+}
+
+.glow-red {
+  box-shadow: 0 0 25px rgba(229, 26, 36, 0.1) !important;
+}
+.glow-red:hover {
+  box-shadow: 0 0 35px rgba(229, 26, 36, 0.2) !important;
+}
+
+.glow-emerald {
+  box-shadow: 0 0 25px rgba(62, 207, 142, 0.1) !important;
+}
+.glow-emerald:hover {
+  box-shadow: 0 0 35px rgba(62, 207, 142, 0.2) !important;
+}
+
+.glow-amber {
+  box-shadow: 0 0 25px rgba(245, 166, 35, 0.1) !important;
+}
+.glow-amber:hover {
+  box-shadow: 0 0 35px rgba(245, 166, 35, 0.2) !important;
+}
+
+/* iOS-style wiggle vibration animation for Edit Layout Mode */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-0.6deg) scale(0.99); }
+  50% { transform: rotate(0.6deg) scale(1.01); }
+}
+
+.animate-wiggle {
+  animation: wiggle 0.24s ease-in-out infinite;
 }
