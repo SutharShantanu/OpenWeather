@@ -52,7 +52,7 @@ export function AiAdvisorBanner({
               <CardTitle className="text-sm font-heading font-semibold tracking-tight">
                 AI Synoptic Intelligence & Advisory
               </CardTitle>
-              <Badge variant="outline" className="text-[10px] font-mono text-primary border-primary/30">
+              <Badge variant="outline" className="text-tiny font-mono text-primary border-primary/30">
                 Live Insights
               </Badge>
             </div>
@@ -90,12 +90,12 @@ export function AiAdvisorBanner({
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-bold text-destructive">{alert.title}</span>
-                    <Badge variant="destructive" className="text-[9px] font-mono uppercase">
+                    <Badge variant="destructive" className="text-micro font-mono uppercase">
                       {alert.timing}
                     </Badge>
                   </div>
                   <p className="text-foreground leading-relaxed">{alert.detail}</p>
-                  <p className="text-muted-foreground text-[11px]">
+                  <p className="text-muted-foreground text-mini">
                     <span className="font-semibold text-foreground">Action Directive:</span> {alert.action}
                   </p>
                 </div>
@@ -108,7 +108,7 @@ export function AiAdvisorBanner({
               <Info className="size-3.5 text-primary" />
               <span>No sudden micro-climate disturbances detected in the 6-hour forecast window.</span>
             </div>
-            <Badge variant="outline" className="text-[9px] font-mono text-emerald-500 border-emerald-500/30">
+            <Badge variant="outline" className="text-micro font-mono text-emerald-500 border-emerald-500/30">
               Stable
             </Badge>
           </div>
@@ -118,36 +118,36 @@ export function AiAdvisorBanner({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pt-1 text-xs font-mono">
           {clothingAdvice && (
             <div className="p-2.5 bg-muted/20 border border-border space-y-1">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] uppercase">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-tiny uppercase">
                 <Shirt className="size-3 text-primary" />
                 <span>Attire Guidance</span>
               </div>
-              <p className="text-[11px] leading-snug text-foreground">{clothingAdvice}</p>
+              <p className="text-mini leading-snug text-foreground">{clothingAdvice}</p>
             </div>
           )}
 
           {sportsAdvice && (
             <div className="p-2.5 bg-muted/20 border border-border space-y-1">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] uppercase">
+                <div className="flex items-center gap-1.5 text-muted-foreground text-tiny uppercase">
                   <Bike className="size-3 text-teal-500" />
                   <span>Outdoor Activity</span>
                 </div>
-                <Badge variant="outline" className="text-[9px] font-mono text-teal-500">
+                <Badge variant="outline" className="text-micro font-mono text-teal-500">
                   {sportsAdvice.score}/10
                 </Badge>
               </div>
-              <p className="text-[11px] leading-snug text-foreground">{sportsAdvice.advice}</p>
+              <p className="text-mini leading-snug text-foreground">{sportsAdvice.advice}</p>
             </div>
           )}
 
           {analysis.plannedShifts[0] && (
             <div className="p-2.5 bg-muted/20 border border-border space-y-1 sm:col-span-2 lg:col-span-1">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] uppercase">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-tiny uppercase">
                 <Thermometer className="size-3 text-amber-500" />
                 <span>Tomorrow Shift</span>
               </div>
-              <p className="text-[11px] leading-snug text-foreground">
+              <p className="text-mini leading-snug text-foreground">
                 <span className="font-semibold text-primary">{analysis.plannedShifts[0].temperatureShift}</span>:{" "}
                 {analysis.plannedShifts[0].summary}
               </p>

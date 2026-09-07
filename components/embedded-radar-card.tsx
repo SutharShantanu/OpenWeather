@@ -134,7 +134,7 @@ export function EmbeddedRadarCard({
             <CloudRain className="size-3.5 text-primary" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight flex items-center gap-2">
               <span>Doppler Radar & Atmospheric Layers</span>
-              <Badge variant="outline" className="text-[10px] font-mono">
+              <Badge variant="outline" className="text-tiny font-mono">
                 {cityName}
               </Badge>
             </CardTitle>
@@ -151,7 +151,7 @@ export function EmbeddedRadarCard({
               variant={mapStyle === "dark" ? "default" : "ghost"}
               size="xs"
               onClick={() => setMapStyle("dark")}
-              className="h-6 px-2 text-[10px] font-mono"
+              className="h-6 px-2 text-tiny font-mono"
             >
               Dark
             </Button>
@@ -159,7 +159,7 @@ export function EmbeddedRadarCard({
               variant={mapStyle === "voyager" ? "default" : "ghost"}
               size="xs"
               onClick={() => setMapStyle("voyager")}
-              className="h-6 px-2 text-[10px] font-mono"
+              className="h-6 px-2 text-tiny font-mono"
             >
               Light
             </Button>
@@ -171,7 +171,7 @@ export function EmbeddedRadarCard({
               variant={activeLayer === "radar" ? "default" : "ghost"}
               size="xs"
               onClick={() => setActiveLayer("radar")}
-              className="gap-1 font-mono text-[10px] h-6 px-2"
+              className="gap-1 font-mono text-tiny h-6 px-2"
             >
               <CloudRain className="size-3" />
               <span>Radar</span>
@@ -180,7 +180,7 @@ export function EmbeddedRadarCard({
               variant={activeLayer === "satellite" ? "default" : "ghost"}
               size="xs"
               onClick={() => setActiveLayer("satellite")}
-              className="gap-1 font-mono text-[10px] h-6 px-2"
+              className="gap-1 font-mono text-tiny h-6 px-2"
             >
               <Cloud className="size-3" />
               <span>Clouds</span>
@@ -189,7 +189,7 @@ export function EmbeddedRadarCard({
               variant={activeLayer === "none" ? "default" : "ghost"}
               size="xs"
               onClick={() => setActiveLayer("none")}
-              className="font-mono text-[10px] h-6 px-2"
+              className="font-mono text-tiny h-6 px-2"
             >
               Clear
             </Button>
@@ -200,7 +200,7 @@ export function EmbeddedRadarCard({
             variant="outline"
             size="xs"
             onClick={() => setPlaybackSpeed((prev) => (prev === 750 ? 400 : 750))}
-            className="h-6 px-2 font-mono text-[10px]"
+            className="h-6 px-2 font-mono text-tiny"
             title="Playback Speed"
           >
             {playbackSpeed === 750 ? "1x" : "2x"}
@@ -231,7 +231,7 @@ export function EmbeddedRadarCard({
         />
 
         {/* Live Legend Overlay on Map */}
-        <div className="absolute top-3 right-3 z-[400] bg-background/90 border border-border p-2 text-[10px] font-mono shadow-md backdrop-blur-sm hidden sm:block">
+        <div className="absolute top-3 right-3 z-[400] bg-background/90 border border-border p-2 text-tiny font-mono shadow-md backdrop-blur-sm hidden sm:block">
           <div className="font-bold text-foreground mb-1">Precipitation dBZ</div>
           <div className="flex items-center gap-1">
             <div className="w-4 h-2 bg-[#00ffff]" title="Light Drizzle" />
@@ -240,7 +240,7 @@ export function EmbeddedRadarCard({
             <div className="w-4 h-2 bg-[#ffff00]" title="Heavy" />
             <div className="w-4 h-2 bg-[#ff0000]" title="Violent / Hail" />
           </div>
-          <div className="flex justify-between text-[8px] text-muted-foreground pt-0.5">
+          <div className="flex justify-between text-nano text-muted-foreground pt-0.5">
             <span>Drizzle</span>
             <span>Heavy</span>
           </div>
@@ -261,9 +261,9 @@ export function EmbeddedRadarCard({
           </Button>
 
           <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="text-muted-foreground text-[10px] uppercase">Frame</span>
+            <span className="text-muted-foreground text-tiny uppercase">Frame</span>
             <span className="font-semibold text-foreground">{frameTimeStr}</span>
-            <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0 h-4">
+            <Badge variant="outline" className="text-tiny font-mono px-1.5 py-0 h-4">
               {currentFrameIndex + 1}/{radarFrames.length}
             </Badge>
           </div>
@@ -271,7 +271,7 @@ export function EmbeddedRadarCard({
 
         {/* Timeline Scrubber */}
         <div className="w-full sm:w-72 flex items-center gap-2">
-          <span className="text-[10px] font-mono text-muted-foreground shrink-0">-2h</span>
+          <span className="text-tiny font-mono text-muted-foreground shrink-0">-2h</span>
           <input
             type="range"
             min={0}
@@ -284,7 +284,7 @@ export function EmbeddedRadarCard({
             disabled={radarFrames.length === 0}
             className="w-full accent-primary h-1 bg-muted cursor-pointer"
           />
-          <span className="text-[10px] font-mono text-muted-foreground shrink-0">Now</span>
+          <span className="text-tiny font-mono text-muted-foreground shrink-0">Now</span>
         </div>
       </CardFooter>
     </Card>

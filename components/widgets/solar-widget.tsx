@@ -73,7 +73,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
             variant={activeTab === "sun" ? "default" : "ghost"}
             size="xs"
             onClick={() => setActiveTab("sun")}
-            className="h-6 px-2 font-mono text-[10px]"
+            className="h-6 px-2 font-mono text-tiny"
           >
             Sun
           </Button>
@@ -81,7 +81,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
             variant={activeTab === "moon" ? "default" : "ghost"}
             size="xs"
             onClick={() => setActiveTab("moon")}
-            className="h-6 px-2 font-mono text-[10px]"
+            className="h-6 px-2 font-mono text-tiny"
           >
             Moon
           </Button>
@@ -115,7 +115,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
               <div className="flex items-center gap-2.5 p-2 bg-muted/20 border border-border">
                 <Sunrise className="size-4 text-amber-500 shrink-0" />
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-mono text-muted-foreground uppercase">Sunrise</span>
+                  <span className="text-micro font-mono text-muted-foreground uppercase">Sunrise</span>
                   <span className="text-xs font-mono font-bold text-foreground">{sunriseTime}</span>
                 </div>
               </div>
@@ -123,15 +123,15 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
               <div className="flex items-center gap-2.5 p-2 bg-muted/20 border border-border">
                 <Sunset className="size-4 text-indigo-400 shrink-0" />
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-mono text-muted-foreground uppercase">Sunset</span>
+                  <span className="text-micro font-mono text-muted-foreground uppercase">Sunset</span>
                   <span className="text-xs font-mono font-bold text-foreground">{sunsetTime}</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-between items-center text-[10px] font-mono text-muted-foreground pt-1">
+            <div className="flex justify-between items-center text-tiny font-mono text-muted-foreground pt-1">
               <span>Daylight: {daylightHours}h {daylightMinutes}m</span>
-              <Badge variant="outline" className="font-mono text-[9px]">
+              <Badge variant="outline" className="font-mono text-micro">
                 {isDaylight ? "Sun Above Horizon" : "Night Cycle"}
               </Badge>
             </div>
@@ -140,7 +140,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
           <div className="space-y-3 py-1">
             <div className="flex items-center justify-between p-3 bg-muted/20 border border-border">
               <div className="space-y-1">
-                <span className="text-[10px] font-mono text-muted-foreground uppercase">Lunar Phase</span>
+                <span className="text-tiny font-mono text-muted-foreground uppercase">Lunar Phase</span>
                 <div className="text-base font-heading font-bold text-foreground">
                   {moonData.name}
                 </div>
@@ -162,11 +162,11 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
 
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
               <div className="p-2 bg-muted/20 border border-border">
-                <span className="text-[9px] text-muted-foreground uppercase block">Cycle Phase</span>
+                <span className="text-micro text-muted-foreground uppercase block">Cycle Phase</span>
                 <span className="font-bold text-foreground">{(moonData.phase * 29.53).toFixed(1)} / 29.5d</span>
               </div>
               <div className="p-2 bg-muted/20 border border-border">
-                <span className="text-[9px] text-muted-foreground uppercase block">Sky Visibility</span>
+                <span className="text-micro text-muted-foreground uppercase block">Sky Visibility</span>
                 <span className="font-bold text-foreground">{moonData.illumination > 40 ? "Bright Sky" : "Dark Sky"}</span>
               </div>
             </div>

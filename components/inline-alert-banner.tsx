@@ -130,7 +130,7 @@ export function InlineAlertBanner({ current, alerts: propAlerts }: InlineAlertBa
           <ShieldCheck className="size-3.5 text-emerald-500" />
           <span>All Synoptic Systems Nominal — No active weather alerts for {current.cityName}.</span>
         </div>
-        <Badge variant="outline" className="text-[9px] font-mono text-emerald-500 border-emerald-500/30">
+        <Badge variant="outline" className="text-micro font-mono text-emerald-500 border-emerald-500/30">
           CLEAR
         </Badge>
       </div>
@@ -152,7 +152,7 @@ export function InlineAlertBanner({ current, alerts: propAlerts }: InlineAlertBa
               </CardTitle>
               <Badge
                 variant={hasCritical ? "destructive" : "outline"}
-                className="font-mono text-[10px]"
+                className="font-mono text-tiny"
               >
                 {activeAlerts.length} Active {activeAlerts.length === 1 ? "Alert" : "Alerts"}
               </Badge>
@@ -169,7 +169,7 @@ export function InlineAlertBanner({ current, alerts: propAlerts }: InlineAlertBa
             size="xs"
             onClick={playChime}
             disabled={isPlaying}
-            className="h-6 px-2 font-mono text-[10px] gap-1"
+            className="h-6 px-2 font-mono text-tiny gap-1"
           >
             <Volume2 className="size-3 text-primary" />
             <span>Sound Chime</span>
@@ -179,7 +179,7 @@ export function InlineAlertBanner({ current, alerts: propAlerts }: InlineAlertBa
             variant="ghost"
             size="xs"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="h-6 px-2 font-mono text-[10px] gap-1 text-muted-foreground hover:text-foreground"
+            className="h-6 px-2 font-mono text-tiny gap-1 text-muted-foreground hover:text-foreground"
           >
             <span>{isExpanded ? "Collapse" : "Expand Directives"}</span>
             {isExpanded ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
@@ -200,13 +200,13 @@ export function InlineAlertBanner({ current, alerts: propAlerts }: InlineAlertBa
                     </span>
                     <Badge
                       variant={alert.severity === "Extreme" || alert.severity === "Severe" ? "destructive" : "outline"}
-                      className="text-[9px] font-mono uppercase"
+                      className="text-micro font-mono uppercase"
                     >
                       {alert.severity}
                     </Badge>
                   </div>
 
-                  <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
+                  <div className="flex items-center gap-2 text-tiny font-mono text-muted-foreground">
                     <Building2 className="size-2.5 text-primary" />
                     <span>{alert.source}</span>
                     {alert.expires && (
@@ -238,10 +238,10 @@ export function InlineAlertBanner({ current, alerts: propAlerts }: InlineAlertBa
                     <Circle className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
                   )}
                   <div className="flex-1">
-                    <span className="font-semibold text-[11px] block mb-0.5">
+                    <span className="font-semibold text-mini block mb-0.5">
                       Safety Protocol: {isChecked ? "Acknowledged" : "Action Required"}
                     </span>
-                    <span className="text-[11px] leading-relaxed text-muted-foreground">
+                    <span className="text-mini leading-relaxed text-muted-foreground">
                       {alert.instruction}
                     </span>
                   </div>

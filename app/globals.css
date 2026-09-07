@@ -73,6 +73,17 @@
     --sidebar-ring: oklch(0.58 0.031 107.3);
 }
 
+@theme {
+    --text-mini: 0.6875rem;
+    --text-mini--line-height: calc(0.9375 / 0.6875);
+    --text-tiny: 0.625rem;
+    --text-tiny--line-height: calc(0.875 / 0.625);
+    --text-micro: 0.5625rem;
+    --text-micro--line-height: calc(0.75 / 0.5625);
+    --text-nano: 0.5rem;
+    --text-nano--line-height: calc(0.625 / 0.5);
+}
+
 @theme inline {
     --font-sans: var(--font-sans);
     --font-heading: var(--font-heading);

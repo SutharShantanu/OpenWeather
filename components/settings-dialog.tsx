@@ -140,7 +140,7 @@ export function SettingsDialog({
           <TabsContent value="units" className="space-y-4 focus-visible:outline-none">
             {/* Temperature */}
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-[10px] uppercase text-muted-foreground font-bold flex justify-between">
+              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
                 <span>Temperature Standard</span>
                 <span className="text-primary font-bold">°{settings.tempUnit}</span>
               </div>
@@ -166,7 +166,7 @@ export function SettingsDialog({
 
             {/* Wind Speed */}
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-[10px] uppercase text-muted-foreground font-bold flex justify-between">
+              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
                 <span>Wind Velocity Unit</span>
                 <span className="text-primary font-bold">{settings.windUnit}</span>
               </div>
@@ -187,7 +187,7 @@ export function SettingsDialog({
 
             {/* Barometric Pressure */}
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-[10px] uppercase text-muted-foreground font-bold flex justify-between">
+              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
                 <span>Atmospheric Barometer</span>
                 <span className="text-primary font-bold">{settings.pressureUnit}</span>
               </div>
@@ -208,7 +208,7 @@ export function SettingsDialog({
 
             {/* Precipitation */}
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-[10px] uppercase text-muted-foreground font-bold flex justify-between">
+              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
                 <span>Precipitation Measurement</span>
                 <span className="text-primary font-bold">{settings.precipUnit}</span>
               </div>
@@ -262,7 +262,7 @@ export function SettingsDialog({
                         onSelectCity(cityName);
                         onOpenChange(false);
                       }}
-                      className="h-6 px-2 text-[10px] font-mono"
+                      className="h-6 px-2 text-tiny font-mono"
                     >
                       Load Station
                     </Button>
@@ -284,7 +284,7 @@ export function SettingsDialog({
           {/* TAB 3: REGIONAL */}
           <TabsContent value="localization" className="space-y-4 focus-visible:outline-none">
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-[10px] uppercase text-muted-foreground font-bold">
+              <div className="text-tiny uppercase text-muted-foreground font-bold">
                 Language Display
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
@@ -310,7 +310,7 @@ export function SettingsDialog({
             </div>
 
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-[10px] uppercase text-muted-foreground font-bold">
+              <div className="text-tiny uppercase text-muted-foreground font-bold">
                 Time Representation
               </div>
               <div className="grid grid-cols-2 gap-2 pt-1">
@@ -337,7 +337,7 @@ export function SettingsDialog({
           {/* TAB 4: SPEECH */}
           <TabsContent value="speech" className="space-y-4 focus-visible:outline-none">
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-[10px] uppercase text-muted-foreground font-bold flex justify-between">
+              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
                 <span>Speech Velocity (TTS)</span>
                 <span className="text-primary font-bold">{settings.speechRate}x</span>
               </div>
@@ -359,7 +359,7 @@ export function SettingsDialog({
             <div className="p-3 bg-muted/20 border border-border flex items-center justify-between">
               <div>
                 <span className="font-bold text-foreground text-xs block">Automatic Audio Briefing</span>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-tiny text-muted-foreground">
                   Read aloud weather report automatically when searching a new station
                 </span>
               </div>
@@ -377,7 +377,7 @@ export function SettingsDialog({
           {/* TAB 5: APPEARANCE */}
           <TabsContent value="appearance" className="space-y-4 focus-visible:outline-none">
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-[10px] uppercase text-muted-foreground font-bold">
+              <div className="text-tiny uppercase text-muted-foreground font-bold">
                 Theme Mode
               </div>
               <div className="grid grid-cols-3 gap-2 pt-1">
@@ -418,7 +418,7 @@ export function SettingsDialog({
             variant="ghost"
             size="xs"
             onClick={onResetSettings}
-            className="font-mono text-[10px] text-muted-foreground hover:text-foreground"
+            className="font-mono text-tiny text-muted-foreground hover:text-foreground"
           >
             <RotateCcw className="size-2.5 mr-1" />
             Reset All

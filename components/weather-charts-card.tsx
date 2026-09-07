@@ -54,7 +54,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
               Atmospheric Progression Analytics
             </CardTitle>
-            <Badge variant="outline" className="text-[10px] font-mono">
+            <Badge variant="outline" className="text-tiny font-mono">
               24-Hour Graph
             </Badge>
           </div>
@@ -127,8 +127,8 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" strokeOpacity={0.08} />
-                <XAxis dataKey="time" stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" tickLine={false} axisLine={false} />
-                <YAxis stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" tickLine={false} axisLine={false} tickFormatter={(val) => `${val}°`} />
+                <XAxis dataKey="time" stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} />
+                <YAxis stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} tickFormatter={(val) => `${val}°`} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
@@ -150,8 +150,8 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
             ) : metric === "precip" ? (
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" strokeOpacity={0.08} />
-                <XAxis dataKey="time" stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" tickLine={false} axisLine={false} />
-                <YAxis stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" domain={[0, 100]} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}%`} />
+                <XAxis dataKey="time" stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} />
+                <YAxis stroke="currentColor" className="text-tiny font-mono text-muted-foreground" domain={[0, 100]} tickLine={false} axisLine={false} tickFormatter={(val) => `${val}%`} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
@@ -171,8 +171,8 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
             ) : metric === "wind" ? (
               <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" strokeOpacity={0.08} />
-                <XAxis dataKey="time" stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" tickLine={false} axisLine={false} />
-                <YAxis stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" tickLine={false} axisLine={false} tickFormatter={(val) => `${val}m/s`} />
+                <XAxis dataKey="time" stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} />
+                <YAxis stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} tickFormatter={(val) => `${val}m/s`} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
@@ -198,8 +198,8 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" strokeOpacity={0.08} />
-                <XAxis dataKey="time" stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" tickLine={false} axisLine={false} />
-                <YAxis stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" tickLine={false} axisLine={false} tickFormatter={(val) => `${val}%`} />
+                <XAxis dataKey="time" stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} />
+                <YAxis stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} tickFormatter={(val) => `${val}%`} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
@@ -219,8 +219,8 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
             ) : (
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" strokeOpacity={0.08} />
-                <XAxis dataKey="time" stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" tickLine={false} axisLine={false} />
-                <YAxis stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" domain={[0, 12]} tickLine={false} axisLine={false} tickFormatter={(val) => `UV ${val}`} />
+                <XAxis dataKey="time" stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} />
+                <YAxis stroke="currentColor" className="text-tiny font-mono text-muted-foreground" domain={[0, 12]} tickLine={false} axisLine={false} tickFormatter={(val) => `UV ${val}`} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {

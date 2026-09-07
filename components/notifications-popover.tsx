@@ -88,7 +88,7 @@ export function NotificationsPopover({ alerts = [], current }: NotificationsPopo
             <Bell className="size-3.5 text-muted-foreground" />
           )}
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 size-4 bg-destructive text-destructive-foreground text-[9px] font-mono font-bold flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 size-4 bg-destructive text-destructive-foreground text-micro font-mono font-bold flex items-center justify-center">
               {unreadCount}
             </span>
           )}
@@ -102,7 +102,7 @@ export function NotificationsPopover({ alerts = [], current }: NotificationsPopo
             <Bell className="size-3.5 text-primary" />
             <span>Notification Center</span>
             {unreadCount > 0 && (
-              <Badge variant="outline" className="text-[9px] font-mono ml-1">
+              <Badge variant="outline" className="text-micro font-mono ml-1">
                 {unreadCount} Active
               </Badge>
             )}
@@ -113,7 +113,7 @@ export function NotificationsPopover({ alerts = [], current }: NotificationsPopo
               variant="ghost"
               size="xs"
               onClick={handleClearAll}
-              className="h-5 px-1.5 text-[10px] text-muted-foreground hover:text-foreground"
+              className="h-5 px-1.5 text-tiny text-muted-foreground hover:text-foreground"
             >
               <Trash2 className="size-2.5 mr-1" />
               Clear
@@ -124,12 +124,12 @@ export function NotificationsPopover({ alerts = [], current }: NotificationsPopo
         {/* Web Push Notification Status Box */}
         <div className="p-2.5 bg-muted/20 border border-border space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase font-bold text-muted-foreground">
+            <span className="text-tiny uppercase font-bold text-muted-foreground">
               Desktop Push Alerts
             </span>
             <Badge
               variant={permission === "granted" ? "default" : "outline"}
-              className="text-[9px] font-mono"
+              className="text-micro font-mono"
             >
               {permission === "granted"
                 ? "Active"
@@ -139,7 +139,7 @@ export function NotificationsPopover({ alerts = [], current }: NotificationsPopo
             </Badge>
           </div>
 
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
+          <p className="text-mini text-muted-foreground leading-relaxed">
             {permission === "granted"
               ? "Browser push permissions active. You will receive native system alerts for sudden squalls, storms, and rapid freezes."
               : "Enable browser push notifications to receive real-time weather advisories even when the tab is running in the background."}
@@ -171,7 +171,7 @@ export function NotificationsPopover({ alerts = [], current }: NotificationsPopo
 
         {/* Active Weather Bulletins */}
         <div className="space-y-2">
-          <div className="text-[10px] uppercase font-bold text-muted-foreground">
+          <div className="text-tiny uppercase font-bold text-muted-foreground">
             Current Station Bulletins
           </div>
 
@@ -185,20 +185,20 @@ export function NotificationsPopover({ alerts = [], current }: NotificationsPopo
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <AlertTriangle className="size-3 text-amber-500 shrink-0" />
-                      <span className="font-bold text-foreground text-[11px]">
+                      <span className="font-bold text-foreground text-mini">
                         {alert.event}
                       </span>
                     </div>
-                    <Badge variant="outline" className="text-[8px] font-mono">
+                    <Badge variant="outline" className="text-nano font-mono">
                       {alert.severity}
                     </Badge>
                   </div>
 
-                  <p className="text-[11px] text-muted-foreground leading-snug">
+                  <p className="text-mini text-muted-foreground leading-snug">
                     {alert.headline}
                   </p>
 
-                  <div className="flex items-center justify-between pt-1 border-t border-border/40 text-[9px] text-muted-foreground">
+                  <div className="flex items-center justify-between pt-1 border-t border-border/40 text-micro text-muted-foreground">
                     <span>{alert.source}</span>
                     <button
                       onClick={() => handleDismissAlert(alert.id)}
@@ -211,7 +211,7 @@ export function NotificationsPopover({ alerts = [], current }: NotificationsPopo
               ))}
             </div>
           ) : (
-            <div className="p-3 bg-muted/10 border border-border text-center text-muted-foreground text-[11px] flex flex-col items-center gap-1">
+            <div className="p-3 bg-muted/10 border border-border text-center text-muted-foreground text-mini flex flex-col items-center gap-1">
               <ShieldCheck className="size-4 text-emerald-500" />
               <span>All clear. No active weather alerts for {current?.cityName || "London"}.</span>
             </div>

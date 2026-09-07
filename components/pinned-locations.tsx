@@ -76,7 +76,7 @@ export function PinnedLocations({
             Persistent quick-access telemetry locations
           </CardDescription>
         </div>
-        <Badge variant="outline" className="text-[10px] font-mono">
+        <Badge variant="outline" className="text-tiny font-mono">
           {pinnedCities.length} {pinnedCities.length === 1 ? "Station" : "Stations"}
         </Badge>
       </CardHeader>
@@ -100,7 +100,7 @@ export function PinnedLocations({
                       {weather?.cityName || city}
                       <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </h4>
-                    <p className="text-[11px] text-muted-foreground capitalize">
+                    <p className="text-mini text-muted-foreground capitalize">
                       {weather?.condition.description || "Loading telemetry…"}
                     </p>
                   </div>

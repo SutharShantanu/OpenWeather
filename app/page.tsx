@@ -206,7 +206,7 @@ export default function WeatherDashboardPage() {
               <RefreshCw className={`size-3 ${loading ? "animate-spin text-primary" : ""}`} />
               <span>Refresh</span>
             </Button>
-            <Badge variant="outline" className="font-mono text-[10px]">
+            <Badge variant="outline" className="font-mono text-tiny">
               <Radio className="size-2.5 mr-1 text-primary" />
               1013.25 hPa
             </Badge>
@@ -220,7 +220,7 @@ export default function WeatherDashboardPage() {
 
         {/* MSN Weather Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
-          <TabsList className="w-full justify-start overflow-x-auto border-b border-border p-0 bg-transparent h-9">
+          <TabsList className="w-full justify-start overflow-x-auto border-b border-border p-0 bg-transparent">
             <TabsTrigger
               value="overview"
               className="font-heading font-medium text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3"

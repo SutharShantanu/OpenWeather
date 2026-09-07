@@ -47,7 +47,7 @@ export function HumidityWidget({ humidity, tempC, unit }: HumidityWidgetProps) {
             Relative moisture content and dewpoint
           </CardDescription>
         </div>
-        <Badge variant="outline" className={`font-mono text-[10px] ${comfort.color}`}>
+        <Badge variant="outline" className={`font-mono text-tiny ${comfort.color}`}>
           {comfort.label}
         </Badge>
       </CardHeader>

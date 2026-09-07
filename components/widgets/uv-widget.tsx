@@ -42,7 +42,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
             Solar radiation intensity & photoprotection
           </CardDescription>
         </div>
-        <Badge variant="outline" className={`font-mono text-[10px] ${classification.color}`}>
+        <Badge variant="outline" className={`font-mono text-tiny ${classification.color}`}>
           {classification.risk}
         </Badge>
       </CardHeader>
@@ -62,7 +62,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
             <div className="text-base font-mono font-semibold text-foreground">
               {maxVal.toFixed(1)}
             </div>
-            <div className="text-[10px] font-mono text-muted-foreground uppercase">
+            <div className="text-tiny font-mono text-muted-foreground uppercase">
               Daily Peak Index
             </div>
           </div>
@@ -86,7 +86,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
             />
           </div>
 
-          <div className="flex justify-between text-[9px] font-mono text-muted-foreground pt-0.5">
+          <div className="flex justify-between text-micro font-mono text-muted-foreground pt-0.5">
             <span>0 Low</span>
             <span>3 Mod</span>
             <span>6 High</span>
@@ -98,7 +98,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
         {/* Protection & Exposure Metrics */}
         <div className="grid grid-cols-2 gap-2 text-xs font-mono">
           <div className="p-2 bg-muted/20 border border-border">
-            <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] mb-1">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-tiny mb-1">
               <Clock className="size-3 text-primary" />
               <span>Skin Burn Time</span>
             </div>
@@ -108,7 +108,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
           </div>
 
           <div className="p-2 bg-muted/20 border border-border">
-            <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] mb-1">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-tiny mb-1">
               <ShieldAlert className="size-3 text-amber-500" />
               <span>Recommended SPF</span>
             </div>
@@ -119,7 +119,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
         </div>
 
         {/* WHO Advice Box */}
-        <div className="p-2.5 bg-muted/30 border border-border text-[11px] leading-relaxed text-muted-foreground flex items-start gap-2">
+        <div className="p-2.5 bg-muted/30 border border-border text-mini leading-relaxed text-muted-foreground flex items-start gap-2">
           <Sparkles className="size-3.5 text-primary shrink-0 mt-0.5" />
           <span>{classification.advice}</span>
         </div>

@@ -34,7 +34,7 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
             Extended synoptic outlook & thermal trajectory
           </CardDescription>
         </div>
-        <Badge variant="outline" className="text-[10px] font-mono">
+        <Badge variant="outline" className="text-tiny font-mono">
           10-Day Synoptic
         </Badge>
       </CardHeader>
@@ -59,12 +59,12 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
                   {day.day}
                 </span>
                 {popPercent > 10 ? (
-                  <span className="flex items-center gap-1 text-[10px] font-mono text-sky-500 font-semibold">
+                  <span className="flex items-center gap-1 text-tiny font-mono text-sky-500 font-semibold">
                     <CloudRain className="size-2.5" />
                     {popPercent}%
                   </span>
                 ) : (
-                  <span className="text-[10px] font-mono text-muted-foreground">0% precip</span>
+                  <span className="text-tiny font-mono text-muted-foreground">0% precip</span>
                 )}
               </div>
 
@@ -77,7 +77,7 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
                   {day.description}
                 </span>
                 {day.uvIndexMax !== undefined && (
-                  <span className="hidden md:flex items-center gap-0.5 text-[9px] font-mono text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1 py-0.5">
+                  <span className="hidden md:flex items-center gap-0.5 text-micro font-mono text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1 py-0.5">
                     <SunMedium className="size-2.5" />
                     UV {Math.round(day.uvIndexMax)}
                   </span>

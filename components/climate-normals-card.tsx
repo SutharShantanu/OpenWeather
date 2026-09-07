@@ -133,7 +133,7 @@ export function ClimateNormalsCard({
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
               Historical Climate & Normals
             </CardTitle>
-            <Badge variant="outline" className="font-mono text-[10px]">
+            <Badge variant="outline" className="font-mono text-tiny">
               {data.sampleYears}-Year Baseline
             </Badge>
           </div>
@@ -148,7 +148,7 @@ export function ClimateNormalsCard({
               variant={viewMode === "daily" ? "default" : "ghost"}
               size="xs"
               onClick={() => setViewMode("daily")}
-              className="h-6 px-2 font-mono text-[10px]"
+              className="h-6 px-2 font-mono text-tiny"
             >
               Today's Delta
             </Button>
@@ -156,7 +156,7 @@ export function ClimateNormalsCard({
               variant={viewMode === "annual" ? "default" : "ghost"}
               size="xs"
               onClick={() => setViewMode("annual")}
-              className="h-6 px-2 font-mono text-[10px]"
+              className="h-6 px-2 font-mono text-tiny"
             >
               12-Month Cycle
             </Button>
@@ -195,7 +195,7 @@ export function ClimateNormalsCard({
                     </span>
                     <Badge
                       variant="outline"
-                      className={`text-[10px] font-mono ${
+                      className={`text-tiny font-mono ${
                         isAboveNormal ? "text-amber-500" : "text-sky-500"
                       }`}
                     >
@@ -206,7 +206,7 @@ export function ClimateNormalsCard({
               </div>
 
               <div className="text-right sm:border-l sm:border-border sm:pl-4">
-                <div className="text-[10px] font-mono text-muted-foreground uppercase">
+                <div className="text-tiny font-mono text-muted-foreground uppercase">
                   Current vs Expected
                 </div>
                 <div className="text-xs font-mono font-semibold text-foreground">
@@ -219,49 +219,49 @@ export function ClimateNormalsCard({
             {/* 4-Box Historical Records Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs font-mono">
               <div className="p-2.5 bg-muted/20 border border-border">
-                <span className="text-[9px] text-muted-foreground uppercase block mb-1">
+                <span className="text-micro text-muted-foreground uppercase block mb-1">
                   Historical Average High
                 </span>
                 <div className="flex items-center gap-1 text-base font-bold text-foreground">
                   <ArrowUp className="size-3 text-amber-500" />
                   <span>{dispAvgHigh}°{unit}</span>
                 </div>
-                <span className="text-[9px] text-muted-foreground">30-day baseline</span>
+                <span className="text-micro text-muted-foreground">30-day baseline</span>
               </div>
 
               <div className="p-2.5 bg-muted/20 border border-border">
-                <span className="text-[9px] text-muted-foreground uppercase block mb-1">
+                <span className="text-micro text-muted-foreground uppercase block mb-1">
                   Historical Average Low
                 </span>
                 <div className="flex items-center gap-1 text-base font-bold text-foreground">
                   <ArrowDown className="size-3 text-sky-500" />
                   <span>{dispAvgLow}°{unit}</span>
                 </div>
-                <span className="text-[9px] text-muted-foreground">diurnal minimum</span>
+                <span className="text-micro text-muted-foreground">diurnal minimum</span>
               </div>
 
               <div className="p-2.5 bg-muted/20 border border-border">
-                <span className="text-[9px] text-muted-foreground uppercase block mb-1">
+                <span className="text-micro text-muted-foreground uppercase block mb-1">
                   All-Time Record High
                 </span>
                 <div className="flex items-center gap-1 text-base font-bold text-rose-500">
                   <ArrowUp className="size-3 text-rose-500" />
                   <span>{dispRecHigh}°{unit}</span>
                 </div>
-                <span className="text-[9px] text-muted-foreground">
+                <span className="text-micro text-muted-foreground">
                   Recorded in {data.recordHigh.year}
                 </span>
               </div>
 
               <div className="p-2.5 bg-muted/20 border border-border">
-                <span className="text-[9px] text-muted-foreground uppercase block mb-1">
+                <span className="text-micro text-muted-foreground uppercase block mb-1">
                   All-Time Record Low
                 </span>
                 <div className="flex items-center gap-1 text-base font-bold text-indigo-400">
                   <ArrowDown className="size-3 text-indigo-400" />
                   <span>{dispRecLow}°{unit}</span>
                 </div>
-                <span className="text-[9px] text-muted-foreground">
+                <span className="text-micro text-muted-foreground">
                   Recorded in {data.recordLow.year}
                 </span>
               </div>
@@ -271,7 +271,7 @@ export function ClimateNormalsCard({
           <div className="space-y-3">
             <div className="flex justify-between items-center text-xs font-mono text-muted-foreground px-1">
               <span>Annual Thermal & Precipitation Normal Curve</span>
-              <span className="text-[10px]">Highs vs Lows (°{unit})</span>
+              <span className="text-tiny">Highs vs Lows (°{unit})</span>
             </div>
 
             <div className="h-48 w-full">
@@ -284,8 +284,8 @@ export function ClimateNormalsCard({
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" strokeOpacity={0.08} />
-                  <XAxis dataKey="month" stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" tickLine={false} axisLine={false} />
-                  <YAxis stroke="currentColor" className="text-[10px] font-mono text-muted-foreground" tickLine={false} axisLine={false} tickFormatter={(val) => `${val}°`} />
+                  <XAxis dataKey="month" stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} />
+                  <YAxis stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} tickFormatter={(val) => `${val}°`} />
                   <Tooltip
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
@@ -295,7 +295,7 @@ export function ClimateNormalsCard({
                             <div className="font-semibold text-foreground">{d.month}</div>
                             <div className="text-amber-500">Normal High: {d.high}°{unit}</div>
                             <div className="text-sky-500">Normal Low: {d.low}°{unit}</div>
-                            <div className="text-muted-foreground text-[10px]">Monthly Rainfall: ~{d.rainfall} mm</div>
+                            <div className="text-muted-foreground text-tiny">Monthly Rainfall: ~{d.rainfall} mm</div>
                           </div>
                         );
                       }

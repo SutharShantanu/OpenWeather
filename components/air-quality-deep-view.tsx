@@ -44,7 +44,7 @@ export function AirQualityDeepView({ airQuality }: AirQualityDeepViewProps) {
             WHO European & Global particulate concentration telemetry
           </CardDescription>
         </div>
-        <Badge variant="outline" className={`font-mono text-[10px] ${classification.color}`}>
+        <Badge variant="outline" className={`font-mono text-tiny ${classification.color}`}>
           AQI {aqi} — {classification.label}
         </Badge>
       </CardHeader>
@@ -53,7 +53,7 @@ export function AirQualityDeepView({ airQuality }: AirQualityDeepViewProps) {
         {/* Top Summary Box */}
         <div className="p-4 bg-muted/20 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <span className="text-[10px] font-mono text-muted-foreground uppercase">Air Quality Index</span>
+            <span className="text-tiny font-mono text-muted-foreground uppercase">Air Quality Index</span>
             <div className="flex items-baseline gap-2 mt-0.5">
               <span className="text-4xl font-mono font-bold text-foreground">
                 <NumberFlow value={aqi} />
@@ -101,7 +101,7 @@ export function AirQualityDeepView({ airQuality }: AirQualityDeepViewProps) {
                     style={{ width: `${pct}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-[9px] font-mono text-muted-foreground">
+                <div className="flex justify-between text-micro font-mono text-muted-foreground">
                   <span>{p.name}</span>
                   <span>{pct}% of limit</span>
                 </div>

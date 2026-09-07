@@ -141,10 +141,10 @@ export function InlineComparisonMatrix({
           <div className="p-3 bg-muted/20 border border-border flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <Badge variant="outline" className="text-[10px] font-mono">
+                <Badge variant="outline" className="text-tiny font-mono">
                   PRIMARY STATION
                 </Badge>
-                <span className="text-[10px] font-mono text-muted-foreground">Active</span>
+                <span className="text-tiny font-mono text-muted-foreground">Active</span>
               </div>
               <h3 className="text-base font-heading font-semibold text-foreground">{baseCurrent.cityName}</h3>
               <p className="text-xs text-muted-foreground capitalize">
@@ -164,7 +164,7 @@ export function InlineComparisonMatrix({
           <div className="p-3 bg-muted/20 border border-border flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <Badge variant="secondary" className="text-[10px] font-mono">
+                <Badge variant="secondary" className="text-tiny font-mono">
                   TARGET STATION
                 </Badge>
                 {renderDelta(tempDiff, `°${unit}`)}
@@ -206,7 +206,7 @@ export function InlineComparisonMatrix({
         {/* Delta Table */}
         {targetWeather && (
           <div className="border border-border text-xs">
-            <div className="bg-muted/40 px-3 py-1.5 border-b border-border flex justify-between font-mono text-[10px] text-muted-foreground font-semibold">
+            <div className="bg-muted/40 px-3 py-1.5 border-b border-border flex justify-between font-mono text-tiny text-muted-foreground font-semibold">
               <span className="w-1/3">ATMOSPHERIC METRIC</span>
               <span className="w-1/4 text-center">{baseCurrent.cityName.toUpperCase()}</span>
               <span className="w-1/4 text-center">{targetWeather.cityName.toUpperCase()}</span>

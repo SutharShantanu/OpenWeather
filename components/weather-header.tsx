@@ -150,7 +150,7 @@ export function WeatherHeader({
             <span className="font-heading font-medium text-sm text-foreground tracking-tight">
               OpenWeather
             </span>
-            <Badge variant="outline" className="text-[10px] font-mono font-normal hidden sm:inline-flex">
+            <Badge variant="outline" className="text-tiny font-mono font-normal hidden sm:inline-flex">
               Console
             </Badge>
           </div>
@@ -199,7 +199,7 @@ export function WeatherHeader({
                 </TooltipTrigger>
                 <TooltipContent>GPS Auto-Detect Location</TooltipContent>
               </Tooltip>
-              <kbd className="hidden sm:inline-flex px-1 py-0.5 text-[9px] font-mono text-muted-foreground border border-border">
+              <kbd className="hidden sm:inline-flex px-1 py-0.5 text-micro font-mono text-muted-foreground border border-border">
                 /
               </kbd>
             </div>
@@ -214,7 +214,7 @@ export function WeatherHeader({
                 </div>
               ) : results.length > 0 ? (
                 <div className="py-1">
-                  <div className="px-3 py-1 text-[10px] font-mono text-muted-foreground uppercase border-b border-border">
+                  <div className="px-3 py-1 text-tiny font-mono text-muted-foreground uppercase border-b border-border">
                     Geocoding Matches
                   </div>
                   {results.map((r, i) => (
@@ -227,12 +227,12 @@ export function WeatherHeader({
                         <MapPin className="size-3 text-primary shrink-0" />
                         <div>
                           <span className="font-medium text-foreground">{r.name}</span>
-                          <span className="text-muted-foreground ml-1.5 text-[11px]">
+                          <span className="text-muted-foreground ml-1.5 text-mini">
                             {r.state ? `${r.state}, ` : ""}{r.country}
                           </span>
                         </div>
                       </div>
-                      <span className="font-mono text-[10px] text-muted-foreground">
+                      <span className="font-mono text-tiny text-muted-foreground">
                         {r.lat.toFixed(2)}°, {r.lon.toFixed(2)}°
                       </span>
                     </button>
@@ -244,7 +244,7 @@ export function WeatherHeader({
                 </div>
               ) : (
                 <div className="p-2.5">
-                  <div className="text-[10px] font-mono text-muted-foreground uppercase mb-1.5">
+                  <div className="text-tiny font-mono text-muted-foreground uppercase mb-1.5">
                     Popular Hubs
                   </div>
                   <div className="flex flex-wrap gap-1">
@@ -289,7 +289,7 @@ export function WeatherHeader({
                   className="font-mono text-xs gap-1.5 h-8 px-2.5"
                 >
                   <Sparkles className="size-3.5 text-primary" />
-                  <span className="hidden md:inline text-[11px]">AI Advisor</span>
+                  <span className="hidden md:inline text-mini">AI Advisor</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>AI Synoptic Intelligence & Sudden Shift Analysis</TooltipContent>

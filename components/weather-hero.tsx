@@ -53,20 +53,20 @@ export function WeatherHero({
       <CardHeader className="border-b border-border pb-4">
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="font-mono text-[10px] gap-1">
+            <Badge variant="outline" className="font-mono text-tiny gap-1">
               <MapPin className="size-2.5 text-primary" />
               <span>
                 {current.lat.toFixed(2)}°N, {current.lon.toFixed(2)}°E
               </span>
             </Badge>
-            <Badge variant="secondary" className="font-mono text-[10px]">
+            <Badge variant="secondary" className="font-mono text-tiny">
               {current.country}
             </Badge>
-            <span className="text-[11px] font-mono text-muted-foreground">
+            <span className="text-mini font-mono text-muted-foreground">
               Observed {localTime}
             </span>
             {current.uvIndex !== undefined && uvClass && (
-              <Badge variant="outline" className={`font-mono text-[10px] ${uvClass.color}`}>
+              <Badge variant="outline" className={`font-mono text-tiny ${uvClass.color}`}>
                 UV {current.uvIndex.toFixed(1)} {uvClass.risk}
               </Badge>
             )}
@@ -144,7 +144,7 @@ export function WeatherHero({
               <Droplets className="size-3.5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-mono text-muted-foreground uppercase">Humidity</span>
+              <span className="text-tiny font-mono text-muted-foreground uppercase">Humidity</span>
               <span className="text-sm font-mono font-semibold text-foreground">
                 <NumberFlow value={current.humidity} />%
               </span>
@@ -156,7 +156,7 @@ export function WeatherHero({
               <Wind className="size-3.5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-mono text-muted-foreground uppercase">Wind Velocity</span>
+              <span className="text-tiny font-mono text-muted-foreground uppercase">Wind Velocity</span>
               <span className="text-sm font-mono font-semibold text-foreground">
                 <NumberFlow value={current.windSpeed} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} /> m/s
               </span>
@@ -168,7 +168,7 @@ export function WeatherHero({
               <Gauge className="size-3.5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-mono text-muted-foreground uppercase">Barometer</span>
+              <span className="text-tiny font-mono text-muted-foreground uppercase">Barometer</span>
               <span className="text-sm font-mono font-semibold text-foreground">
                 <NumberFlow value={current.pressure} /> hPa
               </span>
@@ -180,7 +180,7 @@ export function WeatherHero({
               <Eye className="size-3.5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-mono text-muted-foreground uppercase">Visibility</span>
+              <span className="text-tiny font-mono text-muted-foreground uppercase">Visibility</span>
               <span className="text-sm font-mono font-semibold text-foreground">
                 <NumberFlow value={Math.round(current.visibility / 1000)} /> km
               </span>
@@ -192,7 +192,7 @@ export function WeatherHero({
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs font-mono">
           {current.uvIndex !== undefined && (
             <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-[10px]">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
                 <SunMedium className="size-3 text-amber-500" />
                 <span>UV INDEX</span>
               </div>
@@ -202,7 +202,7 @@ export function WeatherHero({
 
           {displayDewPoint !== null && (
             <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-[10px]">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
                 <Thermometer className="size-3 text-sky-500" />
                 <span>DEW POINT</span>
               </div>
@@ -211,7 +211,7 @@ export function WeatherHero({
           )}
 
           <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-muted-foreground text-[10px]">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
               <Cloud className="size-3 text-muted-foreground" />
               <span>CLOUD COVER</span>
             </div>
@@ -220,7 +220,7 @@ export function WeatherHero({
 
           {current.windGusts !== undefined && (
             <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-muted-foreground text-[10px]">
+              <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
                 <Wind className="size-3 text-teal-500" />
                 <span>WIND GUSTS</span>
               </div>

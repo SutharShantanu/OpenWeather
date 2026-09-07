@@ -119,7 +119,7 @@ export function AiAdvisorDialog({
         <div className="space-y-4 pt-2">
           {/* Sudden Shifts Section */}
           <div className="space-y-2">
-            <div className="text-[10px] font-mono uppercase text-muted-foreground font-bold tracking-wider">
+            <div className="text-tiny font-mono uppercase text-muted-foreground font-bold tracking-wider">
               Short-Range Sudden Disturbances (Next 6-12h)
             </div>
             {analysis.suddenAlerts.length > 0 ? (
@@ -133,12 +133,12 @@ export function AiAdvisorDialog({
                       <AlertCircle className="size-3.5" />
                       <span>{alert.title}</span>
                     </span>
-                    <Badge variant="destructive" className="text-[9px] font-mono">
+                    <Badge variant="destructive" className="text-micro font-mono">
                       {alert.timing}
                     </Badge>
                   </div>
                   <p className="text-foreground">{alert.detail}</p>
-                  <p className="text-muted-foreground text-[11px]">
+                  <p className="text-muted-foreground text-mini">
                     <span className="font-semibold text-foreground">Guidance:</span> {alert.action}
                   </p>
                 </div>
@@ -152,7 +152,7 @@ export function AiAdvisorDialog({
 
           {/* Planned Shifts Section */}
           <div className="space-y-2">
-            <div className="text-[10px] font-mono uppercase text-muted-foreground font-bold tracking-wider">
+            <div className="text-tiny font-mono uppercase text-muted-foreground font-bold tracking-wider">
               Planned Synoptic Shifts & Multi-Day Trend
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -160,12 +160,12 @@ export function AiAdvisorDialog({
                 <div key={idx} className="p-3 bg-muted/20 border border-border space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-foreground">{shift.period}</span>
-                    <Badge variant="outline" className="text-[9px] font-mono text-primary border-primary/30">
+                    <Badge variant="outline" className="text-micro font-mono text-primary border-primary/30">
                       {shift.temperatureShift}
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-foreground">{shift.summary}</p>
-                  <div className="text-[10px] text-muted-foreground">
+                  <p className="text-mini text-foreground">{shift.summary}</p>
+                  <div className="text-tiny text-muted-foreground">
                     Precipitation Risk: <span className="text-foreground">{shift.precipitationRisk}</span>
                   </div>
                 </div>
@@ -175,7 +175,7 @@ export function AiAdvisorDialog({
 
           {/* Quick Questions Chips */}
           <div className="space-y-2 pt-2 border-t border-border">
-            <div className="text-[10px] font-mono uppercase text-muted-foreground font-bold tracking-wider">
+            <div className="text-tiny font-mono uppercase text-muted-foreground font-bold tracking-wider">
               Quick AI Consultation
             </div>
             <div className="flex flex-wrap gap-1.5">
@@ -190,7 +190,7 @@ export function AiAdvisorDialog({
                   variant="outline"
                   size="xs"
                   onClick={() => answerQuery(q)}
-                  className="text-[11px] h-6 font-mono"
+                  className="text-mini h-6 font-mono"
                 >
                   {q}
                 </Button>

@@ -45,7 +45,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
               Hourly Trajectory
             </CardTitle>
-            <Badge variant="outline" className="text-[10px] font-mono">
+            <Badge variant="outline" className="text-tiny font-mono">
               1-Hour Precision
             </Badge>
           </div>
@@ -61,7 +61,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                 variant={hoursLimit === 24 ? "default" : "ghost"}
                 size="xs"
                 onClick={() => setHoursLimit(24)}
-                className="h-6 px-2 font-mono text-[10px]"
+                className="h-6 px-2 font-mono text-tiny"
               >
                 24H
               </Button>
@@ -69,7 +69,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                 variant={hoursLimit === 48 ? "default" : "ghost"}
                 size="xs"
                 onClick={() => setHoursLimit(48)}
-                className="h-6 px-2 font-mono text-[10px]"
+                className="h-6 px-2 font-mono text-tiny"
               >
                 48H
               </Button>
@@ -102,7 +102,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                 <XAxis
                   dataKey="time"
                   stroke="currentColor"
-                  className="text-[10px] font-mono text-muted-foreground"
+                  className="text-tiny font-mono text-muted-foreground"
                   tickLine={false}
                   axisLine={false}
                 />
@@ -114,10 +114,10 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
                           <div className="text-primary font-bold">{data.temp}°{unit}</div>
-                          <div className="text-[10px] text-muted-foreground">Precip: {data.pop}%</div>
-                          <div className="text-[10px] text-muted-foreground">Wind: {data.wind} m/s</div>
+                          <div className="text-tiny text-muted-foreground">Precip: {data.pop}%</div>
+                          <div className="text-tiny text-muted-foreground">Wind: {data.wind} m/s</div>
                           {data.uv > 0 && (
-                            <div className="text-[10px] text-amber-500">UV: {data.uv}</div>
+                            <div className="text-tiny text-amber-500">UV: {data.uv}</div>
                           )}
                         </div>
                       );
@@ -147,7 +147,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                   key={idx}
                   className="flex flex-col items-center justify-between gap-2 min-w-[5.25rem] p-2.5 bg-muted/20 border border-border hover:bg-muted/40 transition-colors text-center shrink-0"
                 >
-                  <span className="text-[10px] font-mono text-muted-foreground font-medium">
+                  <span className="text-tiny font-mono text-muted-foreground font-medium">
                     {item.time}
                   </span>
 
@@ -160,17 +160,17 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                   </span>
 
                   {popPercent > 10 ? (
-                    <div className="flex items-center gap-0.5 text-[10px] font-mono text-sky-500 font-semibold">
+                    <div className="flex items-center gap-0.5 text-tiny font-mono text-sky-500 font-semibold">
                       <CloudRain className="size-2.5" />
                       <span>{popPercent}%</span>
                     </div>
                   ) : (
-                    <span className="text-[10px] font-mono text-muted-foreground/60">
+                    <span className="text-tiny font-mono text-muted-foreground/60">
                       0%
                     </span>
                   )}
 
-                  <div className="flex items-center gap-1 text-[9px] font-mono text-muted-foreground pt-1 border-t border-border/40 w-full justify-center">
+                  <div className="flex items-center gap-1 text-micro font-mono text-muted-foreground pt-1 border-t border-border/40 w-full justify-center">
                     <Wind className="size-2.5 text-muted-foreground" />
                     <span>{item.windSpeed.toFixed(0)}m/s</span>
                   </div>

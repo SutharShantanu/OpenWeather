@@ -61,12 +61,12 @@ export function WeatherTtsButton({
           {isPlaying ? (
             <>
               <Square className="size-3 fill-current" />
-              <span className="hidden sm:inline text-[11px]">Speaking...</span>
+              <span className="hidden sm:inline text-mini">Speaking...</span>
             </>
           ) : (
             <>
               <Volume2 className="size-3.5 text-primary" />
-              <span className="hidden sm:inline text-[11px]">Briefing</span>
+              <span className="hidden sm:inline text-mini">Briefing</span>
             </>
           )}
         </Button>

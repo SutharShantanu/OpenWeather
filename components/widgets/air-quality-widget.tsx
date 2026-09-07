@@ -36,7 +36,7 @@ export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
             Atmospheric particulate matter and gases
           </CardDescription>
         </div>
-        <Badge variant="outline" className={`font-mono text-[10px] ${classification.color}`}>
+        <Badge variant="outline" className={`font-mono text-tiny ${classification.color}`}>
           AQI {aqi} — {classification.label}
         </Badge>
       </CardHeader>
@@ -68,7 +68,7 @@ export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
               <div key={p.label} className="p-2 bg-muted/20 border border-border">
                 <div className="flex items-center justify-between text-xs font-mono mb-1">
                   <span className="font-semibold text-foreground">{p.label}</span>
-                  <span className="text-muted-foreground text-[11px]">
+                  <span className="text-muted-foreground text-mini">
                     <NumberFlow value={p.val} format={{ maximumFractionDigits: 1 }} />
                   </span>
                 </div>

@@ -31,7 +31,7 @@ export function WindWidget({ speed, deg }: WindWidgetProps) {
             Kinetic atmospheric velocity and angle
           </CardDescription>
         </div>
-        <Badge variant="outline" className="font-mono text-[10px]">
+        <Badge variant="outline" className="font-mono text-tiny">
           {direction} ({deg}°)
         </Badge>
       </CardHeader>
@@ -39,10 +39,10 @@ export function WindWidget({ speed, deg }: WindWidgetProps) {
       <CardContent className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Compass Dial */}
         <div className="relative size-24 border border-border bg-muted/20 flex items-center justify-center shrink-0">
-          <span className="absolute top-1 font-mono text-[9px] font-bold text-muted-foreground">N</span>
-          <span className="absolute right-1.5 font-mono text-[9px] font-bold text-muted-foreground">E</span>
-          <span className="absolute bottom-1 font-mono text-[9px] font-bold text-muted-foreground">S</span>
-          <span className="absolute left-1.5 font-mono text-[9px] font-bold text-muted-foreground">W</span>
+          <span className="absolute top-1 font-mono text-micro font-bold text-muted-foreground">N</span>
+          <span className="absolute right-1.5 font-mono text-micro font-bold text-muted-foreground">E</span>
+          <span className="absolute bottom-1 font-mono text-micro font-bold text-muted-foreground">S</span>
+          <span className="absolute left-1.5 font-mono text-micro font-bold text-muted-foreground">W</span>
 
           <div
             className="transition-transform duration-500 ease-out flex items-center justify-center text-teal-500"
@@ -71,7 +71,7 @@ export function WindWidget({ speed, deg }: WindWidgetProps) {
               <span className="text-muted-foreground">Beaufort Scale:</span>
               <span className="font-bold text-foreground">Force {beaufort.scale}</span>
             </div>
-            <p className="text-[11px] font-mono text-teal-500 font-medium mt-0.5">
+            <p className="text-mini font-mono text-teal-500 font-medium mt-0.5">
               {beaufort.label}
             </p>
           </div>
