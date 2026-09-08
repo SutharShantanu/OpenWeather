@@ -9,6 +9,28 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ results: [] });
   }
 
+  // 0. Coordinate query support (e.g. "28.65, 77.23" or "28.65 77.23")
+  const coordMatch = q.match(/^(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)$/);
+  if (coordMatch) {
+    const lat = parseFloat(coordMatch[1]);
+    const lon = parseFloat(coordMatch[2]);
+    if (!isNaN(lat) && !isNaN(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+      return NextResponse.json({
+        results: [
+          {
+            name: `${lat >= 0 ? lat.toFixed(2) + "°N" : Math.abs(lat).toFixed(2) + "°S"}, ${
+              lon >= 0 ? lon.toFixed(2) + "°E" : Math.abs(lon).toFixed(2) + "°W"
+            }`,
+            country: "Coordinates",
+            state: "Custom Station",
+            lat,
+            lon,
+          },
+        ],
+      });
+    }
+  }
+
   // 1. Try Open-Meteo Geocoding (Fast, zero API keys required, global coverage)
   try {
     const openMeteoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(

@@ -69,12 +69,36 @@ export function WeatherHeader({
   const [isOpen, setIsOpen] = useState(false);
   const [results, setResults] = useState<GeocodingResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [detectedCoords, setDetectedCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Catch user location as soon as search is activated
+  const handleSearchFocus = () => {
+    setIsOpen(true);
+    if (typeof navigator !== "undefined" && navigator.geolocation && !detectedCoords && !isLocating) {
+      setIsLocating(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setDetectedCoords({
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude,
+          });
+          setIsLocating(false);
+        },
+        (err) => {
+          console.warn("Geolocation catch on search activation failed:", err);
+          setIsLocating(false);
+        },
+        { timeout: 8000, maximumAge: 60000 }
+      );
+    }
+  };
 
   // Keyboard shortcut: "/" or "Cmd+K" to focus search
   useEffect(() => {
@@ -85,12 +109,12 @@ export function WeatherHeader({
       ) {
         e.preventDefault();
         inputRef.current?.focus();
-        setIsOpen(true);
+        handleSearchFocus();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [detectedCoords, isLocating]);
 
   // Close search dropdown on click outside
   useEffect(() => {
@@ -117,7 +141,12 @@ export function WeatherHeader({
         const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}`);
         if (res.ok) {
           const data = await res.json();
-          setResults(data);
+          const list: GeocodingResult[] = Array.isArray(data)
+            ? data
+            : Array.isArray(data?.results)
+            ? data.results
+            : [];
+          setResults(list);
         }
       } catch (err) {
         console.warn("Geocoding lookup error:", err);
@@ -132,6 +161,7 @@ export function WeatherHeader({
   const handleSelect = (cityName: string) => {
     onSearch(cityName);
     setQuery("");
+    setResults([]);
     setIsOpen(false);
   };
 
@@ -141,6 +171,10 @@ export function WeatherHeader({
       handleSelect(results[0].name);
     } else if (query.trim()) {
       handleSelect(query.trim());
+    } else {
+      // Empty input with Enter: use current location
+      onLocate();
+      setIsOpen(false);
     }
   };
 
@@ -174,7 +208,7 @@ export function WeatherHeader({
                 setQuery(e.target.value);
                 setIsOpen(true);
               }}
-              onFocus={() => setIsOpen(true)}
+              onFocus={handleSearchFocus}
               placeholder="Search station or coordinates… (Press /)"
               className="pl-8 pr-16 text-xs font-mono"
             />
@@ -214,12 +248,50 @@ export function WeatherHeader({
           {/* Autocomplete Dropdown */}
           {isOpen && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border ring-1 ring-foreground/10 z-50 text-xs shadow-md">
+              {/* 0. GPS Current Station (Caught instantly on search activation) */}
+              <button
+                type="button"
+                onClick={() => {
+                  onLocate();
+                  setIsOpen(false);
+                  setQuery("");
+                  setResults([]);
+                }}
+                className="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-muted/80 transition-colors border-b border-border bg-primary/5 text-xs font-mono group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="size-6 bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shrink-0">
+                    <MapPin className={cn("size-3.5", isLocating && "animate-pulse text-primary")} />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-foreground flex items-center gap-1.5">
+                      <span>Current Station (GPS)</span>
+                      {isLocating ? (
+                        <Badge variant="outline" className="text-nano font-mono animate-pulse text-primary border-primary/30 py-0 h-4">
+                          Detecting...
+                        </Badge>
+                      ) : detectedCoords ? (
+                        <Badge variant="outline" className="text-nano font-mono text-emerald-600 dark:text-emerald-400 border-emerald-500/30 py-0 h-4">
+                          GPS Locked
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <div className="text-mini text-muted-foreground">
+                      {detectedCoords
+                        ? `${detectedCoords.lat.toFixed(3)}°, ${detectedCoords.lon.toFixed(3)}° • Click to load station`
+                        : "Auto-detect meteorological station from device sensors"}
+                    </div>
+                  </div>
+                </div>
+                <span className="text-tiny text-primary font-bold group-hover:underline">Locate →</span>
+              </button>
+
               {isSearching ? (
                 <div className="p-3 text-center text-muted-foreground text-xs font-mono">
                   Locating stations…
                 </div>
               ) : results.length > 0 ? (
-                <div className="py-1">
+                <div className="py-1 max-h-64 overflow-y-auto">
                   <div className="px-3 py-1 text-tiny font-mono text-muted-foreground uppercase border-b border-border">
                     Geocoding Matches
                   </div>

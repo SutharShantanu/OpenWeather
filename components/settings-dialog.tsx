@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTheme } from "next-themes";
 import {
   WindSpeedUnit,
@@ -408,24 +409,21 @@ export function SettingsDialog({
                 <span>Temperature Standard</span>
                 <span className="text-primary font-bold">°{settings.tempUnit}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <Button
-                  variant={settings.tempUnit === "C" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => onUpdateSettings({ tempUnit: "C" })}
-                  className="font-mono text-xs"
-                >
+              <ToggleGroup
+                type="single"
+                value={settings.tempUnit}
+                onValueChange={(val) => {
+                  if (val) onUpdateSettings({ tempUnit: val as "C" | "F" });
+                }}
+                className="grid grid-cols-2 gap-2 pt-1 w-full"
+              >
+                <ToggleGroupItem value="C" className="w-full justify-center">
                   Celsius (°C)
-                </Button>
-                <Button
-                  variant={settings.tempUnit === "F" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => onUpdateSettings({ tempUnit: "F" })}
-                  className="font-mono text-xs"
-                >
+                </ToggleGroupItem>
+                <ToggleGroupItem value="F" className="w-full justify-center">
                   Fahrenheit (°F)
-                </Button>
-              </div>
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
 
             {/* Wind Speed */}
@@ -434,19 +432,20 @@ export function SettingsDialog({
                 <span>Wind Velocity Unit</span>
                 <span className="text-primary font-bold">{settings.windUnit}</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <ToggleGroup
+                type="single"
+                value={settings.windUnit}
+                onValueChange={(val) => {
+                  if (val) onUpdateSettings({ windUnit: val as WindSpeedUnit });
+                }}
+                className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 w-full"
+              >
                 {(["m/s", "km/h", "mph", "knots"] as WindSpeedUnit[]).map((u) => (
-                  <Button
-                    key={u}
-                    variant={settings.windUnit === u ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => onUpdateSettings({ windUnit: u })}
-                    className="font-mono text-xs"
-                  >
+                  <ToggleGroupItem key={u} value={u} className="w-full justify-center">
                     {u}
-                  </Button>
+                  </ToggleGroupItem>
                 ))}
-              </div>
+              </ToggleGroup>
             </div>
 
             {/* Barometric Pressure */}
@@ -455,19 +454,20 @@ export function SettingsDialog({
                 <span>Atmospheric Barometer</span>
                 <span className="text-primary font-bold">{settings.pressureUnit}</span>
               </div>
-              <div className="grid grid-cols-3 gap-2 pt-1">
+              <ToggleGroup
+                type="single"
+                value={settings.pressureUnit}
+                onValueChange={(val) => {
+                  if (val) onUpdateSettings({ pressureUnit: val as PressureUnit });
+                }}
+                className="grid grid-cols-3 gap-2 pt-1 w-full"
+              >
                 {(["hPa", "inHg", "mmHg"] as PressureUnit[]).map((u) => (
-                  <Button
-                    key={u}
-                    variant={settings.pressureUnit === u ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => onUpdateSettings({ pressureUnit: u })}
-                    className="font-mono text-xs"
-                  >
+                  <ToggleGroupItem key={u} value={u} className="w-full justify-center">
                     {u}
-                  </Button>
+                  </ToggleGroupItem>
                 ))}
-              </div>
+              </ToggleGroup>
             </div>
 
             {/* Precipitation */}
@@ -476,19 +476,20 @@ export function SettingsDialog({
                 <span>Precipitation Measurement</span>
                 <span className="text-primary font-bold">{settings.precipUnit}</span>
               </div>
-              <div className="grid grid-cols-2 gap-2 pt-1">
+              <ToggleGroup
+                type="single"
+                value={settings.precipUnit}
+                onValueChange={(val) => {
+                  if (val) onUpdateSettings({ precipUnit: val as PrecipitationUnit });
+                }}
+                className="grid grid-cols-2 gap-2 pt-1 w-full"
+              >
                 {(["mm", "in"] as PrecipitationUnit[]).map((u) => (
-                  <Button
-                    key={u}
-                    variant={settings.precipUnit === u ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => onUpdateSettings({ precipUnit: u })}
-                    className="font-mono text-xs"
-                  >
+                  <ToggleGroupItem key={u} value={u} className="w-full justify-center">
                     {u === "mm" ? "Millimeters (mm)" : "Inches (in)"}
-                  </Button>
+                  </ToggleGroupItem>
                 ))}
-              </div>
+              </ToggleGroup>
             </div>
           </TabsContent>
 
@@ -577,24 +578,21 @@ export function SettingsDialog({
               <div className="text-tiny uppercase text-muted-foreground font-bold">
                 Time Representation
               </div>
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <Button
-                  variant={settings.timeFormat === "24h" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => onUpdateSettings({ timeFormat: "24h" })}
-                  className="font-mono text-xs"
-                >
+              <ToggleGroup
+                type="single"
+                value={settings.timeFormat}
+                onValueChange={(val) => {
+                  if (val) onUpdateSettings({ timeFormat: val as "12h" | "24h" });
+                }}
+                className="grid grid-cols-2 gap-2 pt-1 w-full"
+              >
+                <ToggleGroupItem value="24h" className="w-full justify-center">
                   24-Hour (14:30)
-                </Button>
-                <Button
-                  variant={settings.timeFormat === "12h" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => onUpdateSettings({ timeFormat: "12h" })}
-                  className="font-mono text-xs"
-                >
+                </ToggleGroupItem>
+                <ToggleGroupItem value="12h" className="w-full justify-center">
                   12-Hour (2:30 PM)
-                </Button>
-              </div>
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
           </TabsContent>
 
@@ -605,19 +603,20 @@ export function SettingsDialog({
                 <span>Speech Velocity (TTS)</span>
                 <span className="text-primary font-bold">{settings.speechRate}x</span>
               </div>
-              <div className="grid grid-cols-4 gap-2 pt-1">
+              <ToggleGroup
+                type="single"
+                value={String(settings.speechRate)}
+                onValueChange={(val) => {
+                  if (val) onUpdateSettings({ speechRate: parseFloat(val) });
+                }}
+                className="grid grid-cols-4 gap-2 pt-1 w-full"
+              >
                 {[0.8, 1.0, 1.2, 1.4].map((rate) => (
-                  <Button
-                    key={rate}
-                    variant={settings.speechRate === rate ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => onUpdateSettings({ speechRate: rate })}
-                    className="font-mono text-xs"
-                  >
+                  <ToggleGroupItem key={rate} value={String(rate)} className="w-full justify-center">
                     {rate}x
-                  </Button>
+                  </ToggleGroupItem>
                 ))}
-              </div>
+              </ToggleGroup>
             </div>
 
             <div className="p-3 bg-muted/20 border border-border flex items-center justify-between">
@@ -644,35 +643,27 @@ export function SettingsDialog({
               <div className="text-tiny uppercase text-muted-foreground font-bold">
                 Theme Mode
               </div>
-              <div className="grid grid-cols-3 gap-2 pt-1">
-                <Button
-                  variant={theme === "dark" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTheme("dark")}
-                  className="font-mono text-xs gap-1.5"
-                >
+              <ToggleGroup
+                type="single"
+                value={theme || "dark"}
+                onValueChange={(val) => {
+                  if (val) setTheme(val);
+                }}
+                className="grid grid-cols-3 gap-2 pt-1 w-full"
+              >
+                <ToggleGroupItem value="dark" className="w-full justify-center gap-1.5">
                   <Moon className="size-3.5" />
                   <span>Dark</span>
-                </Button>
-                <Button
-                  variant={theme === "light" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTheme("light")}
-                  className="font-mono text-xs gap-1.5"
-                >
+                </ToggleGroupItem>
+                <ToggleGroupItem value="light" className="w-full justify-center gap-1.5">
                   <Sun className="size-3.5" />
                   <span>Light</span>
-                </Button>
-                <Button
-                  variant={theme === "system" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTheme("system")}
-                  className="font-mono text-xs gap-1.5"
-                >
+                </ToggleGroupItem>
+                <ToggleGroupItem value="system" className="w-full justify-center gap-1.5">
                   <Laptop className="size-3.5" />
                   <span>System</span>
-                </Button>
-              </div>
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
           </TabsContent>
         </Tabs>

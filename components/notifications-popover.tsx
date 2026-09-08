@@ -95,9 +95,12 @@ export function NotificationsPopover({
             <Bell className="size-3.5 text-muted-foreground" />
           )}
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 size-4 bg-destructive text-destructive-foreground text-micro font-mono font-bold flex items-center justify-center">
+            <Badge
+              variant="destructive"
+              className="absolute -top-1.5 -right-1.5 size-4 p-0 text-micro font-mono font-bold flex items-center justify-center border border-destructive/30"
+            >
               {unreadCount}
-            </span>
+            </Badge>
           )}
         </Button>
       </PopoverTrigger>
