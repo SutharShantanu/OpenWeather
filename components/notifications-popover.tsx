@@ -24,9 +24,16 @@ import { WeatherAlert, CurrentWeather } from "@/lib/weather";
 interface NotificationsPopoverProps {
   alerts?: WeatherAlert[];
   current?: CurrentWeather;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function NotificationsPopover({ alerts = [], current }: NotificationsPopoverProps) {
+export function NotificationsPopover({
+  alerts = [],
+  current,
+  open,
+  onOpenChange,
+}: NotificationsPopoverProps) {
   const [permission, setPermission] = useState<NotificationPermission>("default");
   const [supported, setSupported] = useState(false);
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
@@ -74,7 +81,7 @@ export function NotificationsPopover({ alerts = [], current }: NotificationsPopo
   };
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"

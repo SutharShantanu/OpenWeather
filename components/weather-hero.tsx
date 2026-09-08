@@ -15,6 +15,8 @@ import {
   SunMedium,
   Cloud,
   Thermometer,
+  Share2,
+  Check,
 } from "lucide-react";
 import { CurrentWeather, formatTemperature, getUvClassification } from "@/lib/weather";
 import { WeatherIcon } from "@/components/weather-icon";
@@ -42,6 +44,15 @@ export function WeatherHero({
   const displayDewPoint = current.dewPoint !== undefined ? formatTemperature(current.dewPoint, unit) : null;
   const uvClass = current.uvIndex !== undefined ? getUvClassification(current.uvIndex) : null;
 
+  const [copied, setCopied] = React.useState(false);
+
+  const handleShare = () => {
+    if (typeof window === "undefined") return;
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const localTime = new Date(current.dt * 1000).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -60,16 +71,16 @@ export function WeatherHero({
               </span>
             </Badge>
             <Badge variant="secondary" className="font-mono text-tiny">
-              {current.country}
+              {current.country || "Station Telemetry"}
             </Badge>
-            <span className="text-mini font-mono text-muted-foreground">
-              Observed {localTime}
-            </span>
-            {current.uvIndex !== undefined && uvClass && (
+            {uvClass && (
               <Badge variant="outline" className={`font-mono text-tiny ${uvClass.color}`}>
-                UV {current.uvIndex.toFixed(1)} {uvClass.risk}
+                UV {current.uvIndex} • {uvClass.label}
               </Badge>
             )}
+            <span className="text-tiny font-mono text-muted-foreground hidden sm:inline">
+              Synoptic Time: {localTime}
+            </span>
           </div>
 
           <CardTitle className="text-2xl sm:text-4xl font-heading font-semibold tracking-tight text-foreground">
@@ -88,7 +99,26 @@ export function WeatherHero({
           </CardDescription>
         </div>
 
-        <CardAction>
+        <CardAction className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShare}
+            className="font-mono text-xs gap-1.5"
+            title="Share Station Deep Link (Copies Current URL)"
+          >
+            {copied ? (
+              <>
+                <Check className="size-3.5 text-emerald-500" />
+                <span className="text-emerald-500">COPIED</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="size-3.5 text-muted-foreground" />
+                <span>SHARE</span>
+              </>
+            )}
+          </Button>
           <Button
             variant={isPinned ? "secondary" : "outline"}
             size="sm"

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { WeatherHeader } from "@/components/weather-header";
 import { WeatherHero } from "@/components/weather-hero";
 import { HourlyForecast } from "@/components/hourly-forecast";
@@ -37,8 +37,69 @@ export default function WeatherDashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showAiAdvisor, setShowAiAdvisor] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsTab, setSettingsTab] = useState("units");
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const isInitializedRef = useRef(false);
+  const isPopStateRef = useRef(false);
 
   const unit = settings.tempUnit;
+
+  // Build industry-standard deep link URL query string
+  const buildCurrentUrl = useCallback(
+    (overrides?: {
+      city?: string | null;
+      coords?: { lat: number; lon: number } | null;
+      tab?: string | null;
+      dialog?: string | null;
+      settingsTab?: string | null;
+    }) => {
+      if (typeof window === "undefined") return "";
+
+      const targetCity = overrides && "city" in overrides ? overrides.city : city;
+      const targetCoords = overrides && "coords" in overrides ? overrides.coords : coords;
+      const targetTab = overrides && "tab" in overrides ? overrides.tab : activeTab;
+      const targetDialog =
+        overrides && "dialog" in overrides
+          ? overrides.dialog
+          : showSettings
+          ? "settings"
+          : showAiAdvisor
+          ? "ai-advisor"
+          : showNotifications
+          ? "notifications"
+          : null;
+      const targetSettingsTab =
+        overrides && "settingsTab" in overrides ? overrides.settingsTab : settingsTab;
+
+      const params = new URLSearchParams();
+
+      // 1. Weather Location (Coordinates take precedence if active, else city)
+      if (targetCoords) {
+        params.set("lat", targetCoords.lat.toFixed(4));
+        params.set("lon", targetCoords.lon.toFixed(4));
+      } else if (targetCity) {
+        params.set("city", targetCity);
+      }
+
+      // 2. Active Tab (omit default 'overview' to keep URLs clean)
+      if (targetTab && targetTab !== "overview") {
+        params.set("tab", targetTab);
+      }
+
+      // 3. Dialog / Popup / Modal State
+      if (targetDialog) {
+        params.set("dialog", targetDialog);
+        if (targetDialog === "settings" && targetSettingsTab && targetSettingsTab !== "units") {
+          params.set("settingsTab", targetSettingsTab);
+        }
+      }
+
+      const qs = params.toString();
+      return qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    },
+    [city, coords, activeTab, showSettings, showAiAdvisor, showNotifications, settingsTab]
+  );
 
   // Initialize settings from localStorage
   useEffect(() => {
@@ -85,6 +146,140 @@ export default function WeatherDashboardPage() {
     }
   }, []);
 
+  // 1. Initial Mount: Read URL query parameters to restore location, tab, and dialog state
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const urlCity = params.get("city") || params.get("q") || params.get("loc") || params.get("location");
+    const urlLat = params.get("lat");
+    const urlLon = params.get("lon");
+    const urlTab = params.get("tab");
+    const urlDialog = params.get("dialog") || params.get("modal") || params.get("popup");
+    const rawSettingsTab = params.get("settingsTab") || params.get("setting");
+    const urlUnit = params.get("unit");
+
+    if (urlLat && urlLon) {
+      const pLat = parseFloat(urlLat);
+      const pLon = parseFloat(urlLon);
+      if (!isNaN(pLat) && !isNaN(pLon)) {
+        setCoords({ lat: pLat, lon: pLon });
+      }
+    } else if (urlCity) {
+      setCity(urlCity);
+    } else {
+      // Default initial city in URL so it is immediately shareable
+      const p = new URLSearchParams(window.location.search);
+      p.set("city", "London");
+      window.history.replaceState(null, "", `${window.location.pathname}?${p.toString()}`);
+    }
+
+    if (
+      urlTab &&
+      ["overview", "charts", "radar", "air-quality", "climate", "compare"].includes(urlTab)
+    ) {
+      setActiveTab(urlTab);
+    }
+
+    if (urlDialog === "settings") {
+      setShowSettings(true);
+    } else if (urlDialog === "ai-advisor" || urlDialog === "ai") {
+      setShowAiAdvisor(true);
+    } else if (urlDialog === "notifications" || urlDialog === "alerts") {
+      setShowNotifications(true);
+    }
+
+    if (rawSettingsTab) {
+      const norm =
+        rawSettingsTab === "regional"
+          ? "localization"
+          : rawSettingsTab === "theme"
+          ? "appearance"
+          : rawSettingsTab;
+      if (["units", "favorites", "localization", "speech", "appearance"].includes(norm)) {
+        setSettingsTab(norm);
+      }
+    }
+
+    if (urlUnit && (urlUnit === "C" || urlUnit === "F")) {
+      handleUpdateSettings({ tempUnit: urlUnit as "C" | "F" });
+    }
+
+    isInitializedRef.current = true;
+  }, []);
+
+  // 2. Popstate Listener: Seamless browser Back/Forward support for dialogs and location history
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handlePopState = () => {
+      isPopStateRef.current = true;
+      const params = new URLSearchParams(window.location.search);
+      const urlCity = params.get("city") || params.get("q") || params.get("loc") || params.get("location");
+      const urlLat = params.get("lat");
+      const urlLon = params.get("lon");
+      const urlTab = params.get("tab");
+      const urlDialog = params.get("dialog") || params.get("modal") || params.get("popup");
+      const rawSettingsTab = params.get("settingsTab") || params.get("setting");
+
+      if (urlLat && urlLon) {
+        const pLat = parseFloat(urlLat);
+        const pLon = parseFloat(urlLon);
+        if (!isNaN(pLat) && !isNaN(pLon)) {
+          setCoords({ lat: pLat, lon: pLon });
+        }
+      } else if (urlCity) {
+        setCoords(null);
+        setCity(urlCity);
+      }
+
+      if (
+        urlTab &&
+        ["overview", "charts", "radar", "air-quality", "climate", "compare"].includes(urlTab)
+      ) {
+        setActiveTab(urlTab);
+      } else {
+        setActiveTab("overview");
+      }
+
+      setShowSettings(urlDialog === "settings");
+      setShowAiAdvisor(urlDialog === "ai-advisor" || urlDialog === "ai");
+      setShowNotifications(urlDialog === "notifications" || urlDialog === "alerts");
+
+      if (rawSettingsTab) {
+        const norm =
+          rawSettingsTab === "regional"
+            ? "localization"
+            : rawSettingsTab === "theme"
+            ? "appearance"
+            : rawSettingsTab;
+        if (["units", "favorites", "localization", "speech", "appearance"].includes(norm)) {
+          setSettingsTab(norm);
+        }
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  // 3. Keep URL query synced with active state
+  useEffect(() => {
+    if (typeof window === "undefined" || !isInitializedRef.current) return;
+
+    if (isPopStateRef.current) {
+      isPopStateRef.current = false;
+      return;
+    }
+
+    const targetUrl = buildCurrentUrl();
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+    if (targetUrl !== currentUrl) {
+      window.history.replaceState(null, "", targetUrl);
+    }
+  }, [buildCurrentUrl]);
+
   // Fetch weather data
   const fetchWeather = useCallback(async (targetCity?: string, targetCoords?: { lat: number; lon: number }) => {
     setLoading(true);
@@ -118,13 +313,18 @@ export default function WeatherDashboardPage() {
     }
   }, [city, coords, fetchWeather]);
 
-  // GPS Locate
+  // GPS Locate with URL update
   const handleLocate = () => {
     if (typeof navigator !== "undefined" && navigator.geolocation) {
       setLoading(true);
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+          const nextCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+          setCoords(nextCoords);
+          if (typeof window !== "undefined") {
+            const nextUrl = buildCurrentUrl({ coords: nextCoords, city: null });
+            window.history.pushState(nextCoords, "", nextUrl);
+          }
         },
         (err) => {
           console.warn("Geolocation denied or unavailable", err);
@@ -133,6 +333,109 @@ export default function WeatherDashboardPage() {
       );
     }
   };
+
+  // User Actions: City selection with URL history push
+  const handleSelectCity = useCallback(
+    (newCity: string) => {
+      setCoords(null);
+      setCity(newCity);
+      if (typeof window !== "undefined") {
+        const nextUrl = buildCurrentUrl({ city: newCity, coords: null });
+        window.history.pushState({ city: newCity }, "", nextUrl);
+      }
+    },
+    [buildCurrentUrl]
+  );
+
+  // Tab change with shallow URL update
+  const handleTabChange = useCallback(
+    (newTab: string) => {
+      setActiveTab(newTab);
+      if (typeof window !== "undefined") {
+        const nextUrl = buildCurrentUrl({ tab: newTab });
+        window.history.replaceState(null, "", nextUrl);
+      }
+    },
+    [buildCurrentUrl]
+  );
+
+  // Open / Close Settings Dialog with deep link
+  const handleOpenSettings = useCallback(
+    (tab?: string) => {
+      if (tab) setSettingsTab(tab);
+      setShowSettings(true);
+      setShowAiAdvisor(false);
+      setShowNotifications(false);
+      if (typeof window !== "undefined") {
+        const nextUrl = buildCurrentUrl({
+          dialog: "settings",
+          settingsTab: tab || settingsTab,
+        });
+        window.history.pushState({ dialog: "settings" }, "", nextUrl);
+      }
+    },
+    [buildCurrentUrl, settingsTab]
+  );
+
+  const handleCloseSettings = useCallback(() => {
+    setShowSettings(false);
+    if (typeof window !== "undefined") {
+      const nextUrl = buildCurrentUrl({ dialog: null, settingsTab: null });
+      window.history.replaceState(null, "", nextUrl);
+    }
+  }, [buildCurrentUrl]);
+
+  // Open / Close AI Advisor Dialog with deep link
+  const handleOpenAiAdvisor = useCallback(() => {
+    setShowAiAdvisor(true);
+    setShowSettings(false);
+    setShowNotifications(false);
+    if (typeof window !== "undefined") {
+      const nextUrl = buildCurrentUrl({ dialog: "ai-advisor" });
+      window.history.pushState({ dialog: "ai-advisor" }, "", nextUrl);
+    }
+  }, [buildCurrentUrl]);
+
+  const handleCloseAiAdvisor = useCallback(() => {
+    setShowAiAdvisor(false);
+    if (typeof window !== "undefined") {
+      const nextUrl = buildCurrentUrl({ dialog: null });
+      window.history.replaceState(null, "", nextUrl);
+    }
+  }, [buildCurrentUrl]);
+
+  // Open / Close Notifications Popover with deep link
+  const handleNotificationsOpenChange = useCallback(
+    (open: boolean) => {
+      setShowNotifications(open);
+      if (open) {
+        setShowSettings(false);
+        setShowAiAdvisor(false);
+        if (typeof window !== "undefined") {
+          const nextUrl = buildCurrentUrl({ dialog: "notifications" });
+          window.history.pushState({ dialog: "notifications" }, "", nextUrl);
+        }
+      } else {
+        if (typeof window !== "undefined") {
+          const nextUrl = buildCurrentUrl({ dialog: null });
+          window.history.replaceState(null, "", nextUrl);
+        }
+      }
+    },
+    [buildCurrentUrl]
+  );
+
+  // Settings internal tab change
+  const handleSettingsTabChange = useCallback(
+    (newTab: string) => {
+      setSettingsTab(newTab);
+      if (typeof window !== "undefined") {
+        const nextUrl = buildCurrentUrl({ dialog: "settings", settingsTab: newTab });
+        window.history.replaceState(null, "", nextUrl);
+      }
+    },
+    [buildCurrentUrl]
+  );
 
   // Pin / Unpin
   const isPinned = weather ? pinnedCities.some((c) => c.toLowerCase() === weather.current.cityName.toLowerCase()) : false;
@@ -170,13 +473,12 @@ export default function WeatherDashboardPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-150">
       <WeatherHeader
-        onSearch={(newCity) => {
-          setCoords(null);
-          setCity(newCity);
-        }}
+        onSearch={handleSelectCity}
         onLocate={handleLocate}
-        onOpenAiAdvisor={() => setShowAiAdvisor(true)}
-        onOpenSettings={() => setShowSettings(true)}
+        onOpenAiAdvisor={handleOpenAiAdvisor}
+        onOpenSettings={() => handleOpenSettings()}
+        showNotifications={showNotifications}
+        onNotificationsOpenChange={handleNotificationsOpenChange}
         current={weather?.current}
         daily={weather?.daily}
         hourly={weather?.hourly}
@@ -219,8 +521,8 @@ export default function WeatherDashboardPage() {
         )}
 
         {/* MSN Weather Navigation Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
-          <TabsList className="w-full justify-start overflow-x-auto border-b border-border p-0 bg-transparent">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-4">
+          <TabsList className="w-full justify-start border-b border-border p-0 bg-transparent h-9 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <TabsTrigger
               value="overview"
               className="font-heading font-medium text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3"
@@ -286,7 +588,7 @@ export default function WeatherDashboardPage() {
                 hourly={weather.hourly}
                 daily={weather.daily}
                 unit={unit}
-                onOpenDetailedAi={() => setShowAiAdvisor(true)}
+                onOpenDetailedAi={handleOpenAiAdvisor}
               />
             )}
 
@@ -304,7 +606,7 @@ export default function WeatherDashboardPage() {
                 lon={weather.current.lon}
                 cityName={weather.current.cityName}
                 heightClass="h-[340px]"
-                onExpand={() => setActiveTab("radar")}
+                onExpand={() => handleTabChange("radar")}
               />
             )}
 
@@ -355,10 +657,7 @@ export default function WeatherDashboardPage() {
             <PinnedLocations
               pinnedCities={pinnedCities}
               unit={unit}
-              onSelectCity={(selected) => {
-                setCoords(null);
-                setCity(selected);
-              }}
+              onSelectCity={handleSelectCity}
               onUnpinCity={handleUnpinCity}
             />
           </TabsContent>
@@ -439,18 +738,12 @@ export default function WeatherDashboardPage() {
                 <InlineComparisonMatrix
                   baseCurrent={weather.current}
                   unit={unit}
-                  onSwitchCity={(newCity) => {
-                    setCoords(null);
-                    setCity(newCity);
-                  }}
+                  onSwitchCity={handleSelectCity}
                 />
                 <PinnedLocations
                   pinnedCities={pinnedCities}
                   unit={unit}
-                  onSelectCity={(selected) => {
-                    setCoords(null);
-                    setCity(selected);
-                  }}
+                  onSelectCity={handleSelectCity}
                   onUnpinCity={handleUnpinCity}
                 />
               </>
@@ -465,7 +758,13 @@ export default function WeatherDashboardPage() {
       {weather && (
         <AiAdvisorDialog
           open={showAiAdvisor}
-          onOpenChange={setShowAiAdvisor}
+          onOpenChange={(open) => {
+            if (open) {
+              handleOpenAiAdvisor();
+            } else {
+              handleCloseAiAdvisor();
+            }
+          }}
           current={weather.current}
           hourly={weather.hourly}
           daily={weather.daily}
@@ -476,17 +775,22 @@ export default function WeatherDashboardPage() {
       {/* Extended Station & Application Preferences Dialog */}
       <SettingsDialog
         open={showSettings}
-        onOpenChange={setShowSettings}
+        onOpenChange={(open) => {
+          if (open) {
+            handleOpenSettings();
+          } else {
+            handleCloseSettings();
+          }
+        }}
+        activeTab={settingsTab}
+        onActiveTabChange={handleSettingsTabChange}
         settings={settings}
         onUpdateSettings={handleUpdateSettings}
         onResetSettings={handleResetSettings}
         pinnedCities={pinnedCities}
         onAddPinnedCity={handleAddPinnedCity}
         onRemovePinnedCity={handleRemovePinnedCity}
-        onSelectCity={(selected) => {
-          setCoords(null);
-          setCity(selected);
-        }}
+        onSelectCity={handleSelectCity}
       />
 
       {/* Footer */}

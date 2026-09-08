@@ -21,8 +21,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CurrentWeather, DailyForecastItem, HourlyForecastItem, WeatherAlert } from "@/lib/weather";
+import { cn } from "@/lib/utils";
 import { WeatherTtsButton } from "@/components/weather-tts-button";
 import { NotificationsPopover } from "@/components/notifications-popover";
+import { ButtonGroup } from "@/components/ui/button-group";
 
 interface GeocodingResult {
   name: string;
@@ -37,6 +39,8 @@ interface WeatherHeaderProps {
   onLocate: () => void;
   onOpenAiAdvisor?: () => void;
   onOpenSettings?: () => void;
+  showNotifications?: boolean;
+  onNotificationsOpenChange?: (open: boolean) => void;
   current?: CurrentWeather;
   daily?: DailyForecastItem[];
   hourly?: HourlyForecastItem[];
@@ -50,6 +54,8 @@ export function WeatherHeader({
   onLocate,
   onOpenAiAdvisor,
   onOpenSettings,
+  showNotifications,
+  onNotificationsOpenChange,
   current,
   daily,
   hourly,
@@ -296,39 +302,63 @@ export function WeatherHeader({
             </Tooltip>
           )}
 
-          {/* 3. Real Notifications Center with Web Push */}
-          <NotificationsPopover alerts={alerts} current={current} />
+          {/* 3, 4, 5: Actions Button Group */}
+          <ButtonGroup>
+            {/* Real Notifications Center with Web Push */}
+            <NotificationsPopover
+              alerts={alerts}
+              current={current}
+              open={showNotifications}
+              onOpenChange={onNotificationsOpenChange}
+            />
 
-          {/* 4. Comprehensive Settings Menu */}
-          {onOpenSettings && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  onClick={onOpenSettings}
-                  className="size-8"
-                  title="Configure Station Settings"
-                >
-                  <Settings className="size-3.5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Station & Application Preferences</TooltipContent>
-            </Tooltip>
-          )}
+            {/* Comprehensive Settings Menu */}
+            {onOpenSettings && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={onOpenSettings}
+                    className="size-8"
+                    title="Configure Station Settings"
+                  >
+                    <Settings className="size-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Station & Application Preferences</TooltipContent>
+              </Tooltip>
+            )}
 
-          {/* 5. Theme Toggle */}
-          {mounted && (
+            {/* Theme Toggle with smooth Sun/Moon transition */}
             <Button
               variant="outline"
               size="icon-sm"
-              className="size-8"
+              className="size-8 relative"
               onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              aria-label={mounted ? `Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode` : "Toggle theme"}
               title="Toggle Dark / Light Theme"
+              disabled={!mounted}
             >
-              {resolvedTheme === "dark" ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
+              <Sun
+                className={cn(
+                  "size-3.5 transition-all duration-300",
+                  mounted && resolvedTheme === "dark"
+                    ? "scale-0 -rotate-90 opacity-0"
+                    : "scale-100 rotate-0 opacity-100"
+                )}
+              />
+              <Moon
+                className={cn(
+                  "absolute size-3.5 transition-all duration-300",
+                  mounted && resolvedTheme === "dark"
+                    ? "scale-100 rotate-0 opacity-100"
+                    : "scale-0 rotate-90 opacity-0"
+                )}
+              />
+              <span className="sr-only">Toggle theme</span>
             </Button>
-          )}
+          </ButtonGroup>
         </div>
       </div>
     </header>

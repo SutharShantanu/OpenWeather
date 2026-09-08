@@ -54,6 +54,8 @@ export const DEFAULT_EXTENDED_SETTINGS: ExtendedSettings = {
 interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  activeTab?: string;
+  onActiveTabChange?: (tab: string) => void;
   settings: ExtendedSettings;
   onUpdateSettings: (newSettings: Partial<ExtendedSettings>) => void;
   onResetSettings: () => void;
@@ -66,6 +68,8 @@ interface SettingsDialogProps {
 export function SettingsDialog({
   open,
   onOpenChange,
+  activeTab = "units",
+  onActiveTabChange,
   settings,
   onUpdateSettings,
   onResetSettings,
@@ -87,7 +91,7 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-4 sm:p-6 font-mono text-xs">
+      <DialogContent className="max-w-fit font-mono text-xs">
         <DialogHeader className="border-b border-border pb-3">
           <div className="flex items-center gap-2">
             <div className="size-7 bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
@@ -102,8 +106,8 @@ export function SettingsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="units" className="w-full pt-2">
-          <TabsList className="w-full justify-start overflow-x-auto border-b border-border p-0 bg-transparent h-9 mb-4">
+        <Tabs value={activeTab} onValueChange={onActiveTabChange} className="w-full">
+          <TabsList className="w-full justify-start border-b border-border p-0 bg-transparent mb-4">
             <TabsTrigger
               value="units"
               className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3"
