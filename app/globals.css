@@ -174,4 +174,18 @@
   number-flow, [data-number-flow], .tabular-nums, .font-mono {
     font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
   }
+
+  /* Leaflet map containment & z-index isolation */
+  .leaflet-container {
+    isolation: isolate !important;
+    z-index: 0 !important;
+  }
+  .leaflet-pane {
+    z-index: 10 !important;
+  }
+  .leaflet-top,
+  .leaflet-bottom,
+  .leaflet-control {
+    z-index: 20 !important;
+  }
 }

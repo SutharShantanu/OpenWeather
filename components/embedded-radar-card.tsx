@@ -219,7 +219,11 @@ export function EmbeddedRadarCard({
         </CardAction>
       </CardHeader>
 
-      <CardContent className={`p-0 relative ${isFullscreen ? "h-[calc(100vh-110px)]" : heightClass} bg-muted/10`}>
+      <CardContent
+        className={`p-0 relative isolate overflow-hidden z-0 ${
+          isFullscreen ? "h-[calc(100vh-110px)]" : heightClass
+        } bg-muted/10`}
+      >
         <MapInner
           lat={lat}
           lon={lon}
@@ -231,7 +235,7 @@ export function EmbeddedRadarCard({
         />
 
         {/* Live Legend Overlay on Map */}
-        <div className="absolute top-3 right-3 z-[400] bg-background/90 border border-border p-2 text-tiny font-mono shadow-md backdrop-blur-sm hidden sm:block">
+        <div className="absolute top-3 right-3 z-10 bg-background/90 border border-border p-2 text-tiny font-mono shadow-md backdrop-blur-sm hidden sm:block">
           <div className="font-bold text-foreground mb-1">Precipitation dBZ</div>
           <div className="flex items-center gap-1">
             <div className="w-4 h-2 bg-[#00ffff]" title="Light Drizzle" />

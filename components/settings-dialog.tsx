@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Settings,
   MapPin,
@@ -130,12 +130,17 @@ export function SettingsDialog({
   onSelectCity,
 }: SettingsDialogProps) {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [newCityInput, setNewCityInput] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [showGoogleKey, setShowGoogleKey] = useState(false);
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [testPingStatus, setTestPingStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [testPingMsg, setTestPingMsg] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleTogglePreviewVoice = async () => {
     if (isPlayingPreview) {
@@ -616,10 +621,18 @@ export function SettingsDialog({
           {/* TAB 3: REGIONAL */}
           <TabsContent value="localization" className="space-y-4 focus-visible:outline-none">
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-tiny uppercase text-muted-foreground font-bold">
-                Language Display
+              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
+                <span>Language Display</span>
+                <span className="text-primary font-bold uppercase">{settings.language}</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+              <ToggleGroup
+                type="single"
+                value={settings.language}
+                onValueChange={(val) => {
+                  if (val) onUpdateSettings({ language: val });
+                }}
+                className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 w-full"
+              >
                 {[
                   { code: "en", label: "English" },
                   { code: "es", label: "Español" },
@@ -628,17 +641,15 @@ export function SettingsDialog({
                   { code: "ja", label: "日本語" },
                   { code: "hi", label: "हिन्दी" },
                 ].map((lang) => (
-                  <Button
+                  <ToggleGroupItem
                     key={lang.code}
-                    variant={settings.language === lang.code ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => onUpdateSettings({ language: lang.code })}
-                    className="font-mono text-xs"
+                    value={lang.code}
+                    className="w-full justify-center font-mono text-xs"
                   >
                     {lang.label}
-                  </Button>
+                  </ToggleGroupItem>
                 ))}
-              </div>
+              </ToggleGroup>
             </div>
 
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
@@ -920,21 +931,28 @@ export function SettingsDialog({
             </div>
 
             {/* 5. Automatic Briefing & Custom API Key */}
-            <div className="p-3 bg-muted/20 border border-border flex items-center justify-between">
+            <div className="p-3 bg-muted/20 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <span className="font-bold text-foreground text-xs block">Automatic Audio Briefing</span>
                 <span className="text-tiny text-muted-foreground">
                   Read aloud meteorological briefing automatically with Google TTS on station switch
                 </span>
               </div>
-              <Button
-                variant={settings.autoSpeakOnLoad ? "default" : "outline"}
-                size="xs"
-                onClick={() => onUpdateSettings({ autoSpeakOnLoad: !settings.autoSpeakOnLoad })}
-                className="h-7 font-mono text-xs"
+              <ToggleGroup
+                type="single"
+                value={settings.autoSpeakOnLoad ? "enabled" : "disabled"}
+                onValueChange={(val) => {
+                  if (val) onUpdateSettings({ autoSpeakOnLoad: val === "enabled" });
+                }}
+                className="grid grid-cols-2 gap-1.5 w-36 shrink-0"
               >
-                {settings.autoSpeakOnLoad ? "Enabled" : "Disabled"}
-              </Button>
+                <ToggleGroupItem value="enabled" className="w-full justify-center">
+                  Enabled
+                </ToggleGroupItem>
+                <ToggleGroupItem value="disabled" className="w-full justify-center">
+                  Disabled
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
 
             {/* Optional Google Cloud API Key */}
@@ -991,7 +1009,7 @@ export function SettingsDialog({
               </div>
               <ToggleGroup
                 type="single"
-                value={theme || "dark"}
+                value={mounted ? theme || "dark" : "dark"}
                 onValueChange={(val) => {
                   if (val) setTheme(val);
                 }}

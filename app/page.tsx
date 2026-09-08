@@ -30,6 +30,7 @@ import {
   ForecastStationModel,
 } from "@/lib/weather"
 import { generateWeatherBriefing, WeatherSpeechSynthesizer } from "@/lib/speech"
+import { useLenis } from "@/components/lenis-provider"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -61,6 +62,30 @@ export default function WeatherDashboardPage() {
   const [showSettings, setShowSettings] = useState(false)
   const [settingsTab, setSettingsTab] = useState("units")
   const [showNotifications, setShowNotifications] = useState(false)
+
+  const lenis = useLenis()
+
+  // Lock background scroll completely when modal dialogs are open
+  useEffect(() => {
+    const isModalOpen = showSettings || showAiAdvisor
+    if (isModalOpen) {
+      lenis?.stop()
+      const prevBodyOverflow = document.body.style.overflow
+      const prevHtmlOverflow = document.documentElement.style.overflow
+      document.body.style.overflow = "hidden"
+      document.documentElement.style.overflow = "hidden"
+
+      return () => {
+        lenis?.start()
+        document.body.style.overflow = prevBodyOverflow
+        document.documentElement.style.overflow = prevHtmlOverflow
+      }
+    } else {
+      lenis?.start()
+      document.body.style.overflow = ""
+      document.documentElement.style.overflow = ""
+    }
+  }, [showSettings, showAiAdvisor, lenis])
 
   const isInitializedRef = useRef(false)
   const isPopStateRef = useRef(false)

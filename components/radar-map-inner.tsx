@@ -133,5 +133,10 @@ export function RadarMapInner({
     overlayRef.current = overlay;
   }, [activeLayer, currentFrame, opacity]);
 
-  return <div ref={containerRef} className="w-full h-full" />;
+  return (
+    <div
+      ref={containerRef}
+      className="w-full h-full relative isolate overflow-hidden z-0"
+    />
+  );
 }
