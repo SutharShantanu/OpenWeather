@@ -15,6 +15,14 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { IconStack } from "@/components/reui/icon-stack";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 import { WeatherAlert, CurrentWeather } from "@/lib/weather";
 
 interface NotificationsPopoverProps {
@@ -136,10 +144,19 @@ export function NotificationsPopover({
               ))}
             </div>
           ) : (
-            <div className="p-4 bg-muted/10 border border-border text-center text-muted-foreground text-mini flex flex-col items-center gap-1.5">
-              <ShieldCheck className="size-4 text-emerald-500" />
-              <span>All clear. No active weather alerts for {current?.cityName || "London"}.</span>
-            </div>
+            <Empty className="py-6 border border-dashed border-border/80 bg-muted/10">
+              <EmptyHeader>
+                <EmptyMedia>
+                  <IconStack aria-hidden="true" className="text-emerald-500 h-16 w-14">
+                    <ShieldCheck className="text-emerald-500 size-4" />
+                  </IconStack>
+                </EmptyMedia>
+                <EmptyTitle className="text-xs">All Systems Clear</EmptyTitle>
+                <EmptyDescription className="text-xs">
+                  No active weather bulletins or severe advisories for {current?.cityName || "London"}.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </div>
       </PopoverContent>

@@ -16,6 +16,7 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription, AlertAction } from "@/components/reui/alert";
 import { CurrentWeather, DailyForecastItem, HourlyForecastItem } from "@/lib/weather";
 import { analyzeWeatherWithAi, AiWeatherAnalysis } from "@/lib/ai-weather-advisor";
 
@@ -82,36 +83,38 @@ export function AiAdvisorBanner({
         {hasSudden ? (
           <div className="space-y-2">
             {analysis.suddenAlerts.map((alert) => (
-              <div
-                key={alert.id}
-                className="p-3 bg-destructive/10 border border-destructive/30 flex items-start gap-2.5 text-xs font-mono"
-              >
+              <Alert key={alert.id} variant="destructive" className="py-2.5">
                 <AlertCircle className="size-4 text-destructive shrink-0 mt-0.5" />
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-bold text-destructive">{alert.title}</span>
-                    <Badge variant="destructive" className="text-micro font-mono uppercase">
-                      {alert.timing}
-                    </Badge>
-                  </div>
-                  <p className="text-foreground leading-relaxed">{alert.detail}</p>
-                  <p className="text-muted-foreground text-mini">
+                <div className="flex items-center justify-between gap-2 w-full">
+                  <AlertTitle className="font-bold text-destructive text-xs">{alert.title}</AlertTitle>
+                  <Badge variant="destructive" className="text-[10px] font-mono uppercase h-4 px-1.5 py-0">
+                    {alert.timing}
+                  </Badge>
+                </div>
+                <AlertDescription className="text-xs text-foreground mt-1 space-y-1">
+                  <p className="leading-relaxed">{alert.detail}</p>
+                  <p className="text-muted-foreground text-[11px]">
                     <span className="font-semibold text-foreground">Action Directive:</span> {alert.action}
                   </p>
-                </div>
-              </div>
+                </AlertDescription>
+              </Alert>
             ))}
           </div>
         ) : (
-          <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between text-xs font-mono">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Info className="size-3.5 text-primary" />
-              <span>No sudden micro-climate disturbances detected in the 6-hour forecast window.</span>
-            </div>
-            <Badge variant="outline" className="text-micro font-mono text-emerald-500 border-emerald-500/30">
-              Stable
-            </Badge>
-          </div>
+          <Alert variant="default" className="py-2.5 bg-muted/20 border-border">
+            <Info className="size-3.5 text-primary shrink-0" />
+            <AlertTitle className="text-xs font-semibold text-foreground">
+              Micro-Climate Stability
+            </AlertTitle>
+            <AlertDescription className="text-xs text-muted-foreground">
+              No sudden micro-climate disturbances detected in the 6-hour forecast window.
+            </AlertDescription>
+            <AlertAction>
+              <Badge variant="outline" className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+                STABLE
+              </Badge>
+            </AlertAction>
+          </Alert>
         )}
 
         {/* Practical AI Telemetry & Recommendations Grid */}

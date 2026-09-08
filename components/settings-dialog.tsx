@@ -24,6 +24,18 @@ import {
   Square,
   Sliders,
   Headphones,
+  Thermometer,
+  Wind,
+  Gauge,
+  CloudRain,
+  CloudLightning,
+  ShieldCheck,
+  Clock,
+  Layers,
+  Activity,
+  Info,
+  SunMoon,
+  Sparkle,
 } from "lucide-react";
 import {
   Dialog,
@@ -33,11 +45,31 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/reui/alert";
+import { IconStack } from "@/components/reui/icon-stack";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Label } from "@/components/ui/label";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import {
@@ -116,6 +148,17 @@ interface SettingsDialogProps {
   onSelectCity: (city: string) => void;
 }
 
+const POPULAR_CITIES = [
+  "London",
+  "Tokyo",
+  "New York",
+  "Paris",
+  "Zurich",
+  "Sydney",
+  "Singapore",
+  "Reykjavik",
+];
+
 export function SettingsDialog({
   open,
   onOpenChange,
@@ -137,9 +180,13 @@ export function SettingsDialog({
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [testPingStatus, setTestPingStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [testPingMsg, setTestPingMsg] = useState("");
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    setCurrentTime(new Date());
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const handleTogglePreviewVoice = async () => {
@@ -191,7 +238,7 @@ export function SettingsDialog({
         const json = await res.json();
         if (json.providerName?.includes("Failover") || json.stationName?.includes("Failover")) {
           setTestPingStatus("error");
-          setTestPingMsg("Authentication failed. Please check the OpenWeather API key.");
+          setTestPingMsg("Authentication failed. Please verify your OpenWeather API key.");
         } else {
           setTestPingStatus("success");
           setTestPingMsg(`Handshake Verified! Live telemetry: ${json.current?.cityName || "London"} (${json.current?.temp}°C, ${json.current?.humidity}% humidity).`);
@@ -214,155 +261,233 @@ export function SettingsDialog({
     }
   };
 
+  const applyMetricPreset = () => {
+    onUpdateSettings({
+      tempUnit: "C",
+      windUnit: "m/s",
+      pressureUnit: "hPa",
+      precipUnit: "mm",
+    });
+  };
+
+  const applyImperialPreset = () => {
+    onUpdateSettings({
+      tempUnit: "F",
+      windUnit: "mph",
+      pressureUnit: "inHg",
+      precipUnit: "in",
+    });
+  };
+
+  const getProviderIcon = (id: WeatherDataSource) => {
+    switch (id) {
+      case "open-meteo":
+        return <CloudLightning className="size-4 text-sky-500" />;
+      case "openweathermap":
+        return <Globe className="size-4 text-amber-500" />;
+      case "simulation":
+        return <Cpu className="size-4 text-purple-500" />;
+      case "auto":
+        return <ShieldCheck className="size-4 text-emerald-500" />;
+      default:
+        return <Server className="size-4 text-primary" />;
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl w-full font-mono text-xs h-[88vh] max-h-[88vh] sm:h-[85vh] sm:max-h-[85vh] flex flex-col overflow-hidden p-0 gap-0">
-        <DialogHeader className="p-4 pr-12 pb-3 border-b border-border shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="size-7 bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
-              <Settings className="size-3.5" />
+      <DialogContent className="max-w-2xl w-full text-xs h-[90vh] max-h-[90vh] sm:h-[86vh] sm:max-h-[86vh] flex flex-col overflow-hidden p-0 gap-0 border border-border shadow-2xl bg-card">
+        {/* DIALOG HEADER */}
+        <DialogHeader className="p-4 sm:p-5 pr-14 pb-3.5 border-b border-border bg-muted/20 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="size-9 rounded-md bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-xs">
+              <Settings className="size-4.5" />
             </div>
-            <DialogTitle className="text-base font-heading font-semibold tracking-tight text-foreground">
-              Station & Application Preferences
-            </DialogTitle>
+            <div>
+              <div className="flex items-center gap-2">
+                <DialogTitle className="text-base font-heading font-semibold tracking-tight text-foreground">
+                  Station & Application Preferences
+                </DialogTitle>
+                <Badge variant="outline" className="text-[10px] font-mono border-border bg-background text-muted-foreground px-1.5 py-0 h-4">
+                  v2.4
+                </Badge>
+              </div>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                Configure meteorological data feeds, numerical forecast models, measurement standards & voice telemetry
+              </DialogDescription>
+            </div>
           </div>
-          <DialogDescription className="text-xs">
-            Configure meteorological data source, numerical forecast station, units, pinned telemetry & speech
-          </DialogDescription>
         </DialogHeader>
 
+        {/* TAB NAVIGATION */}
         <Tabs value={activeTab} onValueChange={onActiveTabChange} className="w-full flex-1 flex flex-col min-h-0 overflow-hidden gap-0">
-          <TabsList className="w-full justify-start border-b border-border p-0 px-4 bg-transparent shrink-0 overflow-x-auto flex-nowrap rounded-none h-9">
+          <TabsList className="w-full justify-start border-b border-border p-1 px-3 bg-muted/30 shrink-0 overflow-x-auto flex-nowrap rounded-none h-11 gap-1">
             <TabsTrigger
               value="source"
-              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
+              className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all whitespace-nowrap"
             >
-              Source & Station
+              <Radio className="size-3.5 text-primary" />
+              <span>Source & Station</span>
             </TabsTrigger>
             <TabsTrigger
               value="units"
-              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
+              className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all whitespace-nowrap"
             >
-              Units
+              <Sliders className="size-3.5 text-primary" />
+              <span>Units</span>
             </TabsTrigger>
             <TabsTrigger
               value="favorites"
-              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
+              className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all whitespace-nowrap"
             >
-              Favorites ({pinnedCities.length})
+              <MapPin className="size-3.5 text-primary" />
+              <span>Favorites</span>
+              <Badge variant="secondary" className="text-[10px] h-4 px-1.5 py-0 rounded-full font-mono">
+                {pinnedCities.length}
+              </Badge>
             </TabsTrigger>
             <TabsTrigger
               value="localization"
-              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
+              className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all whitespace-nowrap"
             >
-              Regional
+              <Globe className="size-3.5 text-primary" />
+              <span>Regional</span>
             </TabsTrigger>
             <TabsTrigger
               value="speech"
-              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
+              className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all whitespace-nowrap"
             >
-              Speech & Audio
+              <Volume2 className="size-3.5 text-primary" />
+              <span>Speech & Audio</span>
             </TabsTrigger>
             <TabsTrigger
               value="appearance"
-              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
+              className="text-xs gap-1.5 h-8 px-3 rounded-md data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-xs transition-all whitespace-nowrap"
             >
-              Theme
+              <SunMoon className="size-3.5 text-primary" />
+              <span>Theme</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* TAB: SOURCE & STATION */}
-          <TabsContent value="source" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-4 focus-visible:outline-none">
-            {/* Telemetry Status Bar */}
-            <div className="p-3 bg-muted/20 border border-border flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="size-2 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-foreground font-bold uppercase tracking-wider text-xs">
-                  Active Telemetry Feed
+          {/* TAB 1: SOURCE & STATION */}
+          <TabsContent value="source" className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-5 space-y-4 focus-visible:outline-none">
+            {/* REUI ALERT: Active Telemetry Feed */}
+            <Alert variant="default" className="bg-card border-border shadow-xs flex flex-wrap items-center justify-between p-3.5 gap-3">
+              <div className="flex items-center gap-3">
+                <span className="relative flex size-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full size-2.5 bg-emerald-500" />
                 </span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-heading font-semibold text-xs tracking-tight text-foreground uppercase">
+                      Active Telemetry Feed
+                    </span>
+                    <Badge variant="outline" className="text-[10px] font-mono border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0 h-4">
+                      LIVE
+                    </Badge>
+                  </div>
+                  <div className="text-muted-foreground text-[11px] mt-0.5">
+                    Real-time atmospheric modeling & observation synchronizer
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5 flex-wrap font-mono text-[11px]">
-                <Badge variant="outline" className="text-primary border-primary/40 bg-primary/5 uppercase">
+              <div className="flex items-center gap-2 font-mono text-[11px]">
+                <Badge variant="secondary" className="font-semibold uppercase tracking-wider px-2 py-0.5 border border-border">
                   {settings.weatherSource}
                 </Badge>
                 <span className="text-muted-foreground">•</span>
-                <span className="text-muted-foreground">
+                <span className="text-muted-foreground text-xs font-sans">
                   Model:{" "}
-                  <strong className="text-foreground">
+                  <strong className="text-foreground font-mono">
                     {FORECAST_STATION_MODELS.find((m) => m.id === settings.forecastStation)?.name || settings.forecastStation}
                   </strong>
                 </span>
               </div>
-            </div>
+            </Alert>
 
-            {/* SECTION 1: DATA PROVIDER / SOURCE */}
-            <div className="space-y-2">
+            {/* SECTION 1: METEOROLOGICAL DATA PROVIDER */}
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-tiny uppercase text-muted-foreground font-bold flex items-center gap-1.5">
-                    <Server className="size-3 text-primary" />
+                  <div className="text-xs font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
+                    <Server className="size-3.5 text-primary" />
                     <span>1. Meteorological Data Provider (Source)</span>
                   </div>
-                  <p className="text-tiny text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     Select the observation and primary synoptic data provider
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {WEATHER_DATA_PROVIDERS.map((provider) => {
                   const isSelected = (settings.weatherSource || "open-meteo") === provider.id;
                   return (
-                    <button
+                    <Card
                       key={provider.id}
-                      type="button"
                       onClick={() => onUpdateSettings({ weatherSource: provider.id })}
-                      className={`p-3 text-left border transition-all cursor-pointer flex flex-col justify-between ${
+                      className={cn(
+                        "p-3.5 text-left border transition-all cursor-pointer flex flex-col justify-between group",
                         isSelected
-                          ? "border-primary bg-primary/5 shadow-xs ring-1 ring-primary/20"
-                          : "border-border bg-muted/20 hover:border-border/80 hover:bg-muted/30"
-                      }`}
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/30 shadow-xs"
+                          : "border-border bg-card hover:border-primary/40 hover:bg-muted/30"
+                      )}
                     >
                       <div>
                         <div className="flex items-start justify-between gap-2">
-                          <div className="font-bold text-foreground text-xs">{provider.name}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 rounded-md bg-muted/60 border border-border/80 group-hover:border-primary/30 transition-colors">
+                              {getProviderIcon(provider.id)}
+                            </div>
+                            <div className="font-heading font-semibold text-xs text-foreground">
+                              {provider.name}
+                            </div>
+                          </div>
                           {isSelected ? (
-                            <div className="size-4 bg-primary text-primary-foreground flex items-center justify-center shrink-0">
-                              <Check className="size-3" />
+                            <div className="size-4.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-2xs">
+                              <Check className="size-3 stroke-[2.5]" />
                             </div>
                           ) : (
-                            <div className="size-4 border border-border shrink-0" />
+                            <div className="size-4.5 rounded-full border border-border group-hover:border-primary/40 shrink-0" />
                           )}
                         </div>
-                        <div className="text-tiny text-muted-foreground mt-1 line-clamp-2">
+                        <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">
                           {provider.description}
-                        </div>
+                        </p>
                       </div>
-                      <div className="mt-2.5 pt-2 border-t border-border/50 flex items-center justify-between text-tiny">
-                        <span className="text-muted-foreground truncate mr-2">{provider.provider}</span>
+
+                      <div className="mt-3 pt-2.5 border-t border-border/60 flex items-center justify-between text-[11px]">
+                        <span className="text-muted-foreground truncate mr-2 font-mono">{provider.provider}</span>
                         {provider.requiresApiKey ? (
-                          <span className="text-amber-500 font-bold shrink-0">API Key</span>
+                          <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 text-[10px] font-mono shrink-0">
+                            API Key
+                          </Badge>
                         ) : (
-                          <span className="text-emerald-500 font-bold shrink-0">Keyless</span>
+                          <Badge variant="outline" className="border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 text-[10px] font-mono shrink-0">
+                            Keyless
+                          </Badge>
                         )}
                       </div>
-                    </button>
+                    </Card>
                   );
                 })}
               </div>
 
               {/* OpenWeatherMap API Key Config */}
               {(settings.weatherSource === "openweathermap" || settings.customApiKey) && (
-                <div className="p-3 bg-muted/20 border border-border space-y-2 mt-2">
+                <Card className="p-3.5 bg-muted/20 border border-border space-y-2.5 mt-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
                       <Key className="size-3.5 text-primary" />
                       <span>OpenWeatherMap API Key</span>
                     </div>
-                    <span className="text-tiny text-muted-foreground">Optional Custom Override</span>
+                    <Badge variant="outline" className="text-[10px] font-mono text-muted-foreground">
+                      Optional Custom Override
+                    </Badge>
                   </div>
-                  <p className="text-tiny text-muted-foreground">
-                    Leave blank to use the server environment key, or enter your personal OpenWeather key.
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Leave blank to use the shared server environment key, or provide your personal OpenWeather key for dedicated quota.
                   </p>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
@@ -371,12 +496,12 @@ export function SettingsDialog({
                         value={settings.customApiKey || ""}
                         onChange={(e) => onUpdateSettings({ customApiKey: e.target.value })}
                         placeholder="e.g. 4483c686af6e2e21072d875ed1e5be27"
-                        className="h-8 text-xs font-mono pr-8 rounded-none"
+                        className="h-8 text-xs font-mono pr-8"
                       />
                       <button
                         type="button"
                         onClick={() => setShowKey(!showKey)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                         title={showKey ? "Hide key" : "Show key"}
                       >
                         {showKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
@@ -388,82 +513,88 @@ export function SettingsDialog({
                       size="sm"
                       onClick={handleTestApiKey}
                       disabled={testPingStatus === "loading"}
-                      className="h-8 px-3 font-mono text-xs gap-1.5 shrink-0"
+                      className="h-8 px-3 text-xs gap-1.5 shrink-0"
                     >
-                      <RefreshCw className={`size-3 ${testPingStatus === "loading" ? "animate-spin text-primary" : ""}`} />
+                      <RefreshCw className={cn("size-3", testPingStatus === "loading" && "animate-spin text-primary")} />
                       <span>Test Handshake</span>
                     </Button>
                   </div>
 
                   {testPingMsg && (
-                    <div
-                      className={`p-2 text-tiny font-mono border ${
-                        testPingStatus === "success"
-                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                          : "bg-destructive/10 border-destructive/30 text-destructive"
-                      }`}
+                    <Alert
+                      variant={testPingStatus === "success" ? "success" : "destructive"}
+                      className="text-xs py-2 mt-1"
                     >
-                      {testPingMsg}
-                    </div>
+                      <AlertTitle className="text-xs font-semibold">
+                        {testPingStatus === "success" ? "Handshake Verified" : "Authentication Failure"}
+                      </AlertTitle>
+                      <AlertDescription className="text-xs mt-0.5">
+                        {testPingMsg}
+                      </AlertDescription>
+                    </Alert>
                   )}
-                </div>
+                </Card>
               )}
             </div>
 
             {/* SECTION 2: FORECAST STATION & NWP MODEL */}
-            <div className="space-y-2 pt-2 border-t border-border">
+            <div className="space-y-2.5 pt-3 border-t border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-tiny uppercase text-muted-foreground font-bold flex items-center gap-1.5">
-                    <Cpu className="size-3 text-primary" />
+                  <div className="text-xs font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
+                    <Cpu className="size-3.5 text-primary" />
                     <span>2. Numerical Weather Prediction (NWP) Forecast Station</span>
                   </div>
-                  <p className="text-tiny text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     Choose the atmospheric physics simulation station model for forecasting
                   </p>
                 </div>
               </div>
 
               {settings.weatherSource === "openweathermap" && (
-                <div className="p-2 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-tiny font-mono">
-                  Notice: OpenWeatherMap uses OWM Station Consensus. Model selection below applies when Open-Meteo or Auto Failover is active.
-                </div>
+                <Alert variant="warning" className="text-xs py-2">
+                  <AlertTitle className="text-xs font-semibold">Station Model Notice</AlertTitle>
+                  <AlertDescription className="text-xs mt-0.5">
+                    OpenWeatherMap uses OWM Station Consensus. Model selection below applies when Open-Meteo or Auto Failover is active.
+                  </AlertDescription>
+                </Alert>
               )}
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {FORECAST_STATION_MODELS.map((model) => {
                   const isSelected = (settings.forecastStation || "best_match") === model.id;
                   return (
                     <div
                       key={model.id}
                       onClick={() => onUpdateSettings({ forecastStation: model.id })}
-                      className={`p-2.5 border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                      className={cn(
+                        "p-3 border transition-all cursor-pointer flex items-center justify-between gap-3 group rounded-md",
                         isSelected
-                          ? "border-primary bg-primary/5 shadow-xs ring-1 ring-primary/20"
-                          : "border-border bg-muted/20 hover:border-border/80 hover:bg-muted/30"
-                      }`}
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/30 shadow-xs"
+                          : "border-border bg-card hover:border-primary/40 hover:bg-muted/30"
+                      )}
                     >
-                      <div className="space-y-0.5 min-w-0">
+                      <div className="space-y-1 min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-foreground text-xs">{model.name}</span>
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-mono">
+                          <span className="font-heading font-semibold text-xs text-foreground">{model.name}</span>
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-mono bg-muted/30">
                             {model.resolution}
                           </Badge>
-                          <span className="text-[10px] text-muted-foreground">• {model.coverage}</span>
+                          <span className="text-[10px] text-muted-foreground font-mono">• {model.coverage}</span>
                         </div>
-                        <p className="text-tiny text-muted-foreground truncate">{model.description}</p>
-                        <div className="text-[10px] text-muted-foreground/80 font-mono pt-0.5">
-                          Agency: {model.agency}
+                        <p className="text-xs text-muted-foreground truncate leading-snug">{model.description}</p>
+                        <div className="text-[10px] text-muted-foreground/80 font-mono">
+                          Agency: <span className="text-foreground/90">{model.agency}</span>
                         </div>
                       </div>
 
-                      <div className="shrink-0">
+                      <div className="shrink-0 pl-2">
                         {isSelected ? (
-                          <div className="size-4 bg-primary text-primary-foreground flex items-center justify-center">
-                            <Check className="size-3" />
+                          <div className="size-4.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xs">
+                            <Check className="size-3 stroke-[2.5]" />
                           </div>
                         ) : (
-                          <div className="size-4 border border-border" />
+                          <div className="size-4.5 rounded-full border border-border group-hover:border-primary/40" />
                         )}
                       </div>
                     </div>
@@ -473,14 +604,59 @@ export function SettingsDialog({
             </div>
           </TabsContent>
 
-          {/* TAB 1: UNITS */}
-          <TabsContent value="units" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-4 focus-visible:outline-none">
-            {/* Temperature */}
-            <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
-                <span>Temperature Standard</span>
-                <span className="text-primary font-bold">°{settings.tempUnit}</span>
+          {/* TAB 2: UNITS */}
+          <TabsContent value="units" className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-5 space-y-4 focus-visible:outline-none">
+            {/* Quick Standard Presets Bar */}
+            <Card className="p-3.5 bg-muted/20 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-md bg-primary/10 text-primary border border-primary/20">
+                  <Sliders className="size-4" />
+                </div>
+                <div>
+                  <div className="font-heading font-semibold text-xs text-foreground">
+                    Measurement System Presets
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    Switch all parameters to International Metric or Imperial standards with one click
+                  </div>
+                </div>
               </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={applyMetricPreset}
+                  className="text-xs font-mono gap-1.5 h-8"
+                >
+                  <span>Metric (°C, m/s)</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={applyImperialPreset}
+                  className="text-xs font-mono gap-1.5 h-8"
+                >
+                  <span>Imperial (°F, mph)</span>
+                </Button>
+              </div>
+            </Card>
+
+            {/* 1. Temperature Standard */}
+            <Card className="p-4 border border-border bg-card space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Thermometer className="size-4 text-rose-500" />
+                  <span className="font-heading font-semibold text-xs text-foreground">Temperature Standard</span>
+                </div>
+                <Badge variant="outline" className="font-mono text-xs text-primary border-primary/30">
+                  °{settings.tempUnit}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Base thermodynamic scale for air temperature, dew point & apparent feels-like calculations
+              </p>
               <ToggleGroup
                 type="single"
                 value={settings.tempUnit}
@@ -489,21 +665,31 @@ export function SettingsDialog({
                 }}
                 className="grid grid-cols-2 gap-2 pt-1 w-full"
               >
-                <ToggleGroupItem value="C" className="w-full justify-center">
-                  Celsius (°C)
+                <ToggleGroupItem value="C" className="w-full justify-center text-xs py-2 h-auto">
+                  <span className="font-semibold">Celsius (°C)</span>
+                  <span className="text-[10px] text-muted-foreground ml-1 font-mono">0°C = 32°F</span>
                 </ToggleGroupItem>
-                <ToggleGroupItem value="F" className="w-full justify-center">
-                  Fahrenheit (°F)
+                <ToggleGroupItem value="F" className="w-full justify-center text-xs py-2 h-auto">
+                  <span className="font-semibold">Fahrenheit (°F)</span>
+                  <span className="text-[10px] text-muted-foreground ml-1 font-mono">68°F = 20°C</span>
                 </ToggleGroupItem>
               </ToggleGroup>
-            </div>
+            </Card>
 
-            {/* Wind Speed */}
-            <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
-                <span>Wind Velocity Unit</span>
-                <span className="text-primary font-bold">{settings.windUnit}</span>
+            {/* 2. Wind Velocity Unit */}
+            <Card className="p-4 border border-border bg-card space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wind className="size-4 text-sky-500" />
+                  <span className="font-heading font-semibold text-xs text-foreground">Wind Velocity Unit</span>
+                </div>
+                <Badge variant="outline" className="font-mono text-xs text-primary border-primary/30">
+                  {settings.windUnit}
+                </Badge>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Anemometer velocity scale for sustained winds and gust turbulence
+              </p>
               <ToggleGroup
                 type="single"
                 value={settings.windUnit}
@@ -513,19 +699,27 @@ export function SettingsDialog({
                 className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 w-full"
               >
                 {(["m/s", "km/h", "mph", "knots"] as WindSpeedUnit[]).map((u) => (
-                  <ToggleGroupItem key={u} value={u} className="w-full justify-center">
+                  <ToggleGroupItem key={u} value={u} className="w-full justify-center text-xs py-1.5 h-auto font-mono">
                     {u}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
-            </div>
+            </Card>
 
-            {/* Barometric Pressure */}
-            <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
-                <span>Atmospheric Barometer</span>
-                <span className="text-primary font-bold">{settings.pressureUnit}</span>
+            {/* 3. Barometric Pressure */}
+            <Card className="p-4 border border-border bg-card space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Gauge className="size-4 text-amber-500" />
+                  <span className="font-heading font-semibold text-xs text-foreground">Atmospheric Barometer</span>
+                </div>
+                <Badge variant="outline" className="font-mono text-xs text-primary border-primary/30">
+                  {settings.pressureUnit}
+                </Badge>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Mean sea-level atmospheric pressure measurement convention
+              </p>
               <ToggleGroup
                 type="single"
                 value={settings.pressureUnit}
@@ -535,19 +729,27 @@ export function SettingsDialog({
                 className="grid grid-cols-3 gap-2 pt-1 w-full"
               >
                 {(["hPa", "inHg", "mmHg"] as PressureUnit[]).map((u) => (
-                  <ToggleGroupItem key={u} value={u} className="w-full justify-center">
+                  <ToggleGroupItem key={u} value={u} className="w-full justify-center text-xs py-1.5 h-auto font-mono">
                     {u}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
-            </div>
+            </Card>
 
-            {/* Precipitation */}
-            <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
-                <span>Precipitation Measurement</span>
-                <span className="text-primary font-bold">{settings.precipUnit}</span>
+            {/* 4. Precipitation Measurement */}
+            <Card className="p-4 border border-border bg-card space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CloudRain className="size-4 text-blue-500" />
+                  <span className="font-heading font-semibold text-xs text-foreground">Precipitation Accumulation</span>
+                </div>
+                <Badge variant="outline" className="font-mono text-xs text-primary border-primary/30">
+                  {settings.precipUnit}
+                </Badge>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Liquid precipitation and liquid-equivalent snowfall liquid accumulation
+              </p>
               <ToggleGroup
                 type="single"
                 value={settings.precipUnit}
@@ -557,105 +759,202 @@ export function SettingsDialog({
                 className="grid grid-cols-2 gap-2 pt-1 w-full"
               >
                 {(["mm", "in"] as PrecipitationUnit[]).map((u) => (
-                  <ToggleGroupItem key={u} value={u} className="w-full justify-center">
+                  <ToggleGroupItem key={u} value={u} className="w-full justify-center text-xs py-1.5 h-auto font-mono">
                     {u === "mm" ? "Millimeters (mm)" : "Inches (in)"}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
-            </div>
+            </Card>
           </TabsContent>
 
-          {/* TAB 2: FAVORITES */}
-          <TabsContent value="favorites" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-3 focus-visible:outline-none">
-            <form onSubmit={handleAddCity} className="flex gap-2">
-              <Input
-                value={newCityInput}
-                onChange={(e) => setNewCityInput(e.target.value)}
-                placeholder="Add favorite city (e.g. Madrid, Sydney, Zurich)..."
-                className="h-8 text-xs font-mono rounded-none"
-              />
-              <Button type="submit" size="sm" className="h-8 px-3 font-mono text-xs gap-1">
-                <Plus className="size-3" />
-                <span>Add</span>
-              </Button>
-            </form>
-
-            <div className="space-y-1.5">
-              {pinnedCities.map((cityName) => (
-                <div
-                  key={cityName}
-                  className="flex items-center justify-between p-2.5 bg-muted/20 border border-border"
-                >
-                  <div className="flex items-center gap-2">
-                    <MapPin className="size-3 text-primary" />
-                    <span className="font-bold text-foreground text-xs">{cityName}</span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <Button
-                      variant="outline"
-                      size="xs"
-                      onClick={() => {
-                        onSelectCity(cityName);
-                        onOpenChange(false);
-                      }}
-                      className="h-6 px-2 text-tiny font-mono"
-                    >
-                      Load Station
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => onRemovePinnedCity(cityName)}
-                      className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                      title="Remove from favorites"
-                    >
-                      <Trash2 className="size-3" />
-                    </Button>
-                  </div>
+          {/* TAB 3: FAVORITES */}
+          <TabsContent value="favorites" className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-5 space-y-4 focus-visible:outline-none">
+            <Card className="p-4 border border-border bg-card space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MapPin className="size-4 text-primary" />
+                  <span className="font-heading font-semibold text-xs text-foreground">Pinned Weather Stations</span>
                 </div>
-              ))}
+                <Badge variant="secondary" className="font-mono text-xs">
+                  {pinnedCities.length} Pinned
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Quick-access telemetry stations saved for rapid switching from the top telemetry header.
+              </p>
+
+              <form onSubmit={handleAddCity} className="flex gap-2">
+                <div className="relative flex-1">
+                  <MapPin className="size-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={newCityInput}
+                    onChange={(e) => setNewCityInput(e.target.value)}
+                    placeholder="Enter city or airport name (e.g. Madrid, Sydney, Zurich)..."
+                    className="h-8 text-xs pl-8 font-sans"
+                  />
+                </div>
+                <Button type="submit" size="sm" className="h-8 px-3 text-xs gap-1.5 shrink-0">
+                  <Plus className="size-3.5" />
+                  <span>Pin Station</span>
+                </Button>
+              </form>
+
+              {/* Quick suggestions */}
+              <div className="pt-1">
+                <div className="text-[11px] text-muted-foreground mb-1.5 font-medium">
+                  Popular Meteorological Stations:
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {POPULAR_CITIES.filter((c) => !pinnedCities.includes(c)).slice(0, 6).map((city) => (
+                    <button
+                      key={city}
+                      type="button"
+                      onClick={() => onAddPinnedCity(city)}
+                      className="px-2 py-0.5 rounded-md border border-border bg-muted/40 hover:bg-muted text-[11px] text-foreground transition-colors cursor-pointer flex items-center gap-1"
+                    >
+                      <Plus className="size-2.5 text-muted-foreground" />
+                      <span>{city}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </Card>
+
+            {/* List of Pinned Cities */}
+            <div className="space-y-2">
+              {pinnedCities.length === 0 ? (
+                <Empty className="py-8 border border-dashed border-border rounded-lg bg-card/40">
+                  <EmptyHeader>
+                    <EmptyMedia>
+                      <IconStack aria-hidden="true" className="text-primary h-20 w-18">
+                        <MapPin className="text-primary size-4" />
+                      </IconStack>
+                    </EmptyMedia>
+                    <EmptyTitle>No Pinned Stations</EmptyTitle>
+                    <EmptyDescription>
+                      Add frequent locations or research observatories above for instant one-click synoptic access.
+                    </EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              ) : (
+                pinnedCities.map((cityName) => (
+                  <Card
+                    key={cityName}
+                    className="flex items-center justify-between p-3 border border-border bg-card hover:border-border/80 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="size-7 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                        <MapPin className="size-3.5" />
+                      </div>
+                      <div>
+                        <div className="font-heading font-semibold text-xs text-foreground">{cityName}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono">Ground Station Telemetry</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={() => {
+                          onSelectCity(cityName);
+                          onOpenChange(false);
+                        }}
+                        className="h-7 px-2.5 text-xs gap-1 font-mono"
+                      >
+                        <Radio className="size-3 text-primary" />
+                        <span>Load Station</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => onRemovePinnedCity(cityName)}
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+                        title="Remove from favorites"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </div>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
 
-          {/* TAB 3: REGIONAL */}
-          <TabsContent value="localization" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-4 focus-visible:outline-none">
-            <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
-                <span>Language Display</span>
-                <span className="text-primary font-bold uppercase">{settings.language}</span>
+          {/* TAB 4: REGIONAL */}
+          <TabsContent value="localization" className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-5 space-y-4 focus-visible:outline-none">
+            {/* Language Selection */}
+            <Card className="p-4 border border-border bg-card space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Globe className="size-4 text-primary" />
+                  <span className="font-heading font-semibold text-xs text-foreground">Language & Regional Dialect</span>
+                </div>
+                <Badge variant="outline" className="font-mono text-xs uppercase text-primary border-primary/30">
+                  {settings.language}
+                </Badge>
               </div>
-              <ToggleGroup
-                type="single"
-                value={settings.language}
-                onValueChange={(val) => {
-                  if (val) onUpdateSettings({ language: val });
-                }}
-                className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 w-full"
-              >
-                {[
-                  { code: "en", label: "English" },
-                  { code: "es", label: "Español" },
-                  { code: "fr", label: "Français" },
-                  { code: "de", label: "Deutsch" },
-                  { code: "ja", label: "日本語" },
-                  { code: "hi", label: "हिन्दी" },
-                ].map((lang) => (
-                  <ToggleGroupItem
-                    key={lang.code}
-                    value={lang.code}
-                    className="w-full justify-center font-mono text-xs"
-                  >
-                    {lang.label}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </div>
+              <p className="text-xs text-muted-foreground">
+                Applies translated weather conditions, AI synoptic advisories & regional Google speech synthesis.
+              </p>
 
-            <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-tiny uppercase text-muted-foreground font-bold">
-                Time Representation
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                {[
+                  { code: "en", label: "English", region: "International" },
+                  { code: "es", label: "Español", region: "España / Latinoamérica" },
+                  { code: "fr", label: "Français", region: "France / Francophonie" },
+                  { code: "de", label: "Deutsch", region: "Deutschland / Österreich" },
+                  { code: "ja", label: "日本語", region: "Japan" },
+                  { code: "hi", label: "हिन्दी", region: "India" },
+                ].map((lang) => {
+                  const isSelected = settings.language === lang.code;
+                  return (
+                    <button
+                      key={lang.code}
+                      type="button"
+                      onClick={() => onUpdateSettings({ language: lang.code })}
+                      className={cn(
+                        "p-2.5 text-left border rounded-md transition-all cursor-pointer flex flex-col justify-between",
+                        isSelected
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/30 shadow-xs"
+                          : "border-border bg-muted/20 hover:border-primary/40 hover:bg-muted/40"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-heading font-semibold text-xs text-foreground">{lang.label}</span>
+                        {isSelected && <Check className="size-3.5 text-primary" />}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground mt-1 truncate font-mono">
+                        {lang.region}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
+            </Card>
+
+            {/* Time Representation */}
+            <Card className="p-4 border border-border bg-card space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock className="size-4 text-primary" />
+                  <span className="font-heading font-semibold text-xs text-foreground">Time Representation</span>
+                </div>
+                {currentTime && (
+                  <Badge variant="outline" className="font-mono text-xs">
+                    Live:{" "}
+                    {currentTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: settings.timeFormat === "12h",
+                    })}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Chronological representation used across hourly charts, solar ephemeris & daily outlooks.
+              </p>
+
               <ToggleGroup
                 type="single"
                 value={settings.timeFormat}
@@ -664,34 +963,47 @@ export function SettingsDialog({
                 }}
                 className="grid grid-cols-2 gap-2 pt-1 w-full"
               >
-                <ToggleGroupItem value="24h" className="w-full justify-center">
-                  24-Hour (14:30)
+                <ToggleGroupItem value="24h" className="w-full justify-center text-xs py-2 h-auto">
+                  <div className="flex flex-col items-center">
+                    <span className="font-semibold">24-Hour Military Format</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">14:30 / 23:15</span>
+                  </div>
                 </ToggleGroupItem>
-                <ToggleGroupItem value="12h" className="w-full justify-center">
-                  12-Hour (2:30 PM)
+                <ToggleGroupItem value="12h" className="w-full justify-center text-xs py-2 h-auto">
+                  <div className="flex flex-col items-center">
+                    <span className="font-semibold">12-Hour Standard Format</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">2:30 PM / 11:15 PM</span>
+                  </div>
                 </ToggleGroupItem>
               </ToggleGroup>
-            </div>
+            </Card>
+
+            <Alert variant="info" className="text-xs">
+              <AlertTitle className="text-xs font-semibold">Localized AI Synoptic Intelligence</AlertTitle>
+              <AlertDescription className="text-xs mt-0.5 leading-relaxed">
+                Weather advice banners, sudden change warnings, and speech synthesis dynamically translate into your chosen regional language.
+              </AlertDescription>
+            </Alert>
           </TabsContent>
 
-          {/* TAB 4: SPEECH & AUDIO (GOOGLE TEXT-TO-SPEECH) */}
-          <TabsContent value="speech" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-4 focus-visible:outline-none">
-            {/* Google TTS Engine Header & Live Preview */}
-            <div className="p-3 bg-muted/20 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* TAB 5: SPEECH & AUDIO */}
+          <TabsContent value="speech" className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-5 space-y-4 focus-visible:outline-none">
+            {/* Engine Header & Live Preview */}
+            <Alert variant="default" className="bg-card border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between p-3.5 gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <div className="size-6 bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
-                    <Sparkles className="size-3" />
+                  <div className="size-6 rounded-md bg-primary/10 border border-primary/25 flex items-center justify-center text-primary">
+                    <Sparkles className="size-3.5" />
                   </div>
-                  <span className="font-bold text-foreground text-xs">Google Text-to-Speech Engine</span>
+                  <span className="font-heading font-semibold text-xs text-foreground">Google Text-to-Speech Engine</span>
                   <Badge
                     variant="outline"
-                    className="h-4 px-1 text-nano border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-mono"
+                    className="h-4 px-1.5 text-[10px] border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-mono bg-emerald-500/10"
                   >
                     ONLINE
                   </Badge>
                 </div>
-                <div className="text-tiny text-muted-foreground mt-1">
+                <div className="text-xs text-muted-foreground mt-1">
                   Synthesized via Google Neural2, Journey & Studio multi-voice models with natural prosody
                 </div>
               </div>
@@ -703,7 +1015,7 @@ export function SettingsDialog({
                 size="sm"
                 onClick={handleTogglePreviewVoice}
                 className={cn(
-                  "h-8 px-3 font-mono text-xs gap-1.5 shrink-0 transition-all",
+                  "h-8 px-3 font-mono text-xs gap-2 shrink-0 transition-all shadow-2xs",
                   isPlayingPreview && "bg-primary text-primary-foreground animate-pulse"
                 )}
               >
@@ -719,13 +1031,13 @@ export function SettingsDialog({
                   </>
                 )}
               </Button>
-            </div>
+            </Alert>
 
             {/* 1. Google Model Architecture */}
-            <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between items-center">
-                <span>Google TTS Model Architecture</span>
-                <Badge variant="secondary" className="font-mono text-nano py-0 h-4 border border-border">
+            <Card className="p-4 border border-border bg-card space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-heading font-semibold text-xs text-foreground">Google TTS Model Architecture</span>
+                <Badge variant="secondary" className="font-mono text-[10px] py-0 h-4 border border-border">
                   {settings.googleTtsModel?.toUpperCase() || "JOURNEY"}
                 </Badge>
               </div>
@@ -749,133 +1061,159 @@ export function SettingsDialog({
                   <ToggleGroupItem
                     key={m.id}
                     value={m.id}
-                    className="w-full justify-center flex flex-col items-center py-1.5 h-auto text-center"
+                    className="w-full justify-center flex flex-col items-center py-2 h-auto text-center"
                   >
-                    <span className="font-bold text-xs">{m.name}</span>
-                    <span className="text-nano opacity-70 uppercase tracking-tighter">{m.badge}</span>
+                    <span className="font-semibold text-xs">{m.name}</span>
+                    <span className="text-[9px] opacity-70 uppercase tracking-tight">{m.badge}</span>
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>
-              <div className="text-nano text-muted-foreground pt-1 italic">
+              <div className="text-[11px] text-muted-foreground pt-0.5 italic">
                 {GOOGLE_TTS_MODELS.find((m) => m.id === (settings.googleTtsModel || "Journey"))?.description}
               </div>
-            </div>
+            </Card>
 
             {/* 2. Voice Persona & Character */}
-            <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between items-center">
-                <span>Voice Persona & Synoptic Cadence</span>
-                <span className="text-primary font-bold text-nano truncate max-w-[200px]">
+            <Card className="p-4 border border-border bg-card space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-heading font-semibold text-xs text-foreground">Voice Persona & Synoptic Cadence</span>
+                <span className="text-primary font-mono text-[11px] font-semibold truncate max-w-[220px]">
                   {settings.googleTtsVoice}
                 </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 max-h-52 overflow-y-auto pr-1">
-                {getAvailableGoogleVoices(settings.language, settings.googleTtsModel).map((v) => {
-                  const isSelected = settings.googleTtsVoice === v.id;
-                  return (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() =>
-                        onUpdateSettings({
-                          googleTtsVoice: v.id,
-                          googleTtsModel: v.model,
-                        })
-                      }
-                      className={cn(
-                        "p-2 text-left border transition-colors flex items-start justify-between gap-2 group cursor-pointer",
-                        isSelected
-                          ? "bg-primary/10 border-primary text-foreground ring-1 ring-primary"
-                          : "border-border hover:bg-muted/40 text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <div>
-                        <div className="flex items-center gap-1.5 font-bold text-xs text-foreground">
-                          <span>{v.name}</span>
-                          <span
-                            className={cn(
-                              "text-nano uppercase px-1 py-0 border",
-                              v.gender === "FEMALE"
-                                ? "border-pink-500/30 text-pink-600 dark:text-pink-400 bg-pink-500/5"
-                                : "border-sky-500/30 text-sky-600 dark:text-sky-400 bg-sky-500/5"
-                            )}
-                          >
-                            {v.gender === "FEMALE" ? "Female" : "Male"}
-                          </span>
+              <ScrollArea className="max-h-52 pr-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  {getAvailableGoogleVoices(settings.language, settings.googleTtsModel).map((v) => {
+                    const isSelected = settings.googleTtsVoice === v.id;
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() =>
+                          onUpdateSettings({
+                            googleTtsVoice: v.id,
+                            googleTtsModel: v.model,
+                          })
+                        }
+                        className={cn(
+                          "p-2.5 text-left border rounded-md transition-all flex items-start justify-between gap-2 group cursor-pointer",
+                          isSelected
+                            ? "bg-primary/10 border-primary text-foreground ring-1 ring-primary/40 shadow-xs"
+                            : "border-border hover:bg-muted/40 text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <div>
+                          <div className="flex items-center gap-1.5 font-semibold text-xs text-foreground">
+                            <span>{v.name}</span>
+                            <span
+                              className={cn(
+                                "text-[9px] uppercase px-1 py-0 rounded-sm border font-mono",
+                                v.gender === "FEMALE"
+                                  ? "border-pink-500/30 text-pink-600 dark:text-pink-400 bg-pink-500/5"
+                                  : "border-sky-500/30 text-sky-600 dark:text-sky-400 bg-sky-500/5"
+                              )}
+                            >
+                              {v.gender === "FEMALE" ? "Female" : "Male"}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-muted-foreground mt-1 leading-snug">
+                            {v.description}
+                          </div>
                         </div>
-                        <div className="text-nano text-muted-foreground mt-0.5">
-                          {v.description}
-                        </div>
-                      </div>
-                      {isSelected && (
-                        <Check className="size-3.5 text-primary shrink-0 mt-0.5" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+                        {isSelected && (
+                          <Check className="size-3.5 text-primary shrink-0 mt-0.5" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </Card>
 
-            {/* 3. Speed & Tone (Pitch) Modulation Row */}
+            {/* 3. Speed & Tone (Pitch) Modulation Row with shadcn Sliders */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Speech Velocity / Speed */}
-              <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-                <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
-                  <span>Speech Velocity (Speed)</span>
-                  <span className="text-primary font-bold">{settings.speechRate}x</span>
+              {/* Speech Velocity / Speed Slider */}
+              <Card className="p-3.5 border border-border bg-card space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-semibold text-xs text-foreground">Speech Velocity (Speed)</span>
+                  <Badge variant="outline" className="font-mono text-xs text-primary border-primary/30">
+                    {settings.speechRate.toFixed(2)}x
+                  </Badge>
                 </div>
-                <ToggleGroup
-                  type="single"
-                  value={String(settings.speechRate)}
+                <Slider
+                  value={[settings.speechRate]}
+                  min={0.6}
+                  max={1.6}
+                  step={0.05}
                   onValueChange={(val) => {
-                    if (val) onUpdateSettings({ speechRate: parseFloat(val) });
+                    if (val[0] !== undefined) onUpdateSettings({ speechRate: Number(val[0].toFixed(2)) });
                   }}
-                  className="grid grid-cols-4 gap-1.5 pt-1 w-full"
-                >
+                  className="py-1"
+                />
+                <div className="flex justify-between gap-1 pt-1">
                   {[0.8, 1.0, 1.2, 1.4].map((rate) => (
-                    <ToggleGroupItem key={rate} value={String(rate)} className="w-full justify-center">
-                      {rate}x
-                    </ToggleGroupItem>
-                  ))}
-                </ToggleGroup>
-              </div>
-
-              {/* Tone / Pitch Modulation */}
-              <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-                <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
-                  <span>Voice Tone (Pitch)</span>
-                  <span className="text-primary font-bold">
-                    {settings.googleTtsPitch > 0 ? `+${settings.googleTtsPitch}` : settings.googleTtsPitch} st
-                  </span>
-                </div>
-                <ToggleGroup
-                  type="single"
-                  value={String(settings.googleTtsPitch ?? 0)}
-                  onValueChange={(val) => {
-                    if (val) onUpdateSettings({ googleTtsPitch: parseFloat(val) });
-                  }}
-                  className="grid grid-cols-5 gap-1 pt-1 w-full"
-                >
-                  {GOOGLE_TTS_PITCH_PRESETS.map((p) => (
-                    <ToggleGroupItem
-                      key={p.value}
-                      value={String(p.value)}
-                      className="w-full justify-center flex flex-col py-1 h-auto"
+                    <button
+                      key={rate}
+                      type="button"
+                      onClick={() => onUpdateSettings({ speechRate: rate })}
+                      className={cn(
+                        "flex-1 py-1 text-center font-mono text-[11px] rounded-md border transition-colors cursor-pointer",
+                        settings.speechRate === rate
+                          ? "bg-primary/10 border-primary text-primary font-bold"
+                          : "border-border bg-muted/20 hover:bg-muted/40 text-muted-foreground"
+                      )}
                     >
-                      <span className="text-xs font-bold">{p.label}</span>
-                      <span className="text-nano opacity-70">{p.desc}</span>
-                    </ToggleGroupItem>
+                      {rate}x
+                    </button>
                   ))}
-                </ToggleGroup>
-              </div>
+                </div>
+              </Card>
+
+              {/* Tone / Pitch Modulation Slider */}
+              <Card className="p-3.5 border border-border bg-card space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-semibold text-xs text-foreground">Voice Tone (Pitch)</span>
+                  <Badge variant="outline" className="font-mono text-xs text-primary border-primary/30">
+                    {settings.googleTtsPitch > 0 ? `+${settings.googleTtsPitch}` : settings.googleTtsPitch} st
+                  </Badge>
+                </div>
+                <Slider
+                  value={[settings.googleTtsPitch]}
+                  min={-6}
+                  max={6}
+                  step={0.5}
+                  onValueChange={(val) => {
+                    if (val[0] !== undefined) onUpdateSettings({ googleTtsPitch: Number(val[0].toFixed(1)) });
+                  }}
+                  className="py-1"
+                />
+                <div className="flex justify-between gap-1 pt-1">
+                  {GOOGLE_TTS_PITCH_PRESETS.map((p) => (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => onUpdateSettings({ googleTtsPitch: p.value })}
+                      className={cn(
+                        "flex-1 py-1 text-center font-mono text-[11px] rounded-md border transition-colors cursor-pointer",
+                        settings.googleTtsPitch === p.value
+                          ? "bg-primary/10 border-primary text-primary font-bold"
+                          : "border-border bg-muted/20 hover:bg-muted/40 text-muted-foreground"
+                      )}
+                    >
+                      <span>{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </Card>
             </div>
 
-            {/* 4. Acoustic Audio Profile (Device EQ) & Volume Gain */}
+            {/* 4. Acoustic Audio Profile (EQ) & Volume Gain */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Audio Profile */}
-              <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-                <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
-                  <span>Acoustic Profile (EQ)</span>
+              <Card className="p-3.5 border border-border bg-card space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-semibold text-xs text-foreground">Acoustic Device Profile (EQ)</span>
+                  <Headphones className="size-3.5 text-muted-foreground" />
                 </div>
                 <ToggleGroup
                   type="single"
@@ -889,82 +1227,82 @@ export function SettingsDialog({
                     <ToggleGroupItem
                       key={prof.id}
                       value={prof.id}
-                      className="w-full justify-center text-center py-1.5 h-auto flex flex-col"
+                      className="w-full justify-center text-center py-2 h-auto flex flex-col"
                     >
-                      <span className="font-bold text-xs">{prof.label}</span>
-                      <span className="text-nano opacity-70 truncate max-w-full">
-                        {prof.description.slice(0, 18)}...
+                      <span className="font-semibold text-xs">{prof.label}</span>
+                      <span className="text-[10px] opacity-70 truncate max-w-full">
+                        {prof.description.slice(0, 20)}...
                       </span>
                     </ToggleGroupItem>
                   ))}
                 </ToggleGroup>
-              </div>
+              </Card>
 
-              {/* Volume Gain (dB) */}
-              <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-                <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
-                  <span>Output Volume Gain</span>
-                  <span className="text-primary font-bold">
+              {/* Volume Gain (dB) Slider */}
+              <Card className="p-3.5 border border-border bg-card space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-heading font-semibold text-xs text-foreground">Output Volume Gain</span>
+                  <Badge variant="outline" className="font-mono text-xs text-primary border-primary/30">
                     {settings.googleTtsVolumeGain > 0 ? `+${settings.googleTtsVolumeGain}` : settings.googleTtsVolumeGain} dB
-                  </span>
+                  </Badge>
                 </div>
-                <ToggleGroup
-                  type="single"
-                  value={String(settings.googleTtsVolumeGain ?? 0)}
+                <Slider
+                  value={[settings.googleTtsVolumeGain]}
+                  min={-6}
+                  max={6}
+                  step={0.5}
                   onValueChange={(val) => {
-                    if (val) onUpdateSettings({ googleTtsVolumeGain: parseFloat(val) });
+                    if (val[0] !== undefined) onUpdateSettings({ googleTtsVolumeGain: Number(val[0].toFixed(1)) });
                   }}
-                  className="grid grid-cols-4 gap-1.5 pt-1 w-full"
-                >
+                  className="py-1"
+                />
+                <div className="flex justify-between gap-1 pt-1">
                   {GOOGLE_TTS_VOLUME_PRESETS.map((vol) => (
-                    <ToggleGroupItem
+                    <button
                       key={vol.value}
-                      value={String(vol.value)}
-                      className="w-full justify-center flex flex-col py-1 h-auto"
+                      type="button"
+                      onClick={() => onUpdateSettings({ googleTtsVolumeGain: vol.value })}
+                      className={cn(
+                        "flex-1 py-1 text-center font-mono text-[11px] rounded-md border transition-colors cursor-pointer",
+                        settings.googleTtsVolumeGain === vol.value
+                          ? "bg-primary/10 border-primary text-primary font-bold"
+                          : "border-border bg-muted/20 hover:bg-muted/40 text-muted-foreground"
+                      )}
                     >
-                      <span className="text-xs font-bold">{vol.label}</span>
-                      <span className="text-nano opacity-70">{vol.desc}</span>
-                    </ToggleGroupItem>
+                      <span>{vol.label}</span>
+                    </button>
                   ))}
-                </ToggleGroup>
-              </div>
-            </div>
-
-            {/* 5. Automatic Briefing & Custom API Key */}
-            <div className="p-3 bg-muted/20 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <span className="font-bold text-foreground text-xs block">Automatic Audio Briefing</span>
-                <span className="text-tiny text-muted-foreground">
-                  Read aloud meteorological briefing automatically with Google TTS on station switch
-                </span>
-              </div>
-              <ToggleGroup
-                type="single"
-                value={settings.autoSpeakOnLoad ? "enabled" : "disabled"}
-                onValueChange={(val) => {
-                  if (val) onUpdateSettings({ autoSpeakOnLoad: val === "enabled" });
-                }}
-                className="grid grid-cols-2 gap-1.5 w-36 shrink-0"
-              >
-                <ToggleGroupItem value="enabled" className="w-full justify-center">
-                  Enabled
-                </ToggleGroupItem>
-                <ToggleGroupItem value="disabled" className="w-full justify-center">
-                  Disabled
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
-
-            {/* Optional Google Cloud API Key */}
-            <div className="space-y-2 p-3 bg-muted/20 border border-border">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-tiny uppercase text-muted-foreground font-bold">
-                  <Key className="size-3 text-primary" />
-                  <span>Custom Google Cloud API Key (Optional)</span>
                 </div>
-                <span className="text-nano text-muted-foreground font-mono">
-                  {settings.googleApiKey?.trim() ? "Custom Key Set" : "Keyless Free TTS Active"}
-                </span>
+              </Card>
+            </div>
+
+            {/* 5. Automatic Audio Briefing with shadcn Switch */}
+            <Card className="p-4 border border-border bg-card flex items-center justify-between gap-4">
+              <div className="space-y-0.5">
+                <Label htmlFor="auto-briefing-switch" className="font-heading font-semibold text-xs text-foreground cursor-pointer">
+                  Automatic Audio Meteorological Briefing
+                </Label>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Read aloud synopsis automatically via Google Neural TTS upon station selection or initialization
+                </p>
+              </div>
+              <Switch
+                id="auto-briefing-switch"
+                checked={settings.autoSpeakOnLoad}
+                onCheckedChange={(checked) => onUpdateSettings({ autoSpeakOnLoad: checked })}
+              />
+            </Card>
+
+            {/* 6. Custom Google Cloud API Key */}
+            <Card className="p-4 border border-border bg-card space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                  <Key className="size-3.5 text-primary" />
+                  <span>Custom Google Cloud API Key</span>
+                </div>
+                <Badge variant="outline" className="text-[10px] font-mono text-muted-foreground">
+                  {settings.googleApiKey?.trim() ? "Dedicated Key Set" : "Standard Keyless Active"}
+                </Badge>
               </div>
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -973,12 +1311,12 @@ export function SettingsDialog({
                     placeholder="AIzaSy... (Leave empty for default free Google synthesis)"
                     value={settings.googleApiKey || ""}
                     onChange={(e) => onUpdateSettings({ googleApiKey: e.target.value })}
-                    className="h-8 pr-8 font-mono text-xs rounded-none"
+                    className="h-8 pr-8 font-mono text-xs"
                   />
                   <button
                     type="button"
                     onClick={() => setShowGoogleKey(!showGoogleKey)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
                   >
                     {showGoogleKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                   </button>
@@ -989,66 +1327,125 @@ export function SettingsDialog({
                     variant="outline"
                     size="sm"
                     onClick={() => onUpdateSettings({ googleApiKey: "" })}
-                    className="h-8 px-2 font-mono text-xs"
+                    className="h-8 px-2.5 font-mono text-xs"
                   >
                     Clear
                   </Button>
                 )}
               </div>
-              <p className="text-nano text-muted-foreground">
-                Zero configuration required: OpenWeather utilizes Google's neural synthesis engine with browser failover by default. Provide a private Google Cloud API key for dedicated enterprise quota.
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                Zero configuration required: OpenWeather integrates with Google neural voice synthesis out-of-the-box with browser failover. Provide a Google Cloud key for dedicated enterprise quota.
               </p>
-            </div>
+            </Card>
           </TabsContent>
 
-          {/* TAB 5: APPEARANCE */}
-          <TabsContent value="appearance" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-4 focus-visible:outline-none">
-            <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
-              <div className="text-tiny uppercase text-muted-foreground font-bold">
-                Theme Mode
+          {/* TAB 6: THEME */}
+          <TabsContent value="appearance" className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-5 space-y-4 focus-visible:outline-none">
+            <Card className="p-4 border border-border bg-card space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <SunMoon className="size-4 text-primary" />
+                  <span className="font-heading font-semibold text-xs text-foreground">Theme Mode & Atmosphere</span>
+                </div>
+                <Badge variant="outline" className="font-mono text-xs uppercase text-primary border-primary/30">
+                  {mounted ? theme : "dark"}
+                </Badge>
               </div>
-              <ToggleGroup
-                type="single"
-                value={mounted ? theme || "dark" : "dark"}
-                onValueChange={(val) => {
-                  if (val) setTheme(val);
-                }}
-                className="grid grid-cols-3 gap-2 pt-1 w-full"
-              >
-                <ToggleGroupItem value="dark" className="w-full justify-center gap-1.5">
-                  <Moon className="size-3.5" />
-                  <span>Dark</span>
-                </ToggleGroupItem>
-                <ToggleGroupItem value="light" className="w-full justify-center gap-1.5">
-                  <Sun className="size-3.5" />
-                  <span>Light</span>
-                </ToggleGroupItem>
-                <ToggleGroupItem value="system" className="w-full justify-center gap-1.5">
-                  <Laptop className="size-3.5" />
-                  <span>System</span>
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
+              <p className="text-xs text-muted-foreground">
+                High-contrast terminal aesthetic optimized for day and nighttime meteorological radar observation.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                {[
+                  {
+                    id: "dark",
+                    title: "Dark Synoptic",
+                    desc: "Optimal for radar observation & low eye strain",
+                    icon: Moon,
+                    swatch: "bg-zinc-950 border-zinc-800 text-zinc-100",
+                  },
+                  {
+                    id: "light",
+                    title: "Light Daylight",
+                    desc: "Crisp high-contrast daytime telemetry",
+                    icon: Sun,
+                    swatch: "bg-zinc-50 border-zinc-200 text-zinc-900",
+                  },
+                  {
+                    id: "system",
+                    title: "System Synced",
+                    desc: "Dynamically matches OS appearance",
+                    icon: Laptop,
+                    swatch: "bg-gradient-to-r from-zinc-900 to-zinc-100 border-zinc-400 text-foreground",
+                  },
+                ].map((item) => {
+                  const isSelected = mounted && theme === item.id;
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setTheme(item.id)}
+                      className={cn(
+                        "p-3.5 border rounded-lg text-left transition-all cursor-pointer flex flex-col justify-between group",
+                        isSelected
+                          ? "border-primary bg-primary/5 ring-2 ring-primary/40 shadow-xs"
+                          : "border-border bg-card hover:border-primary/40 hover:bg-muted/30"
+                      )}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <div className="size-8 rounded-md bg-muted/60 border border-border flex items-center justify-center text-foreground group-hover:text-primary transition-colors">
+                            <Icon className="size-4" />
+                          </div>
+                          {isSelected ? (
+                            <div className="size-4.5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xs">
+                              <Check className="size-3 stroke-[2.5]" />
+                            </div>
+                          ) : (
+                            <div className="size-4.5 rounded-full border border-border group-hover:border-primary/40" />
+                          )}
+                        </div>
+                        <div className="font-heading font-semibold text-xs text-foreground mt-3">
+                          {item.title}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
+                          {item.desc}
+                        </p>
+                      </div>
+
+                      <div className="mt-3 pt-2 border-t border-border/60">
+                        <div className={cn("h-6 rounded border flex items-center px-2 text-[10px] font-mono", item.swatch)}>
+                          Preview Swatch
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Card>
           </TabsContent>
         </Tabs>
 
-        <DialogFooter className="border-t border-border p-3 px-4 shrink-0 flex items-center justify-between sm:justify-between w-full bg-muted/10">
+        {/* DIALOG FOOTER */}
+        <DialogFooter className="border-t border-border p-3 sm:p-4 px-5 shrink-0 flex items-center justify-between sm:justify-between w-full bg-muted/20">
           <Button
             variant="ghost"
-            size="xs"
+            size="sm"
             onClick={onResetSettings}
-            className="font-mono text-tiny text-muted-foreground hover:text-foreground"
+            className="text-xs text-muted-foreground hover:text-foreground gap-1.5 h-8 font-sans"
           >
-            <RotateCcw className="size-2.5 mr-1" />
-            Reset All
+            <RotateCcw className="size-3.5" />
+            <span>Reset All Defaults</span>
           </Button>
 
           <Button
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="font-mono text-xs px-4"
+            className="text-xs px-5 h-8 gap-1.5 shadow-2xs"
           >
-            Done
+            <Check className="size-3.5 stroke-[2.5]" />
+            <span>Done</span>
           </Button>
         </DialogFooter>
       </DialogContent>

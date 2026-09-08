@@ -12,6 +12,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  AlertAction,
+} from "@/components/reui/alert";
+import {
   AlertTriangle,
   ShieldCheck,
   ShieldAlert,
@@ -125,15 +131,20 @@ export function InlineAlertBanner({ current, alerts: propAlerts }: InlineAlertBa
 
   if (activeAlerts.length === 0) {
     return (
-      <div className="w-full p-2.5 bg-muted/20 border border-border flex items-center justify-between text-xs font-mono">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <ShieldCheck className="size-3.5 text-emerald-500" />
-          <span>All Synoptic Systems Nominal — No active weather alerts for {current.cityName}.</span>
-        </div>
-        <Badge variant="outline" className="text-micro font-mono text-emerald-500 border-emerald-500/30">
-          CLEAR
-        </Badge>
-      </div>
+      <Alert variant="default" className="bg-card border-border shadow-2xs py-2.5">
+        <ShieldCheck className="size-4 text-emerald-500" />
+        <AlertTitle className="text-xs font-semibold tracking-tight">
+          All Synoptic Systems Nominal
+        </AlertTitle>
+        <AlertDescription className="text-xs text-muted-foreground">
+          No active meteorological warnings or severe weather advisories for {current.cityName}.
+        </AlertDescription>
+        <AlertAction>
+          <Badge variant="outline" className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+            NOMINAL
+          </Badge>
+        </AlertAction>
+      </Alert>
     );
   }
 
