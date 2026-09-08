@@ -1,4 +1,5 @@
 import { CurrentWeather, DailyForecastItem, HourlyForecastItem, formatTemperature } from "./weather";
+import { GoogleTtsAudioProfile, GoogleTtsModel } from "./google-tts";
 
 export function generateWeatherBriefing(
   current: CurrentWeather,
@@ -32,55 +33,173 @@ export function generateWeatherBriefing(
   return script;
 }
 
+export interface WeatherSpeechOptions {
+  rate?: number;
+  pitch?: number; // semitones (-4.0 to +4.0)
+  lang?: string;
+  voiceName?: string;
+  model?: GoogleTtsModel;
+  audioProfile?: GoogleTtsAudioProfile;
+  volumeGainDb?: number;
+  googleApiKey?: string;
+  onStart?: () => void;
+  onEnd?: () => void;
+  onError?: (err?: unknown) => void;
+}
+
 export class WeatherSpeechSynthesizer {
   private static utterance: SpeechSynthesisUtterance | null = null;
+  private static audio: HTMLAudioElement | null = null;
+  private static abortController: AbortController | null = null;
 
   public static isSupported(): boolean {
-    return typeof window !== "undefined" && "speechSynthesis" in window;
+    return typeof window !== "undefined";
   }
 
   public static isSpeaking(): boolean {
-    if (!this.isSupported()) return false;
-    return window.speechSynthesis.speaking;
+    if (typeof window === "undefined") return false;
+    const isAudioPlaying = this.audio !== null && !this.audio.paused && !this.audio.ended;
+    const isUtteranceSpeaking =
+      typeof window.speechSynthesis !== "undefined" &&
+      window.speechSynthesis.speaking;
+    return isAudioPlaying || isUtteranceSpeaking;
   }
 
-  public static speak(
+  public static async speak(
     text: string,
-    options?: {
-      rate?: number;
-      pitch?: number;
-      lang?: string;
-      onStart?: () => void;
-      onEnd?: () => void;
-      onError?: () => void;
-    }
-  ): void {
-    if (!this.isSupported()) return;
+    options?: WeatherSpeechOptions
+  ): Promise<void> {
+    if (!this.isSupported() || !text) return;
 
     this.stop();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = options?.rate ?? 1.0;
-    utterance.pitch = options?.pitch ?? 1.0;
-    utterance.lang = options?.lang ?? "en-US";
+    // 1. Try Google Text-to-Speech API route first
+    try {
+      this.abortController = new AbortController();
 
-    if (options?.onStart) {
-      utterance.onstart = options.onStart;
-    }
-    if (options?.onEnd) {
-      utterance.onend = options.onEnd;
-    }
-    if (options?.onError) {
-      utterance.onerror = options.onError;
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text,
+          voiceName: options?.voiceName || "en-US-Journey-F",
+          model: options?.model || "Journey",
+          languageCode: options?.lang || "en-US",
+          speakingRate: options?.rate ?? 1.0,
+          pitch: options?.pitch ?? 0.0,
+          volumeGainDb: options?.volumeGainDb ?? 0.0,
+          effectsProfileId: options?.audioProfile || "headphone-class-device",
+          apiKey: options?.googleApiKey,
+        }),
+        signal: this.abortController.signal,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.audioContent) {
+          const audio = new Audio("data:audio/mp3;base64," + data.audioContent);
+          if (options?.rate && options.rate !== 1.0) {
+            audio.playbackRate = Math.max(0.5, Math.min(2.0, options.rate));
+          }
+
+          audio.onplay = () => {
+            options?.onStart?.();
+          };
+
+          audio.onended = () => {
+            this.audio = null;
+            options?.onEnd?.();
+          };
+
+          audio.onerror = (e) => {
+            console.warn("Google TTS audio playback error, falling back to Web Speech API:", e);
+            this.audio = null;
+            this.fallbackWebSpeech(text, options);
+          };
+
+          this.audio = audio;
+          await audio.play();
+          return;
+        }
+      }
+    } catch (err: unknown) {
+      if ((err as Error)?.name === "AbortError") {
+        return;
+      }
+      console.warn("Google Cloud TTS fetch error, falling back to Web Speech API:", err);
     }
 
-    this.utterance = utterance;
-    window.speechSynthesis.speak(utterance);
+    // 2. Fallback to Browser Web Speech API with Google voice preference
+    this.fallbackWebSpeech(text, options);
+  }
+
+  private static fallbackWebSpeech(
+    text: string,
+    options?: WeatherSpeechOptions
+  ): void {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      options?.onError?.("Speech synthesis not supported in this browser");
+      return;
+    }
+
+    try {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = options?.rate ?? 1.0;
+      
+      // Convert semitones (-4.0 to +4.0) into pitch (0.5 to 1.5)
+      const semitones = options?.pitch ?? 0.0;
+      utterance.pitch = Math.max(0.5, Math.min(1.8, 1.0 + semitones / 8));
+      utterance.lang = options?.lang ?? "en-US";
+
+      // Try to find native Google voice in browser
+      const voices = window.speechSynthesis.getVoices();
+      const langPrefix = (options?.lang || "en").split("-")[0].toLowerCase();
+      const googleVoice =
+        voices.find(
+          (v) =>
+            v.name.toLowerCase().includes("google") &&
+            v.lang.toLowerCase().startsWith(langPrefix)
+        ) ||
+        voices.find((v) => v.name.toLowerCase().includes("google")) ||
+        voices.find((v) => v.lang.toLowerCase().startsWith(langPrefix));
+
+      if (googleVoice) {
+        utterance.voice = googleVoice;
+      }
+
+      if (options?.onStart) utterance.onstart = options.onStart;
+      if (options?.onEnd) utterance.onend = options.onEnd;
+      if (options?.onError) utterance.onerror = options.onError;
+
+      this.utterance = utterance;
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      options?.onError?.(err);
+    }
   }
 
   public static stop(): void {
-    if (!this.isSupported()) return;
-    window.speechSynthesis.cancel();
-    this.utterance = null;
+    if (typeof window === "undefined") return;
+
+    if (this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
+
+    if (this.audio) {
+      try {
+        this.audio.pause();
+        this.audio.currentTime = 0;
+        this.audio.src = "";
+      } catch {}
+      this.audio = null;
+    }
+
+    if ("speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {}
+      this.utterance = null;
+    }
   }
 }

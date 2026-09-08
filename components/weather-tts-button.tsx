@@ -8,12 +8,14 @@ import { CurrentWeather, DailyForecastItem, HourlyForecastItem } from "@/lib/wea
 import { generateWeatherBriefing, WeatherSpeechSynthesizer } from "@/lib/speech";
 
 import { cn } from "@/lib/utils";
+import type { ExtendedSettings } from "@/components/settings-dialog";
 
 interface WeatherTtsButtonProps {
   current?: CurrentWeather;
   daily?: DailyForecastItem[];
   hourly?: HourlyForecastItem[];
   unit: "C" | "F";
+  settings?: ExtendedSettings;
   className?: string;
 }
 
@@ -22,6 +24,7 @@ export function WeatherTtsButton({
   daily = [],
   hourly = [],
   unit,
+  settings,
   className,
 }: WeatherTtsButtonProps) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -42,6 +45,14 @@ export function WeatherTtsButton({
 
     const script = generateWeatherBriefing(current, daily, hourly, unit);
     WeatherSpeechSynthesizer.speak(script, {
+      rate: settings?.speechRate,
+      pitch: settings?.googleTtsPitch,
+      lang: settings?.language,
+      voiceName: settings?.googleTtsVoice,
+      model: settings?.googleTtsModel,
+      audioProfile: settings?.googleTtsAudioProfile,
+      volumeGainDb: settings?.googleTtsVolumeGain,
+      googleApiKey: settings?.googleApiKey,
       onStart: () => setIsPlaying(true),
       onEnd: () => setIsPlaying(false),
       onError: () => setIsPlaying(false),

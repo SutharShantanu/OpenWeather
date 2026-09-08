@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils"
 import { WeatherTtsButton } from "@/components/weather-tts-button"
 import { NotificationsPopover } from "@/components/notifications-popover"
 import { ButtonGroup } from "@/components/ui/button-group"
+import type { ExtendedSettings } from "@/components/settings-dialog"
 
 interface GeocodingResult {
   name: string
@@ -55,6 +56,7 @@ interface WeatherHeaderProps {
   hourly?: HourlyForecastItem[]
   alerts?: WeatherAlert[]
   unit: "C" | "F"
+  settings?: ExtendedSettings
   isLoading?: boolean
 }
 
@@ -72,6 +74,7 @@ export function WeatherHeader({
   hourly,
   alerts = [],
   unit,
+  settings,
   isLoading = false,
 }: WeatherHeaderProps) {
   const { setTheme, resolvedTheme } = useTheme()
@@ -409,6 +412,7 @@ export function WeatherHeader({
               daily={daily}
               hourly={hourly}
               unit={unit}
+              settings={settings}
             />
 
             {/* AI Weather Intelligence Advisor */}
