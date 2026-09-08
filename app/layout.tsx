@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LenisProvider } from "@/components/lenis-provider";
@@ -12,13 +12,7 @@ const fontSans = Inter({
   display: "swap",
 });
 
-const fontHeading = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  display: "swap",
-});
-
-const fontMono = Geist_Mono({
+const fontMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
   display: "swap",
@@ -41,7 +35,6 @@ export default function RootLayout({
       className={cn(
         "h-full antialiased font-sans",
         fontSans.variable,
-        fontHeading.variable,
         fontMono.variable
       )}
     >
