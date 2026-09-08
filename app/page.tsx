@@ -20,7 +20,7 @@ import { ClimateNormalsCard } from "@/components/climate-normals-card";
 import { SettingsDialog, DEFAULT_EXTENDED_SETTINGS, ExtendedSettings } from "@/components/settings-dialog";
 import { AiAdvisorBanner } from "@/components/ai-advisor-banner";
 import { AiAdvisorDialog } from "@/components/ai-advisor-dialog";
-import { WeatherData } from "@/lib/weather";
+import { WeatherData, WeatherDataSource, ForecastStationModel } from "@/lib/weather";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -90,7 +90,7 @@ export default function WeatherDashboardPage() {
       // 3. Dialog / Popup / Modal State
       if (targetDialog) {
         params.set("dialog", targetDialog);
-        if (targetDialog === "settings" && targetSettingsTab && targetSettingsTab !== "units") {
+        if (targetDialog === "settings" && targetSettingsTab && targetSettingsTab !== "source") {
           params.set("settingsTab", targetSettingsTab);
         }
       }
@@ -195,8 +195,10 @@ export default function WeatherDashboardPage() {
           ? "localization"
           : rawSettingsTab === "theme"
           ? "appearance"
+          : rawSettingsTab === "station" || rawSettingsTab === "sources"
+          ? "source"
           : rawSettingsTab;
-      if (["units", "favorites", "localization", "speech", "appearance"].includes(norm)) {
+      if (["source", "units", "favorites", "localization", "speech", "appearance"].includes(norm)) {
         setSettingsTab(norm);
       }
     }
@@ -252,8 +254,10 @@ export default function WeatherDashboardPage() {
             ? "localization"
             : rawSettingsTab === "theme"
             ? "appearance"
+            : rawSettingsTab === "station" || rawSettingsTab === "sources"
+            ? "source"
             : rawSettingsTab;
-        if (["units", "favorites", "localization", "speech", "appearance"].includes(norm)) {
+        if (["source", "units", "favorites", "localization", "speech", "appearance"].includes(norm)) {
           setSettingsTab(norm);
         }
       }
@@ -280,30 +284,49 @@ export default function WeatherDashboardPage() {
     }
   }, [buildCurrentUrl]);
 
-  // Fetch weather data
-  const fetchWeather = useCallback(async (targetCity?: string, targetCoords?: { lat: number; lon: number }) => {
-    setLoading(true);
-    try {
-      let url = "";
-      if (targetCoords) {
-        url = `/api/weather?lat=${targetCoords.lat}&lon=${targetCoords.lon}`;
-      } else {
-        const query = targetCity || city;
-        url = `/api/weather?city=${encodeURIComponent(query)}`;
-      }
+  // Fetch weather data with dynamic source and NWP forecast station model
+  const fetchWeather = useCallback(
+    async (
+      targetCity?: string,
+      targetCoords?: { lat: number; lon: number },
+      sourceOverride?: WeatherDataSource,
+      stationOverride?: ForecastStationModel,
+      keyOverride?: string
+    ) => {
+      setLoading(true);
+      try {
+        const src = sourceOverride ?? settings.weatherSource ?? "open-meteo";
+        const stn = stationOverride ?? settings.forecastStation ?? "best_match";
+        const apiKey = keyOverride ?? settings.customApiKey ?? "";
 
-      const res = await fetch(url);
-      if (res.ok) {
-        const data: WeatherData = await res.json();
-        setWeather(data);
-        if (targetCity) setCity(data.current.cityName);
+        const params = new URLSearchParams();
+        if (targetCoords) {
+          params.set("lat", targetCoords.lat.toString());
+          params.set("lon", targetCoords.lon.toString());
+        } else {
+          const query = targetCity || city;
+          params.set("city", query);
+        }
+        params.set("source", src);
+        params.set("station", stn);
+        if (apiKey) {
+          params.set("apiKey", apiKey);
+        }
+
+        const res = await fetch(`/api/weather?${params.toString()}`);
+        if (res.ok) {
+          const data: WeatherData = await res.json();
+          setWeather(data);
+          if (targetCity) setCity(data.current.cityName);
+        }
+      } catch (err) {
+        console.warn("Failed to load meteorological telemetry", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.warn("Failed to load meteorological telemetry", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [city]);
+    },
+    [city, settings.weatherSource, settings.forecastStation, settings.customApiKey]
+  );
 
   useEffect(() => {
     if (coords) {
@@ -311,7 +334,7 @@ export default function WeatherDashboardPage() {
     } else {
       fetchWeather(city);
     }
-  }, [city, coords, fetchWeather]);
+  }, [city, coords, fetchWeather, settings.weatherSource, settings.forecastStation, settings.customApiKey]);
 
   // GPS Locate with URL update
   const handleLocate = () => {
@@ -490,11 +513,29 @@ export default function WeatherDashboardPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
         {/* Status Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-mono text-muted-foreground border-b border-border pb-2.5">
-          <div className="flex items-center gap-2">
-            <span className="size-2 bg-emerald-500 shrink-0" />
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="size-2 bg-emerald-500 shrink-0 animate-pulse" />
             <span className="font-semibold text-foreground uppercase">Station Telemetry Active</span>
             <span>•</span>
-            <span className="uppercase">Source: {weather?.dataSource === "LIVE_API" ? "Open-Meteo & RainViewer Live Feeds" : "Simulated Sensor"}</span>
+            <button
+              type="button"
+              onClick={() => handleOpenSettings("source")}
+              className="uppercase hover:text-foreground inline-flex items-center gap-1.5 transition-colors cursor-pointer group text-left"
+              title="Click to choose weather data source & forecast station"
+            >
+              <span className="text-muted-foreground group-hover:text-foreground">
+                Source:{" "}
+                <strong className="text-foreground">
+                  {weather?.providerName || (weather?.dataSource === "LIVE_API" ? "Open-Meteo" : "Simulated Sensor")}
+                </strong>
+                {weather?.stationName && (
+                  <span className="text-primary ml-1 font-semibold">[{weather.stationName}]</span>
+                )}
+              </span>
+              <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/30 group-hover:bg-primary group-hover:text-primary-foreground transition-colors font-mono font-bold">
+                CHANGE
+              </span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2">

@@ -6,6 +6,9 @@ import {
   DailyForecastItem,
   AirQualityData,
   WeatherAlert,
+  WeatherDataSource,
+  ForecastStationModel,
+  FORECAST_STATION_MODELS,
   mapOpenWeatherCondition,
   mapWmoCode,
   calculateMoonInfo,
@@ -17,16 +20,19 @@ export async function GET(request: NextRequest) {
   const city = searchParams.get("city");
   const latParam = searchParams.get("lat");
   const lonParam = searchParams.get("lon");
+  const requestedSource = (searchParams.get("source") || "open-meteo") as WeatherDataSource;
+  const requestedStation = (searchParams.get("station") || "best_match") as ForecastStationModel;
+  const customApiKey = searchParams.get("apiKey")?.trim() || "";
+  const apiKey = customApiKey || OPENWEATHER_API_KEY;
 
-  // 1. PRIMARY ENGINE: Open-Meteo (Zero API keys, 10-day outlook, 1-hour resolution, UV, Dew point, etc.)
-  try {
-    let resolvedLat = latParam ? parseFloat(latParam) : null;
-    let resolvedLon = lonParam ? parseFloat(lonParam) : null;
-    let resolvedCity = city?.trim() || "London";
-    let resolvedCountry = "";
+  let resolvedLat = latParam ? parseFloat(latParam) : null;
+  let resolvedLon = lonParam ? parseFloat(lonParam) : null;
+  let resolvedCity = city?.trim() || "London";
+  let resolvedCountry = "";
 
-    // Geocode if only city is given
-    if (resolvedLat === null || resolvedLon === null || isNaN(resolvedLat) || isNaN(resolvedLon)) {
+  // 1. Resolve coordinates if not provided
+  if (resolvedLat === null || resolvedLon === null || isNaN(resolvedLat) || isNaN(resolvedLon)) {
+    try {
       const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
         resolvedCity
       )}&count=1&language=en&format=json`;
@@ -41,196 +47,291 @@ export async function GET(request: NextRequest) {
           resolvedCountry = loc.country || loc.country_code || "";
         }
       }
+    } catch {
+      // Geocoding fallback will proceed with name query
     }
-
-    if (resolvedLat !== null && resolvedLon !== null && !isNaN(resolvedLat) && !isNaN(resolvedLon)) {
-      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${resolvedLat}&longitude=${resolvedLon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,surface_pressure,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timezone=auto&forecast_days=10&wind_speed_unit=ms`;
-      const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${resolvedLat}&longitude=${resolvedLon}&current=european_aqi,us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
-
-      const [weatherRes, aqiRes] = await Promise.all([
-        fetch(weatherUrl, { next: { revalidate: 180 } }),
-        fetch(aqiUrl, { next: { revalidate: 600 } }).catch(() => null),
-      ]);
-
-      if (weatherRes.ok) {
-        const weatherJson = await weatherRes.json();
-        const aqiJson = aqiRes && aqiRes.ok ? await aqiRes.json() : null;
-
-        const currentMeteo = weatherJson.current;
-        const dailyMeteo = weatherJson.daily;
-        const hourlyMeteo = weatherJson.hourly;
-
-        // Current weather mapping
-        const cond = mapWmoCode(currentMeteo.weather_code, Boolean(currentMeteo.is_day));
-        const sunriseIso = dailyMeteo.sunrise?.[0];
-        const sunsetIso = dailyMeteo.sunset?.[0];
-        const sunriseTs = sunriseIso ? Math.floor(new Date(sunriseIso).getTime() / 1000) : Math.floor(Date.now() / 1000) - 20000;
-        const sunsetTs = sunsetIso ? Math.floor(new Date(sunsetIso).getTime() / 1000) : Math.floor(Date.now() / 1000) + 20000;
-
-        // Find current hour index
-        const currentHourIdx = 0;
-        const currentUv = hourlyMeteo.uv_index?.[currentHourIdx] ?? dailyMeteo.uv_index_max?.[0] ?? 0;
-        const currentDewPoint = hourlyMeteo.dew_point_2m?.[currentHourIdx] ?? 12;
-        const currentVisibility = hourlyMeteo.visibility?.[currentHourIdx] ?? 10000;
-
-        // Air Quality mapping
-        let airQuality: AirQualityData | undefined;
-        if (aqiJson?.current) {
-          const cAqi = aqiJson.current;
-          const usAqi = cAqi.us_aqi ?? 25;
-          let aqiBand = 1;
-          if (usAqi > 200) aqiBand = 5;
-          else if (usAqi > 150) aqiBand = 4;
-          else if (usAqi > 100) aqiBand = 3;
-          else if (usAqi > 50) aqiBand = 2;
-
-          airQuality = {
-            aqi: aqiBand,
-            usAqi: Math.round(usAqi),
-            europeanAqi: Math.round(cAqi.european_aqi ?? 20),
-            co: parseFloat((cAqi.carbon_monoxide ?? 180).toFixed(1)),
-            no: 0.1,
-            no2: parseFloat((cAqi.nitrogen_dioxide ?? 10).toFixed(1)),
-            o3: parseFloat((cAqi.ozone ?? 45).toFixed(1)),
-            so2: parseFloat((cAqi.sulphur_dioxide ?? 2).toFixed(1)),
-            pm2_5: parseFloat((cAqi.pm2_5 ?? 5.5).toFixed(1)),
-            pm10: parseFloat((cAqi.pm10 ?? 12.0).toFixed(1)),
-            nh3: 0.5,
-          };
-        } else {
-          airQuality = {
-            aqi: 1,
-            usAqi: 28,
-            europeanAqi: 22,
-            co: 150,
-            no: 0.1,
-            no2: 8.5,
-            o3: 42,
-            so2: 1.8,
-            pm2_5: 4.8,
-            pm10: 9.5,
-            nh3: 0.4,
-          };
-        }
-
-        const current: CurrentWeather = {
-          cityName: resolvedCity,
-          country: resolvedCountry || "GLOBAL",
-          lat: resolvedLat,
-          lon: resolvedLon,
-          temp: currentMeteo.temperature_2m,
-          feelsLike: currentMeteo.apparent_temperature,
-          tempMin: dailyMeteo.temperature_2m_min[0] ?? currentMeteo.temperature_2m - 4,
-          tempMax: dailyMeteo.temperature_2m_max[0] ?? currentMeteo.temperature_2m + 4,
-          humidity: currentMeteo.relative_humidity_2m,
-          pressure: Math.round(currentMeteo.surface_pressure),
-          windSpeed: parseFloat(currentMeteo.wind_speed_10m.toFixed(1)),
-          windDeg: currentMeteo.wind_direction_10m,
-          windGusts: parseFloat(currentMeteo.wind_gusts_10m.toFixed(1)),
-          clouds: currentMeteo.cloud_cover,
-          visibility: currentVisibility,
-          uvIndex: currentUv,
-          dewPoint: currentDewPoint,
-          condition: {
-            type: cond.type,
-            main: cond.label,
-            description: cond.label.toLowerCase(),
-            icon: "02d",
-          },
-          sunrise: sunriseTs,
-          sunset: sunsetTs,
-          dt: Math.floor(Date.now() / 1000),
-          moon: calculateMoonInfo(new Date()),
-          airQuality,
-        };
-
-        // 24 to 48 hours hourly sequence
-        const hourly: HourlyForecastItem[] = [];
-        const maxHours = Math.min(48, hourlyMeteo.time.length);
-        for (let i = 0; i < maxHours; i++) {
-          const timeIso = hourlyMeteo.time[i];
-          const date = new Date(timeIso);
-          const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
-          const isDay = Boolean(hourlyMeteo.is_day?.[i] ?? 1);
-          const hCond = mapWmoCode(hourlyMeteo.weather_code[i], isDay);
-
-          hourly.push({
-            time: timeStr,
-            timestamp: Math.floor(date.getTime() / 1000),
-            temp: hourlyMeteo.temperature_2m[i],
-            feelsLike: hourlyMeteo.apparent_temperature[i],
-            humidity: hourlyMeteo.relative_humidity_2m[i],
-            windSpeed: parseFloat(hourlyMeteo.wind_speed_10m[i].toFixed(1)),
-            windGusts: parseFloat(hourlyMeteo.wind_gusts_10m?.[i]?.toFixed(1) ?? "0"),
-            uvIndex: hourlyMeteo.uv_index?.[i] ?? 0,
-            dewPoint: hourlyMeteo.dew_point_2m?.[i],
-            cloudCover: hourlyMeteo.cloud_cover?.[i],
-            conditionType: hCond.type,
-            description: hCond.label,
-            pop: (hourlyMeteo.precipitation_probability[i] ?? 0) / 100,
-          });
-        }
-
-        // 10-day outlook sequence
-        const daily: DailyForecastItem[] = [];
-        const todayIso = new Date().toISOString().split("T")[0];
-        const numDays = Math.min(10, dailyMeteo.time.length);
-
-        for (let i = 0; i < numDays; i++) {
-          const dateStr = dailyMeteo.time[i];
-          const date = new Date(dateStr);
-          const dayName =
-            dateStr === todayIso
-              ? "TODAY"
-              : date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-          const dCond = mapWmoCode(dailyMeteo.weather_code[i], true);
-          const sRise = dailyMeteo.sunrise?.[i] ? Math.floor(new Date(dailyMeteo.sunrise[i]).getTime() / 1000) : undefined;
-          const sSet = dailyMeteo.sunset?.[i] ? Math.floor(new Date(dailyMeteo.sunset[i]).getTime() / 1000) : undefined;
-
-          daily.push({
-            day: dayName,
-            date: dateStr,
-            tempMin: dailyMeteo.temperature_2m_min[i],
-            tempMax: dailyMeteo.temperature_2m_max[i],
-            conditionType: dCond.type,
-            description: dCond.label,
-            pop: (dailyMeteo.precipitation_probability_max?.[i] ?? 0) / 100,
-            humidity: Math.round(hourlyMeteo.relative_humidity_2m[i * 24 + 12] ?? 60),
-            windSpeed: parseFloat(dailyMeteo.wind_speed_10m_max[i].toFixed(1)),
-            windGusts: parseFloat(dailyMeteo.wind_gusts_10m_max?.[i]?.toFixed(1) ?? "0"),
-            uvIndexMax: dailyMeteo.uv_index_max?.[i] ?? 3,
-            sunrise: sRise,
-            sunset: sSet,
-          });
-        }
-
-        const alerts = buildMeteorologicalAlerts(current, daily);
-
-        return NextResponse.json({
-          current,
-          hourly,
-          daily,
-          alerts,
-          dataSource: "LIVE_API",
-        } satisfies WeatherData);
-      }
-    }
-  } catch (error) {
-    console.warn("Open-Meteo primary fetch failed, falling back to OpenWeather", error);
   }
 
-  // 2. SECONDARY ENGINE: OpenWeather API Fallback
+  // 2. Direct Simulation Engine requested
+  if (requestedSource === "simulation") {
+    const mock = generateFallbackWeather(resolvedCity, resolvedLat, resolvedLon, resolvedCountry);
+    mock.providerName = "Autonomous Synoptic Simulator";
+    mock.stationName = "Synthetic Mathematical Station";
+    return NextResponse.json(mock);
+  }
+
+  // 3. Direct OpenWeatherMap requested
+  if (requestedSource === "openweathermap") {
+    const owmData = await fetchOpenWeather(resolvedCity, resolvedLat, resolvedLon, apiKey);
+    if (owmData) {
+      return NextResponse.json(owmData);
+    }
+
+    // Fallback with informational advisory if user's key or OWM call failed
+    const fallback = generateFallbackWeather(resolvedCity, resolvedLat, resolvedLon, resolvedCountry);
+    fallback.providerName = "OpenWeatherMap (Simulation Failover)";
+    fallback.stationName = "OWM Auth Failover Station";
+    fallback.alerts = [
+      {
+        id: "alert-owm-offline",
+        source: "Station Telemetry Gateway",
+        event: "OWM Station Communication Warning",
+        headline: apiKey
+          ? "Unable to authenticate with OpenWeatherMap API using provided key. Reverting to synoptic simulation."
+          : "No OpenWeatherMap API Key configured. Please add an API key in Settings > Source & Station.",
+        severity: "Moderate",
+        urgency: "Immediate",
+        instruction: "Configure a valid OpenWeather API key in Settings > Source & Station or choose Open-Meteo as primary source.",
+      },
+      ...(fallback.alerts || []),
+    ];
+    return NextResponse.json(fallback);
+  }
+
+  // 4. Open-Meteo High-Resolution Engine (Default or Auto)
+  if (resolvedLat !== null && resolvedLon !== null && !isNaN(resolvedLat) && !isNaN(resolvedLon)) {
+    const openMeteoData = await fetchOpenMeteo(
+      resolvedCity,
+      resolvedCountry,
+      resolvedLat,
+      resolvedLon,
+      requestedStation
+    );
+    if (openMeteoData) {
+      return NextResponse.json(openMeteoData);
+    }
+  }
+
+  // 5. Failover in Auto mode: Attempt OpenWeatherMap if key is available
+  if (requestedSource === "auto" && apiKey) {
+    const owmData = await fetchOpenWeather(resolvedCity, resolvedLat, resolvedLon, apiKey);
+    if (owmData) {
+      return NextResponse.json(owmData);
+    }
+  }
+
+  // 6. Tertiary Fallback: Autonomous Synoptic Simulator
+  const mock = generateFallbackWeather(resolvedCity, resolvedLat, resolvedLon, resolvedCountry);
+  mock.providerName = "Autonomous Synoptic Simulator";
+  mock.stationName = "Synthetic Mathematical Station";
+  return NextResponse.json(mock);
+}
+
+async function fetchOpenMeteo(
+  resolvedCity: string,
+  resolvedCountry: string,
+  resolvedLat: number,
+  resolvedLon: number,
+  requestedStation: ForecastStationModel
+): Promise<WeatherData | null> {
+  try {
+    let weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${resolvedLat}&longitude=${resolvedLon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,surface_pressure,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timezone=auto&forecast_days=10&wind_speed_unit=ms`;
+
+    if (requestedStation && requestedStation !== "best_match") {
+      weatherUrl += `&models=${requestedStation}`;
+    }
+
+    const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${resolvedLat}&longitude=${resolvedLon}&current=european_aqi,us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
+
+    const [weatherRes, aqiRes] = await Promise.all([
+      fetch(weatherUrl, { next: { revalidate: 180 } }),
+      fetch(aqiUrl, { next: { revalidate: 600 } }).catch(() => null),
+    ]);
+
+    if (!weatherRes.ok) return null;
+
+    const weatherJson = await weatherRes.json();
+    const aqiJson = aqiRes && aqiRes.ok ? await aqiRes.json() : null;
+
+    const currentMeteo = weatherJson.current;
+    const dailyMeteo = weatherJson.daily;
+    const hourlyMeteo = weatherJson.hourly;
+
+    // Current weather mapping
+    const cond = mapWmoCode(currentMeteo.weather_code, Boolean(currentMeteo.is_day));
+    const sunriseIso = dailyMeteo.sunrise?.[0];
+    const sunsetIso = dailyMeteo.sunset?.[0];
+    const sunriseTs = sunriseIso ? Math.floor(new Date(sunriseIso).getTime() / 1000) : Math.floor(Date.now() / 1000) - 20000;
+    const sunsetTs = sunsetIso ? Math.floor(new Date(sunsetIso).getTime() / 1000) : Math.floor(Date.now() / 1000) + 20000;
+
+    const currentHourIdx = 0;
+    const currentUv = hourlyMeteo.uv_index?.[currentHourIdx] ?? dailyMeteo.uv_index_max?.[0] ?? 0;
+    const currentDewPoint = hourlyMeteo.dew_point_2m?.[currentHourIdx] ?? 12;
+    const currentVisibility = hourlyMeteo.visibility?.[currentHourIdx] ?? 10000;
+
+    // Air Quality mapping
+    let airQuality: AirQualityData | undefined;
+    if (aqiJson?.current) {
+      const cAqi = aqiJson.current;
+      const usAqi = cAqi.us_aqi ?? 25;
+      let aqiBand = 1;
+      if (usAqi > 200) aqiBand = 5;
+      else if (usAqi > 150) aqiBand = 4;
+      else if (usAqi > 100) aqiBand = 3;
+      else if (usAqi > 50) aqiBand = 2;
+
+      airQuality = {
+        aqi: aqiBand,
+        usAqi: Math.round(usAqi),
+        europeanAqi: Math.round(cAqi.european_aqi ?? 20),
+        co: parseFloat((cAqi.carbon_monoxide ?? 180).toFixed(1)),
+        no: 0.1,
+        no2: parseFloat((cAqi.nitrogen_dioxide ?? 10).toFixed(1)),
+        o3: parseFloat((cAqi.ozone ?? 45).toFixed(1)),
+        so2: parseFloat((cAqi.sulphur_dioxide ?? 2).toFixed(1)),
+        pm2_5: parseFloat((cAqi.pm2_5 ?? 5.5).toFixed(1)),
+        pm10: parseFloat((cAqi.pm10 ?? 12.0).toFixed(1)),
+        nh3: 0.5,
+      };
+    } else {
+      airQuality = {
+        aqi: 1,
+        usAqi: 28,
+        europeanAqi: 22,
+        co: 150,
+        no: 0.1,
+        no2: 8.5,
+        o3: 42,
+        so2: 1.8,
+        pm2_5: 4.8,
+        pm10: 9.5,
+        nh3: 0.4,
+      };
+    }
+
+    const current: CurrentWeather = {
+      cityName: resolvedCity,
+      country: resolvedCountry || "GLOBAL",
+      lat: resolvedLat,
+      lon: resolvedLon,
+      temp: currentMeteo.temperature_2m,
+      feelsLike: currentMeteo.apparent_temperature ?? currentMeteo.temperature_2m,
+      tempMin: dailyMeteo.temperature_2m_min?.[0] ?? currentMeteo.temperature_2m - 4,
+      tempMax: dailyMeteo.temperature_2m_max?.[0] ?? currentMeteo.temperature_2m + 4,
+      humidity: currentMeteo.relative_humidity_2m ?? 60,
+      pressure: Math.round(currentMeteo.surface_pressure ?? 1013),
+      windSpeed: parseFloat((currentMeteo.wind_speed_10m ?? 2).toFixed(1)),
+      windDeg: currentMeteo.wind_direction_10m ?? 0,
+      windGusts: parseFloat((currentMeteo.wind_gusts_10m ?? 4).toFixed(1)),
+      clouds: currentMeteo.cloud_cover ?? 0,
+      visibility: currentVisibility,
+      uvIndex: currentUv,
+      dewPoint: currentDewPoint,
+      condition: {
+        type: cond.type,
+        main: cond.label,
+        description: cond.label.toLowerCase(),
+        icon: "02d",
+      },
+      sunrise: sunriseTs,
+      sunset: sunsetTs,
+      dt: Math.floor(Date.now() / 1000),
+      moon: calculateMoonInfo(new Date()),
+      airQuality,
+    };
+
+    // 24 to 48 hours hourly sequence
+    const hourly: HourlyForecastItem[] = [];
+    const maxHours = Math.min(48, hourlyMeteo.time.length);
+    for (let i = 0; i < maxHours; i++) {
+      const timeIso = hourlyMeteo.time[i];
+      if (!timeIso || hourlyMeteo.temperature_2m?.[i] == null) continue;
+      const date = new Date(timeIso);
+      const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+      const isDay = Boolean(hourlyMeteo.is_day?.[i] ?? 1);
+      const hCond = mapWmoCode(hourlyMeteo.weather_code?.[i] ?? 0, isDay);
+
+      hourly.push({
+        time: timeStr,
+        timestamp: Math.floor(date.getTime() / 1000),
+        temp: hourlyMeteo.temperature_2m[i],
+        feelsLike: hourlyMeteo.apparent_temperature?.[i] ?? hourlyMeteo.temperature_2m[i],
+        humidity: hourlyMeteo.relative_humidity_2m?.[i] ?? 60,
+        windSpeed: parseFloat((hourlyMeteo.wind_speed_10m?.[i] ?? 3).toFixed(1)),
+        windGusts: parseFloat(hourlyMeteo.wind_gusts_10m?.[i]?.toFixed(1) ?? "0"),
+        uvIndex: hourlyMeteo.uv_index?.[i] ?? 0,
+        dewPoint: hourlyMeteo.dew_point_2m?.[i] ?? 10,
+        cloudCover: hourlyMeteo.cloud_cover?.[i] ?? 20,
+        conditionType: hCond.type,
+        description: hCond.label,
+        pop: (hourlyMeteo.precipitation_probability?.[i] ?? 0) / 100,
+      });
+    }
+
+    // 10-day outlook sequence
+    const daily: DailyForecastItem[] = [];
+    const todayIso = new Date().toISOString().split("T")[0];
+    const numDays = Math.min(10, dailyMeteo.time.length);
+
+    for (let i = 0; i < numDays; i++) {
+      const dateStr = dailyMeteo.time[i];
+      if (!dateStr || dailyMeteo.temperature_2m_max?.[i] == null || dailyMeteo.temperature_2m_min?.[i] == null) {
+        continue;
+      }
+      const date = new Date(dateStr);
+      const dayName =
+        dateStr === todayIso
+          ? "TODAY"
+          : date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+      const dCond = mapWmoCode(dailyMeteo.weather_code?.[i] ?? 0, true);
+      const sRise = dailyMeteo.sunrise?.[i] ? Math.floor(new Date(dailyMeteo.sunrise[i]).getTime() / 1000) : undefined;
+      const sSet = dailyMeteo.sunset?.[i] ? Math.floor(new Date(dailyMeteo.sunset[i]).getTime() / 1000) : undefined;
+
+      daily.push({
+        day: dayName,
+        date: dateStr,
+        tempMin: dailyMeteo.temperature_2m_min[i],
+        tempMax: dailyMeteo.temperature_2m_max[i],
+        conditionType: dCond.type,
+        description: dCond.label,
+        pop: (dailyMeteo.precipitation_probability_max?.[i] ?? 0) / 100,
+        humidity: Math.round(hourlyMeteo.relative_humidity_2m?.[i * 24 + 12] ?? 60),
+        windSpeed: parseFloat((dailyMeteo.wind_speed_10m_max?.[i] ?? 4).toFixed(1)),
+        windGusts: parseFloat(dailyMeteo.wind_gusts_10m_max?.[i]?.toFixed(1) ?? "0"),
+        uvIndexMax: dailyMeteo.uv_index_max?.[i] ?? 3,
+        sunrise: sRise,
+        sunset: sSet,
+      });
+    }
+
+    const alerts = buildMeteorologicalAlerts(current, daily);
+    const stationInfo = FORECAST_STATION_MODELS.find((s) => s.id === requestedStation);
+    const stationName = stationInfo ? stationInfo.name : "WMO Best Match Consensus";
+
+    return {
+      current,
+      hourly,
+      daily,
+      alerts,
+      dataSource: "LIVE_API",
+      providerName: "Open-Meteo High-Resolution",
+      stationName,
+    };
+  } catch (err) {
+    console.warn("fetchOpenMeteo error:", err);
+    return null;
+  }
+}
+
+async function fetchOpenWeather(
+  targetCity: string,
+  lat: number | null,
+  lon: number | null,
+  apiKey: string
+): Promise<WeatherData | null> {
+  if (!apiKey) return null;
+
   try {
     let queryUrl = "";
     let forecastUrl = "";
 
-    if (latParam && lonParam) {
-      queryUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latParam}&lon=${lonParam}&units=metric&appid=${OPENWEATHER_API_KEY}`;
-      forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${latParam}&lon=${lonParam}&units=metric&appid=${OPENWEATHER_API_KEY}`;
+    if (lat !== null && lon !== null && !isNaN(lat) && !isNaN(lon)) {
+      queryUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+      forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
     } else {
-      const targetCity = city?.trim() || "London";
-      queryUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(targetCity)}&units=metric&appid=${OPENWEATHER_API_KEY}`;
-      forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(targetCity)}&units=metric&appid=${OPENWEATHER_API_KEY}`;
+      const q = targetCity || "London";
+      queryUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(q)}&units=metric&appid=${apiKey}`;
+      forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(q)}&units=metric&appid=${apiKey}`;
     }
 
     const [currentRes, forecastRes] = await Promise.all([
@@ -238,172 +339,179 @@ export async function GET(request: NextRequest) {
       fetch(forecastUrl, { next: { revalidate: 300 } }),
     ]);
 
-    if (currentRes.ok && forecastRes.ok) {
-      const currentJson = await currentRes.json();
-      const forecastJson = await forecastRes.json();
+    if (!currentRes.ok || !forecastRes.ok) return null;
 
-      let airQuality: AirQualityData | undefined;
-      try {
-        const aqiRes = await fetch(
-          `https://api.openweathermap.org/data/2.5/air_pollution?lat=${currentJson.coord.lat}&lon=${currentJson.coord.lon}&appid=${OPENWEATHER_API_KEY}`,
-          { next: { revalidate: 600 } }
-        );
-        if (aqiRes.ok) {
-          const aqiJson = await aqiRes.json();
-          const item = aqiJson.list?.[0];
-          if (item) {
-            airQuality = {
-              aqi: item.main.aqi,
-              usAqi: item.main.aqi * 30,
-              europeanAqi: item.main.aqi * 20,
-              co: item.components.co,
-              no: item.components.no,
-              no2: item.components.no2,
-              o3: item.components.o3,
-              so2: item.components.so2,
-              pm2_5: item.components.pm2_5,
-              pm10: item.components.pm10,
-              nh3: item.components.nh3,
-            };
-          }
+    const currentJson = await currentRes.json();
+    const forecastJson = await forecastRes.json();
+
+    let airQuality: AirQualityData | undefined;
+    try {
+      const aqiRes = await fetch(
+        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${currentJson.coord.lat}&lon=${currentJson.coord.lon}&appid=${apiKey}`,
+        { next: { revalidate: 600 } }
+      );
+      if (aqiRes.ok) {
+        const aqiJson = await aqiRes.json();
+        const item = aqiJson.list?.[0];
+        if (item) {
+          airQuality = {
+            aqi: item.main.aqi,
+            usAqi: item.main.aqi * 30,
+            europeanAqi: item.main.aqi * 20,
+            co: item.components.co,
+            no: item.components.no,
+            no2: item.components.no2,
+            o3: item.components.o3,
+            so2: item.components.so2,
+            pm2_5: item.components.pm2_5,
+            pm10: item.components.pm10,
+            nh3: item.components.nh3,
+          };
         }
-      } catch {
-        // air quality non-critical
       }
-
-      if (!airQuality) {
-        airQuality = {
-          aqi: 2,
-          usAqi: 45,
-          europeanAqi: 30,
-          co: 240.3,
-          no: 0.1,
-          no2: 12.4,
-          o3: 48.2,
-          so2: 3.1,
-          pm2_5: 8.6,
-          pm10: 16.2,
-          nh3: 0.8,
-        };
-      }
-
-      const primaryCond = currentJson.weather?.[0] || { main: "Clear", description: "clear sky", icon: "01d" };
-
-      const current: CurrentWeather = {
-        cityName: currentJson.name,
-        country: currentJson.sys?.country || "",
-        lat: currentJson.coord.lat,
-        lon: currentJson.coord.lon,
-        temp: currentJson.main.temp,
-        feelsLike: currentJson.main.feels_like,
-        tempMin: currentJson.main.temp_min,
-        tempMax: currentJson.main.temp_max,
-        humidity: currentJson.main.humidity,
-        pressure: currentJson.main.pressure,
-        windSpeed: currentJson.wind.speed,
-        windDeg: currentJson.wind.deg ?? 0,
-        windGusts: currentJson.wind.gust,
-        clouds: currentJson.clouds?.all ?? 0,
-        visibility: currentJson.visibility ?? 10000,
-        uvIndex: 4.2,
-        dewPoint: currentJson.main.temp - (100 - currentJson.main.humidity) / 5,
-        condition: {
-          type: mapOpenWeatherCondition(primaryCond.icon, primaryCond.main),
-          main: primaryCond.main,
-          description: primaryCond.description,
-          icon: primaryCond.icon,
-        },
-        sunrise: currentJson.sys?.sunrise ?? Math.floor(Date.now() / 1000) - 20000,
-        sunset: currentJson.sys?.sunset ?? Math.floor(Date.now() / 1000) + 20000,
-        dt: currentJson.dt ?? Math.floor(Date.now() / 1000),
-        moon: calculateMoonInfo(new Date()),
-        airQuality,
-      };
-
-      const hourly: HourlyForecastItem[] = (forecastJson.list || []).slice(0, 12).map((item: any) => {
-        const date = new Date(item.dt * 1000);
-        const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
-        const cond = item.weather?.[0] || { main: "Clear", description: "clear sky", icon: "01d" };
-
-        return {
-          time: timeStr,
-          timestamp: item.dt,
-          temp: item.main.temp,
-          feelsLike: item.main.feels_like,
-          humidity: item.main.humidity,
-          windSpeed: item.wind.speed,
-          windGusts: item.wind.gust,
-          uvIndex: 3.5,
-          dewPoint: item.main.temp - (100 - item.main.humidity) / 5,
-          cloudCover: item.clouds?.all ?? 20,
-          conditionType: mapOpenWeatherCondition(cond.icon, cond.main),
-          description: cond.description,
-          pop: item.pop ?? 0,
-        };
-      });
-
-      const dayGroups: Record<string, any[]> = {};
-      (forecastJson.list || []).forEach((item: any) => {
-        const date = new Date(item.dt * 1000);
-        const dayKey = date.toISOString().split("T")[0];
-        if (!dayGroups[dayKey]) dayGroups[dayKey] = [];
-        dayGroups[dayKey].push(item);
-      });
-
-      const todayIso = new Date().toISOString().split("T")[0];
-      const daily: DailyForecastItem[] = Object.entries(dayGroups).slice(0, 7).map(([dateStr, items]) => {
-        const date = new Date(dateStr);
-        const dayName =
-          dateStr === todayIso
-            ? "TODAY"
-            : date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-
-        const temps = items.map((i) => i.main.temp);
-        const min = Math.min(...temps);
-        const max = Math.max(...temps);
-        const midItem = items[Math.floor(items.length / 2)] || items[0];
-        const cond = midItem.weather?.[0] || { main: "Clouds", description: "few clouds", icon: "02d" };
-
-        return {
-          day: dayName,
-          date: dateStr,
-          tempMin: min,
-          tempMax: max,
-          conditionType: mapOpenWeatherCondition(cond.icon, cond.main),
-          description: cond.description,
-          pop: Math.max(...items.map((i) => i.pop ?? 0)),
-          humidity: midItem.main.humidity,
-          windSpeed: midItem.wind.speed,
-          windGusts: midItem.wind.gust,
-          uvIndexMax: 4.5,
-        };
-      });
-
-      return NextResponse.json({
-        current,
-        hourly,
-        daily,
-        dataSource: "LIVE_API",
-      } satisfies WeatherData);
+    } catch {
+      // air quality non-critical
     }
-  } catch (error) {
-    console.warn("OpenWeather fallback failed:", error);
-  }
 
-  // 3. TERTIARY ENGINE: High-Fidelity Mathematical Simulation Fallback
-  const mock = generateFallbackWeather(city || "London");
-  return NextResponse.json(mock);
+    if (!airQuality) {
+      airQuality = {
+        aqi: 2,
+        usAqi: 45,
+        europeanAqi: 30,
+        co: 240.3,
+        no: 0.1,
+        no2: 12.4,
+        o3: 48.2,
+        so2: 3.1,
+        pm2_5: 8.6,
+        pm10: 16.2,
+        nh3: 0.8,
+      };
+    }
+
+    const primaryCond = currentJson.weather?.[0] || { main: "Clear", description: "clear sky", icon: "01d" };
+
+    const current: CurrentWeather = {
+      cityName: currentJson.name,
+      country: currentJson.sys?.country || "",
+      lat: currentJson.coord.lat,
+      lon: currentJson.coord.lon,
+      temp: currentJson.main.temp,
+      feelsLike: currentJson.main.feels_like,
+      tempMin: currentJson.main.temp_min,
+      tempMax: currentJson.main.temp_max,
+      humidity: currentJson.main.humidity,
+      pressure: currentJson.main.pressure,
+      windSpeed: currentJson.wind.speed,
+      windDeg: currentJson.wind.deg ?? 0,
+      windGusts: currentJson.wind.gust,
+      clouds: currentJson.clouds?.all ?? 0,
+      visibility: currentJson.visibility ?? 10000,
+      uvIndex: 4.2,
+      dewPoint: currentJson.main.temp - (100 - currentJson.main.humidity) / 5,
+      condition: {
+        type: mapOpenWeatherCondition(primaryCond.icon, primaryCond.main),
+        main: primaryCond.main,
+        description: primaryCond.description,
+        icon: primaryCond.icon,
+      },
+      sunrise: currentJson.sys?.sunrise ?? Math.floor(Date.now() / 1000) - 20000,
+      sunset: currentJson.sys?.sunset ?? Math.floor(Date.now() / 1000) + 20000,
+      dt: currentJson.dt ?? Math.floor(Date.now() / 1000),
+      moon: calculateMoonInfo(new Date()),
+      airQuality,
+    };
+
+    const hourly: HourlyForecastItem[] = (forecastJson.list || []).slice(0, 12).map((item: any) => {
+      const date = new Date(item.dt * 1000);
+      const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+      const cond = item.weather?.[0] || { main: "Clear", description: "clear sky", icon: "01d" };
+
+      return {
+        time: timeStr,
+        timestamp: item.dt,
+        temp: item.main.temp,
+        feelsLike: item.main.feels_like,
+        humidity: item.main.humidity,
+        windSpeed: item.wind.speed,
+        windGusts: item.wind.gust,
+        uvIndex: 3.5,
+        dewPoint: item.main.temp - (100 - item.main.humidity) / 5,
+        cloudCover: item.clouds?.all ?? 20,
+        conditionType: mapOpenWeatherCondition(cond.icon, cond.main),
+        description: cond.description,
+        pop: item.pop ?? 0,
+      };
+    });
+
+    const dayGroups: Record<string, any[]> = {};
+    (forecastJson.list || []).forEach((item: any) => {
+      const date = new Date(item.dt * 1000);
+      const dayKey = date.toISOString().split("T")[0];
+      if (!dayGroups[dayKey]) dayGroups[dayKey] = [];
+      dayGroups[dayKey].push(item);
+    });
+
+    const todayIso = new Date().toISOString().split("T")[0];
+    const daily: DailyForecastItem[] = Object.entries(dayGroups).slice(0, 7).map(([dateStr, items]) => {
+      const date = new Date(dateStr);
+      const dayName =
+        dateStr === todayIso
+          ? "TODAY"
+          : date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+
+      const temps = items.map((i) => i.main.temp);
+      const min = Math.min(...temps);
+      const max = Math.max(...temps);
+      const midItem = items[Math.floor(items.length / 2)] || items[0];
+      const cond = midItem.weather?.[0] || { main: "Clouds", description: "few clouds", icon: "02d" };
+
+      return {
+        day: dayName,
+        date: dateStr,
+        tempMin: min,
+        tempMax: max,
+        conditionType: mapOpenWeatherCondition(cond.icon, cond.main),
+        description: cond.description,
+        pop: Math.max(...items.map((i) => i.pop ?? 0)),
+        humidity: midItem.main.humidity,
+        windSpeed: midItem.wind.speed,
+        windGusts: midItem.wind.gust,
+        uvIndexMax: 4.5,
+      };
+    });
+
+    const alerts = buildMeteorologicalAlerts(current, daily);
+
+    return {
+      current,
+      hourly,
+      daily,
+      alerts,
+      dataSource: "LIVE_API",
+      providerName: "OpenWeatherMap Live API",
+      stationName: "OWM 2.5 Surface Stations",
+    };
+  } catch (error) {
+    console.warn("fetchOpenWeather error:", error);
+    return null;
+  }
 }
 
-function generateFallbackWeather(cityName: string): WeatherData {
+function generateFallbackWeather(
+  cityName: string,
+  lat: number | null = null,
+  lon: number | null = null,
+  country: string = "GLOBAL"
+): WeatherData {
   const cleanName = cityName.charAt(0).toUpperCase() + cityName.slice(1).toLowerCase();
   const now = Math.floor(Date.now() / 1000);
 
   const current: CurrentWeather = {
     cityName: cleanName,
-    country: "GLOBAL",
-    lat: 51.5074,
-    lon: -0.1278,
+    country: country || "GLOBAL",
+    lat: lat ?? 51.5074,
+    lon: lon ?? -0.1278,
     temp: 21.4,
     feelsLike: 20.8,
     tempMin: 16.0,
@@ -492,6 +600,8 @@ function generateFallbackWeather(cityName: string): WeatherData {
     daily,
     alerts,
     dataSource: "MOCK_FALLBACK",
+    providerName: "Autonomous Synoptic Simulator",
+    stationName: "Synthetic Mathematical Station",
   };
 }
 

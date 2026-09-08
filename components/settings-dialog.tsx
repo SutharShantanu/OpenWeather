@@ -13,6 +13,13 @@ import {
   RotateCcw,
   Plus,
   Trash2,
+  Radio,
+  Server,
+  Cpu,
+  Key,
+  RefreshCw,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   Dialog,
@@ -27,7 +34,15 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useTheme } from "next-themes";
-import { WindSpeedUnit, PressureUnit, PrecipitationUnit } from "@/lib/weather";
+import {
+  WindSpeedUnit,
+  PressureUnit,
+  PrecipitationUnit,
+  WeatherDataSource,
+  ForecastStationModel,
+  FORECAST_STATION_MODELS,
+  WEATHER_DATA_PROVIDERS,
+} from "@/lib/weather";
 
 export interface ExtendedSettings {
   tempUnit: "C" | "F";
@@ -38,6 +53,9 @@ export interface ExtendedSettings {
   language: string;
   speechRate: number;
   autoSpeakOnLoad: boolean;
+  weatherSource: WeatherDataSource;
+  forecastStation: ForecastStationModel;
+  customApiKey?: string;
 }
 
 export const DEFAULT_EXTENDED_SETTINGS: ExtendedSettings = {
@@ -49,6 +67,9 @@ export const DEFAULT_EXTENDED_SETTINGS: ExtendedSettings = {
   language: "en",
   speechRate: 1.0,
   autoSpeakOnLoad: false,
+  weatherSource: "open-meteo",
+  forecastStation: "best_match",
+  customApiKey: "",
 };
 
 interface SettingsDialogProps {
@@ -68,7 +89,7 @@ interface SettingsDialogProps {
 export function SettingsDialog({
   open,
   onOpenChange,
-  activeTab = "units",
+  activeTab = "source",
   onActiveTabChange,
   settings,
   onUpdateSettings,
@@ -80,6 +101,37 @@ export function SettingsDialog({
 }: SettingsDialogProps) {
   const { theme, setTheme } = useTheme();
   const [newCityInput, setNewCityInput] = useState("");
+  const [showKey, setShowKey] = useState(false);
+  const [testPingStatus, setTestPingStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [testPingMsg, setTestPingMsg] = useState("");
+
+  const handleTestApiKey = async () => {
+    setTestPingStatus("loading");
+    setTestPingMsg("Connecting to OpenWeather station...");
+    try {
+      const keyToTest = settings.customApiKey?.trim() || "";
+      const url = keyToTest
+        ? `/api/weather?city=London&source=openweathermap&apiKey=${encodeURIComponent(keyToTest)}`
+        : `/api/weather?city=London&source=openweathermap`;
+      const res = await fetch(url);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.providerName?.includes("Failover") || json.stationName?.includes("Failover")) {
+          setTestPingStatus("error");
+          setTestPingMsg("Authentication failed. Please check the OpenWeather API key.");
+        } else {
+          setTestPingStatus("success");
+          setTestPingMsg(`Handshake Verified! Live telemetry: ${json.current?.cityName || "London"} (${json.current?.temp}°C, ${json.current?.humidity}% humidity).`);
+        }
+      } else {
+        setTestPingStatus("error");
+        setTestPingMsg(`API responded with HTTP ${res.status}.`);
+      }
+    } catch {
+      setTestPingStatus("error");
+      setTestPingMsg("Network or gateway timeout testing station.");
+    }
+  };
 
   const handleAddCity = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +143,7 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-fit font-mono text-xs">
+      <DialogContent className="max-w-2xl w-full font-mono text-xs max-h-[90vh] overflow-y-auto">
         <DialogHeader className="border-b border-border pb-3">
           <div className="flex items-center gap-2">
             <div className="size-7 bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
@@ -102,43 +154,251 @@ export function SettingsDialog({
             </DialogTitle>
           </div>
           <DialogDescription className="text-xs">
-            Configure meteorological units, pinned telemetry stations, audio speech & regional conventions
+            Configure meteorological data source, numerical forecast station, units, pinned telemetry & speech
           </DialogDescription>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={onActiveTabChange} className="w-full">
-          <TabsList className="w-full justify-start border-b border-border p-0 bg-transparent mb-4">
+          <TabsList className="w-full justify-start border-b border-border p-0 bg-transparent mb-4 overflow-x-auto flex-nowrap">
+            <TabsTrigger
+              value="source"
+              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
+            >
+              Source & Station
+            </TabsTrigger>
             <TabsTrigger
               value="units"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3"
+              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
             >
               Units
             </TabsTrigger>
             <TabsTrigger
               value="favorites"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3"
+              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
             >
               Favorites ({pinnedCities.length})
             </TabsTrigger>
             <TabsTrigger
               value="localization"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3"
+              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
             >
               Regional
             </TabsTrigger>
             <TabsTrigger
               value="speech"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3"
+              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
             >
               Speech & Audio
             </TabsTrigger>
             <TabsTrigger
               value="appearance"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3"
+              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
             >
               Theme
             </TabsTrigger>
           </TabsList>
+
+          {/* TAB: SOURCE & STATION */}
+          <TabsContent value="source" className="space-y-4 focus-visible:outline-none">
+            {/* Telemetry Status Bar */}
+            <div className="p-3 bg-muted/20 border border-border flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="size-2 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-foreground font-bold uppercase tracking-wider text-xs">
+                  Active Telemetry Feed
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap font-mono text-[11px]">
+                <Badge variant="outline" className="text-primary border-primary/40 bg-primary/5 uppercase">
+                  {settings.weatherSource}
+                </Badge>
+                <span className="text-muted-foreground">•</span>
+                <span className="text-muted-foreground">
+                  Model:{" "}
+                  <strong className="text-foreground">
+                    {FORECAST_STATION_MODELS.find((m) => m.id === settings.forecastStation)?.name || settings.forecastStation}
+                  </strong>
+                </span>
+              </div>
+            </div>
+
+            {/* SECTION 1: DATA PROVIDER / SOURCE */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-tiny uppercase text-muted-foreground font-bold flex items-center gap-1.5">
+                    <Server className="size-3 text-primary" />
+                    <span>1. Meteorological Data Provider (Source)</span>
+                  </div>
+                  <p className="text-tiny text-muted-foreground mt-0.5">
+                    Select the observation and primary synoptic data provider
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {WEATHER_DATA_PROVIDERS.map((provider) => {
+                  const isSelected = (settings.weatherSource || "open-meteo") === provider.id;
+                  return (
+                    <button
+                      key={provider.id}
+                      type="button"
+                      onClick={() => onUpdateSettings({ weatherSource: provider.id })}
+                      className={`p-3 text-left border transition-all cursor-pointer flex flex-col justify-between ${
+                        isSelected
+                          ? "border-primary bg-primary/5 shadow-xs ring-1 ring-primary/20"
+                          : "border-border bg-muted/20 hover:border-border/80 hover:bg-muted/30"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="font-bold text-foreground text-xs">{provider.name}</div>
+                          {isSelected ? (
+                            <div className="size-4 bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                              <Check className="size-3" />
+                            </div>
+                          ) : (
+                            <div className="size-4 border border-border shrink-0" />
+                          )}
+                        </div>
+                        <div className="text-tiny text-muted-foreground mt-1 line-clamp-2">
+                          {provider.description}
+                        </div>
+                      </div>
+                      <div className="mt-2.5 pt-2 border-t border-border/50 flex items-center justify-between text-tiny">
+                        <span className="text-muted-foreground truncate mr-2">{provider.provider}</span>
+                        {provider.requiresApiKey ? (
+                          <span className="text-amber-500 font-bold shrink-0">API Key</span>
+                        ) : (
+                          <span className="text-emerald-500 font-bold shrink-0">Keyless</span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* OpenWeatherMap API Key Config */}
+              {(settings.weatherSource === "openweathermap" || settings.customApiKey) && (
+                <div className="p-3 bg-muted/20 border border-border space-y-2 mt-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                      <Key className="size-3.5 text-primary" />
+                      <span>OpenWeatherMap API Key</span>
+                    </div>
+                    <span className="text-tiny text-muted-foreground">Optional Custom Override</span>
+                  </div>
+                  <p className="text-tiny text-muted-foreground">
+                    Leave blank to use the server environment key, or enter your personal OpenWeather key.
+                  </p>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        type={showKey ? "text" : "password"}
+                        value={settings.customApiKey || ""}
+                        onChange={(e) => onUpdateSettings({ customApiKey: e.target.value })}
+                        placeholder="e.g. 4483c686af6e2e21072d875ed1e5be27"
+                        className="h-8 text-xs font-mono pr-8 rounded-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowKey(!showKey)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        title={showKey ? "Hide key" : "Show key"}
+                      >
+                        {showKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                      </button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleTestApiKey}
+                      disabled={testPingStatus === "loading"}
+                      className="h-8 px-3 font-mono text-xs gap-1.5 shrink-0"
+                    >
+                      <RefreshCw className={`size-3 ${testPingStatus === "loading" ? "animate-spin text-primary" : ""}`} />
+                      <span>Test Handshake</span>
+                    </Button>
+                  </div>
+
+                  {testPingMsg && (
+                    <div
+                      className={`p-2 text-tiny font-mono border ${
+                        testPingStatus === "success"
+                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                          : "bg-destructive/10 border-destructive/30 text-destructive"
+                      }`}
+                    >
+                      {testPingMsg}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* SECTION 2: FORECAST STATION & NWP MODEL */}
+            <div className="space-y-2 pt-2 border-t border-border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-tiny uppercase text-muted-foreground font-bold flex items-center gap-1.5">
+                    <Cpu className="size-3 text-primary" />
+                    <span>2. Numerical Weather Prediction (NWP) Forecast Station</span>
+                  </div>
+                  <p className="text-tiny text-muted-foreground mt-0.5">
+                    Choose the atmospheric physics simulation station model for forecasting
+                  </p>
+                </div>
+              </div>
+
+              {settings.weatherSource === "openweathermap" && (
+                <div className="p-2 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-tiny font-mono">
+                  Notice: OpenWeatherMap uses OWM Station Consensus. Model selection below applies when Open-Meteo or Auto Failover is active.
+                </div>
+              )}
+
+              <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                {FORECAST_STATION_MODELS.map((model) => {
+                  const isSelected = (settings.forecastStation || "best_match") === model.id;
+                  return (
+                    <div
+                      key={model.id}
+                      onClick={() => onUpdateSettings({ forecastStation: model.id })}
+                      className={`p-2.5 border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                        isSelected
+                          ? "border-primary bg-primary/5 shadow-xs ring-1 ring-primary/20"
+                          : "border-border bg-muted/20 hover:border-border/80 hover:bg-muted/30"
+                      }`}
+                    >
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-foreground text-xs">{model.name}</span>
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-mono">
+                            {model.resolution}
+                          </Badge>
+                          <span className="text-[10px] text-muted-foreground">• {model.coverage}</span>
+                        </div>
+                        <p className="text-tiny text-muted-foreground truncate">{model.description}</p>
+                        <div className="text-[10px] text-muted-foreground/80 font-mono pt-0.5">
+                          Agency: {model.agency}
+                        </div>
+                      </div>
+
+                      <div className="shrink-0">
+                        {isSelected ? (
+                          <div className="size-4 bg-primary text-primary-foreground flex items-center justify-center">
+                            <Check className="size-3" />
+                          </div>
+                        ) : (
+                          <div className="size-4 border border-border" />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </TabsContent>
 
           {/* TAB 1: UNITS */}
           <TabsContent value="units" className="space-y-4 focus-visible:outline-none">

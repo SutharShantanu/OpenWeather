@@ -107,12 +107,137 @@ export interface WeatherAlert {
   expires?: string;
 }
 
+export type WeatherDataSource = "open-meteo" | "openweathermap" | "simulation" | "auto";
+
+export type ForecastStationModel =
+  | "best_match"
+  | "ecmwf_ifs025"
+  | "gfs_seamless"
+  | "icon_seamless"
+  | "gem_seamless"
+  | "meteofrance_seamless"
+  | "jma_seamless";
+
+export interface ForecastStationInfo {
+  id: ForecastStationModel;
+  name: string;
+  agency: string;
+  resolution: string;
+  coverage: string;
+  description: string;
+}
+
+export const FORECAST_STATION_MODELS: ForecastStationInfo[] = [
+  {
+    id: "best_match",
+    name: "WMO Best Match Consensus",
+    agency: "Multi-Model Ensemble",
+    resolution: "Auto (1-11 km)",
+    coverage: "Global",
+    description: "Intelligently blends optimal high-resolution meteorological models for coordinates.",
+  },
+  {
+    id: "ecmwf_ifs025",
+    name: "ECMWF IFS (9 km)",
+    agency: "European Centre for Medium-Range Weather Forecasts",
+    resolution: "9 km",
+    coverage: "Global",
+    description: "World gold standard for medium-range atmospheric physics and numerical simulation.",
+  },
+  {
+    id: "gfs_seamless",
+    name: "NOAA GFS (13 km)",
+    agency: "US National Oceanic & Atmospheric Administration",
+    resolution: "13 km",
+    coverage: "Global",
+    description: "Operational global numerical weather prediction run by the US National Weather Service.",
+  },
+  {
+    id: "icon_seamless",
+    name: "DWD ICON (13 km)",
+    agency: "Deutscher Wetterdienst (Germany)",
+    resolution: "13 km",
+    coverage: "Global / Europe",
+    description: "Advanced non-hydrostatic atmospheric modeling with precision precipitation dynamics.",
+  },
+  {
+    id: "meteofrance_seamless",
+    name: "Météo-France (ARPEGE / AROME)",
+    agency: "Météo-France",
+    resolution: "2.5-10 km",
+    coverage: "Europe & Global",
+    description: "High-resolution mesoscale weather prediction with superior convection physics.",
+  },
+  {
+    id: "gem_seamless",
+    name: "GEM Global (15 km)",
+    agency: "Environment and Climate Change Canada",
+    resolution: "15 km",
+    coverage: "Global",
+    description: "Canadian Meteorological Centre operational numerical weather prediction system.",
+  },
+  {
+    id: "jma_seamless",
+    name: "JMA MSM (5 km)",
+    agency: "Japan Meteorological Agency",
+    resolution: "5 km",
+    coverage: "East Asia & Pacific",
+    description: "High-resolution meso-scale numerical forecast model with optimized storm tracking.",
+  },
+];
+
+export interface WeatherDataProviderInfo {
+  id: WeatherDataSource;
+  name: string;
+  provider: string;
+  status: "active" | "ready";
+  requiresApiKey: boolean;
+  description: string;
+}
+
+export const WEATHER_DATA_PROVIDERS: WeatherDataProviderInfo[] = [
+  {
+    id: "open-meteo",
+    name: "Open-Meteo High-Resolution",
+    provider: "Open-Meteo GmbH & WMO Consensus",
+    status: "active",
+    requiresApiKey: false,
+    description: "10-day outlook, 1-hour resolution, hourly UV & air quality. No API key required.",
+  },
+  {
+    id: "openweathermap",
+    name: "OpenWeatherMap Live API",
+    provider: "OpenWeather Ltd (OWM 2.5)",
+    status: "ready",
+    requiresApiKey: true,
+    description: "Global weather station network, 5-day forecast, air pollution telemetry.",
+  },
+  {
+    id: "simulation",
+    name: "Autonomous Synoptic Simulator",
+    provider: "Local Mathematical Physics Engine",
+    status: "ready",
+    requiresApiKey: false,
+    description: "Deterministic atmospheric modeling for offline testing and calibration.",
+  },
+  {
+    id: "auto",
+    name: "Auto Consensus & Failover",
+    provider: "Dynamic Multi-Engine Failover",
+    status: "active",
+    requiresApiKey: false,
+    description: "Attempts Open-Meteo with chosen station model, then OWM, then simulator.",
+  },
+];
+
 export interface WeatherData {
   current: CurrentWeather;
   hourly: HourlyForecastItem[];
   daily: DailyForecastItem[];
   alerts?: WeatherAlert[];
   dataSource: "LIVE_API" | "MOCK_FALLBACK";
+  providerName?: string;
+  stationName?: string;
 }
 
 export const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || "";
