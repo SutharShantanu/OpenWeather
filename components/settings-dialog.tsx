@@ -216,8 +216,8 @@ export function SettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl w-full font-mono text-xs max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="border-b border-border pb-3">
+      <DialogContent className="max-w-2xl w-full font-mono text-xs h-[88vh] max-h-[88vh] sm:h-[85vh] sm:max-h-[85vh] flex flex-col overflow-hidden p-0 gap-0">
+        <DialogHeader className="p-4 pr-12 pb-3 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
             <div className="size-7 bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
               <Settings className="size-3.5" />
@@ -231,48 +231,48 @@ export function SettingsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={onActiveTabChange} className="w-full">
-          <TabsList className="w-full justify-start border-b border-border p-0 bg-transparent mb-4 overflow-x-auto flex-nowrap">
+        <Tabs value={activeTab} onValueChange={onActiveTabChange} className="w-full flex-1 flex flex-col min-h-0 overflow-hidden gap-0">
+          <TabsList className="w-full justify-start border-b border-border p-0 px-4 bg-transparent shrink-0 overflow-x-auto flex-nowrap rounded-none h-9">
             <TabsTrigger
               value="source"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
+              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
             >
               Source & Station
             </TabsTrigger>
             <TabsTrigger
               value="units"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
+              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
             >
               Units
             </TabsTrigger>
             <TabsTrigger
               value="favorites"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
+              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
             >
               Favorites ({pinnedCities.length})
             </TabsTrigger>
             <TabsTrigger
               value="localization"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
+              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
             >
               Regional
             </TabsTrigger>
             <TabsTrigger
               value="speech"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
+              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
             >
               Speech & Audio
             </TabsTrigger>
             <TabsTrigger
               value="appearance"
-              className="font-mono text-xs gap-1.5 border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap"
+              className="font-mono text-xs gap-1.5 h-full border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground rounded-none px-3 whitespace-nowrap shadow-none"
             >
               Theme
             </TabsTrigger>
           </TabsList>
 
           {/* TAB: SOURCE & STATION */}
-          <TabsContent value="source" className="space-y-4 focus-visible:outline-none">
+          <TabsContent value="source" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-4 focus-visible:outline-none">
             {/* Telemetry Status Bar */}
             <div className="p-3 bg-muted/20 border border-border flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -430,7 +430,7 @@ export function SettingsDialog({
                 </div>
               )}
 
-              <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+              <div className="space-y-1.5">
                 {FORECAST_STATION_MODELS.map((model) => {
                   const isSelected = (settings.forecastStation || "best_match") === model.id;
                   return (
@@ -474,7 +474,7 @@ export function SettingsDialog({
           </TabsContent>
 
           {/* TAB 1: UNITS */}
-          <TabsContent value="units" className="space-y-4 focus-visible:outline-none">
+          <TabsContent value="units" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-4 focus-visible:outline-none">
             {/* Temperature */}
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
               <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
@@ -566,7 +566,7 @@ export function SettingsDialog({
           </TabsContent>
 
           {/* TAB 2: FAVORITES */}
-          <TabsContent value="favorites" className="space-y-3 focus-visible:outline-none">
+          <TabsContent value="favorites" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-3 focus-visible:outline-none">
             <form onSubmit={handleAddCity} className="flex gap-2">
               <Input
                 value={newCityInput}
@@ -580,7 +580,7 @@ export function SettingsDialog({
               </Button>
             </form>
 
-            <div className="space-y-1.5 max-h-60 overflow-y-auto">
+            <div className="space-y-1.5">
               {pinnedCities.map((cityName) => (
                 <div
                   key={cityName}
@@ -619,7 +619,7 @@ export function SettingsDialog({
           </TabsContent>
 
           {/* TAB 3: REGIONAL */}
-          <TabsContent value="localization" className="space-y-4 focus-visible:outline-none">
+          <TabsContent value="localization" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-4 focus-visible:outline-none">
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
               <div className="text-tiny uppercase text-muted-foreground font-bold flex justify-between">
                 <span>Language Display</span>
@@ -675,7 +675,7 @@ export function SettingsDialog({
           </TabsContent>
 
           {/* TAB 4: SPEECH & AUDIO (GOOGLE TEXT-TO-SPEECH) */}
-          <TabsContent value="speech" className="space-y-4 focus-visible:outline-none">
+          <TabsContent value="speech" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-4 focus-visible:outline-none">
             {/* Google TTS Engine Header & Live Preview */}
             <div className="p-3 bg-muted/20 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
@@ -1002,7 +1002,7 @@ export function SettingsDialog({
           </TabsContent>
 
           {/* TAB 5: APPEARANCE */}
-          <TabsContent value="appearance" className="space-y-4 focus-visible:outline-none">
+          <TabsContent value="appearance" className="flex-1 overflow-y-auto min-h-0 p-4 space-y-4 focus-visible:outline-none">
             <div className="space-y-1.5 p-3 bg-muted/20 border border-border">
               <div className="text-tiny uppercase text-muted-foreground font-bold">
                 Theme Mode
@@ -1032,7 +1032,7 @@ export function SettingsDialog({
           </TabsContent>
         </Tabs>
 
-        <DialogFooter className="border-t border-border pt-3 flex items-center justify-between sm:justify-between w-full">
+        <DialogFooter className="border-t border-border p-3 px-4 shrink-0 flex items-center justify-between sm:justify-between w-full bg-muted/10">
           <Button
             variant="ghost"
             size="xs"
