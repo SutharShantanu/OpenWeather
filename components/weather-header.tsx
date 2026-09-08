@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from "react"
+import Link from "next/link"
 import { useTheme } from "next-themes"
 import {
   Search,
@@ -42,6 +43,7 @@ interface GeocodingResult {
 interface WeatherHeaderProps {
   onSearch: (city: string) => void
   onLocate: () => void
+  onHome?: () => void
   onOpenAiAdvisor?: () => void
   onOpenSettings?: () => void
   showNotifications?: boolean
@@ -57,6 +59,7 @@ interface WeatherHeaderProps {
 export function WeatherHeader({
   onSearch,
   onLocate,
+  onHome,
   onOpenAiAdvisor,
   onOpenSettings,
   showNotifications,
@@ -196,8 +199,21 @@ export function WeatherHeader({
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6 lg:px-8">
-        {/* Logo & Brand */}
-        <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+        {/* Logo & Brand: Home route */}
+        <Link
+          href="/"
+          onClick={(e) => {
+            setQuery("")
+            setResults([])
+            setIsOpen(false)
+            if (onHome) {
+              e.preventDefault()
+              onHome()
+            }
+          }}
+          className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:gap-2.5"
+          title="OpenWeather Home"
+        >
           <div className="flex size-8 items-center justify-center bg-primary text-primary-foreground">
             <Compass className="size-4" />
           </div>
@@ -205,14 +221,8 @@ export function WeatherHeader({
             <span className="font-heading text-sm font-medium tracking-tight text-foreground">
               OpenWeather
             </span>
-            <Badge
-              variant="outline"
-              className="hidden font-mono text-tiny font-normal sm:inline-flex"
-            >
-              Console
-            </Badge>
           </div>
-        </div>
+        </Link>
 
         {/* Center: Search with integrated GPS pin */}
         <div ref={searchRef} className="relative max-w-md flex-1">

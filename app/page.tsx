@@ -522,11 +522,22 @@ export default function WeatherDashboardPage() {
     handleUnpinCity(removeCity);
   };
 
+  const handleHome = useCallback(() => {
+    setActiveTab("overview");
+    setShowSettings(false);
+    setShowAiAdvisor(false);
+    setShowNotifications(false);
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", "/");
+    }
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-150">
       <WeatherHeader
         onSearch={handleSelectCity}
         onLocate={handleLocate}
+        onHome={handleHome}
         onOpenAiAdvisor={handleOpenAiAdvisor}
         onOpenSettings={() => handleOpenSettings()}
         showNotifications={showNotifications}
