@@ -12,6 +12,7 @@ import {
   Moon,
   X,
   Compass,
+  Radio,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -45,7 +46,8 @@ interface WeatherHeaderProps {
   onLocate: () => void
   onHome?: () => void
   onOpenAiAdvisor?: () => void
-  onOpenSettings?: () => void
+  onOpenSettings?: (tab?: string) => void
+  onChangeStation?: () => void
   showNotifications?: boolean
   onNotificationsOpenChange?: (open: boolean) => void
   current?: CurrentWeather
@@ -62,6 +64,7 @@ export function WeatherHeader({
   onHome,
   onOpenAiAdvisor,
   onOpenSettings,
+  onChangeStation,
   showNotifications,
   onNotificationsOpenChange,
   current,
@@ -398,35 +401,61 @@ export function WeatherHeader({
 
         {/* Right Actions: Decluttered, unified controls */}
         <div className="flex shrink-0 items-center gap-1.5">
-          {/* 1. Spoken Audio Briefing (Text-to-Speech) */}
-          {current && (
+          {/* 1, 2, 3: Synoptic Operations Button Group (Briefing, AI Advisor, Change Station) */}
+          <ButtonGroup>
+            {/* Spoken Audio Briefing (Text-to-Speech) */}
             <WeatherTtsButton
               current={current}
               daily={daily}
               hourly={hourly}
               unit={unit}
             />
-          )}
 
-          {/* 2. AI Weather Intelligence Advisor */}
-          {onOpenAiAdvisor && (
+            {/* AI Weather Intelligence Advisor */}
+            {onOpenAiAdvisor && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onOpenAiAdvisor}
+                    className="h-8 gap-1.5 px-2.5 font-mono text-xs"
+                  >
+                    <Sparkles className="size-3.5 text-primary" />
+                    <span className="hidden text-mini sm:inline">AI Advisor</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  AI Synoptic Intelligence & Sudden Shift Analysis
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {/* Change Station / Data Source */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={onOpenAiAdvisor}
+                  onClick={() => {
+                    if (onChangeStation) {
+                      onChangeStation()
+                    } else if (onOpenSettings) {
+                      onOpenSettings("source")
+                    }
+                  }}
                   className="h-8 gap-1.5 px-2.5 font-mono text-xs"
+                  title="Change Weather Provider & Forecast Station"
                 >
-                  <Sparkles className="size-3.5 text-primary" />
-                  <span className="hidden text-mini md:inline">AI Advisor</span>
+                  <Radio className="size-3.5 text-primary" />
+                  <span className="hidden text-mini sm:inline">Station</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                AI Synoptic Intelligence & Sudden Shift Analysis
+                Change Weather Provider & Forecast Station
               </TooltipContent>
             </Tooltip>
-          )}
+          </ButtonGroup>
 
           {/* Real Notifications Center with Web Push */}
           <NotificationsPopover
@@ -444,7 +473,7 @@ export function WeatherHeader({
                   <Button
                     variant="outline"
                     size="icon-sm"
-                    onClick={onOpenSettings}
+                    onClick={() => onOpenSettings()}
                     className="size-8"
                     title="Configure Station Settings"
                   >

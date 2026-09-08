@@ -7,11 +7,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { CurrentWeather, DailyForecastItem, HourlyForecastItem } from "@/lib/weather";
 import { generateWeatherBriefing, WeatherSpeechSynthesizer } from "@/lib/speech";
 
+import { cn } from "@/lib/utils";
+
 interface WeatherTtsButtonProps {
   current?: CurrentWeather;
   daily?: DailyForecastItem[];
   hourly?: HourlyForecastItem[];
   unit: "C" | "F";
+  className?: string;
 }
 
 export function WeatherTtsButton({
@@ -19,6 +22,7 @@ export function WeatherTtsButton({
   daily = [],
   hourly = [],
   unit,
+  className,
 }: WeatherTtsButtonProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [supported, setSupported] = useState(false);
@@ -52,10 +56,13 @@ export function WeatherTtsButton({
         <Button
           variant={isPlaying ? "default" : "outline"}
           size="sm"
+          disabled={!current}
           onClick={handleToggleSpeak}
-          className={`font-mono text-xs gap-1.5 h-8 px-2.5 transition-all ${
-            isPlaying ? "bg-primary text-primary-foreground animate-pulse" : ""
-          }`}
+          className={cn(
+            "font-mono text-xs gap-1.5 h-8 px-2.5 transition-all",
+            isPlaying && "bg-primary text-primary-foreground animate-pulse",
+            className
+          )}
           title={isPlaying ? "Stop Audio Briefing" : "Listen to Weather Briefing"}
         >
           {isPlaying ? (
