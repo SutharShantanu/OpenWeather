@@ -15,6 +15,55 @@ import {
   OPENWEATHER_API_KEY,
 } from "@/lib/weather";
 
+async function reverseGeocodeCoords(
+  lat: number,
+  lon: number,
+  apiKey?: string
+): Promise<{ city: string; country: string }> {
+  // 1. Try OpenWeatherMap reverse geocoding if API key is configured
+  if (apiKey) {
+    try {
+      const owmGeoUrl = `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`;
+      const res = await fetch(owmGeoUrl, { next: { revalidate: 86400 } });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0 && data[0].name) {
+          return {
+            city: data[0].name,
+            country: data[0].country || "",
+          };
+        }
+      }
+    } catch (e) {
+      console.warn("OWM reverse geocoding error:", e);
+    }
+  }
+
+  // 2. Try BigDataCloud reverse geocoding (fast, accurate, keyless global API)
+  try {
+    const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+    const res = await fetch(bdcUrl, { next: { revalidate: 86400 } });
+    if (res.ok) {
+      const data = await res.json();
+      const city = data.city || data.locality || data.principalSubdivision || "";
+      const country = data.countryName || data.countryCode || "";
+      if (city) {
+        return { city, country };
+      }
+    }
+  } catch (e) {
+    console.warn("BigDataCloud reverse geocoding error:", e);
+  }
+
+  // 3. Coordinate label fallback
+  const latStr = lat >= 0 ? `${lat.toFixed(2)}°N` : `${Math.abs(lat).toFixed(2)}°S`;
+  const lonStr = lon >= 0 ? `${lon.toFixed(2)}°E` : `${Math.abs(lon).toFixed(2)}°W`;
+  return {
+    city: `${latStr}, ${lonStr}`,
+    country: "GPS",
+  };
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const city = searchParams.get("city");
@@ -27,11 +76,21 @@ export async function GET(request: NextRequest) {
 
   let resolvedLat = latParam ? parseFloat(latParam) : null;
   let resolvedLon = lonParam ? parseFloat(lonParam) : null;
-  let resolvedCity = city?.trim() || "London";
+  let resolvedCity = city?.trim() || "";
   let resolvedCountry = "";
 
-  // 1. Resolve coordinates if not provided
-  if (resolvedLat === null || resolvedLon === null || isNaN(resolvedLat) || isNaN(resolvedLon)) {
+  // 1. If coordinates are provided: reverse geocode to get true city & country if not specified
+  if (resolvedLat !== null && resolvedLon !== null && !isNaN(resolvedLat) && !isNaN(resolvedLon)) {
+    if (!resolvedCity) {
+      const rev = await reverseGeocodeCoords(resolvedLat, resolvedLon, apiKey);
+      resolvedCity = rev.city;
+      resolvedCountry = rev.country;
+    }
+  } else {
+    // 2. If coordinates are NOT provided: forward geocode the city name (default to London if empty)
+    if (!resolvedCity) {
+      resolvedCity = "London";
+    }
     try {
       const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
         resolvedCity

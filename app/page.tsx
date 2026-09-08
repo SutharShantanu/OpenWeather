@@ -168,10 +168,34 @@ export default function WeatherDashboardPage() {
     } else if (urlCity) {
       setCity(urlCity);
     } else {
-      // Default initial city in URL so it is immediately shareable
-      const p = new URLSearchParams(window.location.search);
-      p.set("city", "London");
-      window.history.replaceState(null, "", `${window.location.pathname}?${p.toString()}`);
+      const savedLastCity = typeof window !== "undefined" ? localStorage.getItem("openweather_last_city") : null;
+      if (savedLastCity) {
+        setCity(savedLastCity);
+        const p = new URLSearchParams(window.location.search);
+        p.set("city", savedLastCity);
+        window.history.replaceState(null, "", `${window.location.pathname}?${p.toString()}`);
+      } else if (typeof navigator !== "undefined" && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const locCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+            setCoords(locCoords);
+            const p = new URLSearchParams(window.location.search);
+            p.set("lat", locCoords.lat.toFixed(4));
+            p.set("lon", locCoords.lon.toFixed(4));
+            window.history.replaceState(null, "", `${window.location.pathname}?${p.toString()}`);
+          },
+          () => {
+            const p = new URLSearchParams(window.location.search);
+            p.set("city", "London");
+            window.history.replaceState(null, "", `${window.location.pathname}?${p.toString()}`);
+          },
+          { timeout: 5000, maximumAge: 300000 }
+        );
+      } else {
+        const p = new URLSearchParams(window.location.search);
+        p.set("city", "London");
+        window.history.replaceState(null, "", `${window.location.pathname}?${p.toString()}`);
+      }
     }
 
     if (
@@ -317,7 +341,12 @@ export default function WeatherDashboardPage() {
         if (res.ok) {
           const data: WeatherData = await res.json();
           setWeather(data);
-          if (targetCity) setCity(data.current.cityName);
+          if (data.current?.cityName) {
+            setCity(data.current.cityName);
+            try {
+              localStorage.setItem("openweather_last_city", data.current.cityName);
+            } catch {}
+          }
         }
       } catch (err) {
         console.warn("Failed to load meteorological telemetry", err);
