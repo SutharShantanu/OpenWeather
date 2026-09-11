@@ -485,7 +485,34 @@ async function fetchOpenWeather(
       airQuality,
     };
 
-    const hourly: HourlyForecastItem[] = (forecastJson.list || []).slice(0, 12).map((item: any) => {
+    interface OwmForecastItem {
+      dt: number;
+      main: {
+        temp: number;
+        feels_like: number;
+        humidity: number;
+        temp_min: number;
+        temp_max: number;
+      };
+      weather?: Array<{
+        main: string;
+        description: string;
+        icon: string;
+      }>;
+      clouds?: { all: number };
+      wind: {
+        speed: number;
+        gust?: number;
+        deg?: number;
+      };
+      pop?: number;
+    }
+
+    const hourly: HourlyForecastItem[] = (
+      (forecastJson.list as OwmForecastItem[]) || []
+    )
+      .slice(0, 12)
+      .map((item: OwmForecastItem) => {
       const date = new Date(item.dt * 1000);
       const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
       const cond = item.weather?.[0] || { main: "Clear", description: "clear sky", icon: "01d" };
@@ -507,8 +534,8 @@ async function fetchOpenWeather(
       };
     });
 
-    const dayGroups: Record<string, any[]> = {};
-    (forecastJson.list || []).forEach((item: any) => {
+    const dayGroups: Record<string, OwmForecastItem[]> = {};
+    ((forecastJson.list as OwmForecastItem[]) || []).forEach((item: OwmForecastItem) => {
       const date = new Date(item.dt * 1000);
       const dayKey = date.toISOString().split("T")[0];
       if (!dayGroups[dayKey]) dayGroups[dayKey] = [];
@@ -668,10 +695,29 @@ function generateFallbackWeather(
   };
 }
 
-function buildMeteorologicalAlerts(current: CurrentWeather, daily: DailyForecastItem[]): WeatherAlert[] {
+function buildMeteorologicalAlerts(current: CurrentWeather, daily?: DailyForecastItem[]): WeatherAlert[] {
   const alerts: WeatherAlert[] = [];
   const now = new Date();
   const dateStr = now.toLocaleDateString();
+
+  // Multi-day extreme precipitation outlook from daily forecast
+  if (daily && daily.length > 0) {
+    const heavyRainDay = daily.find((d) => (d.pop ?? 0) >= 85);
+    if (heavyRainDay) {
+      alerts.push({
+        id: "alert-precipitation",
+        source: "Synoptic Precipitation Model",
+        event: "Heavy Precipitation Outlook",
+        headline: `Elevated precipitation probability of ${heavyRainDay.pop}% projected for ${heavyRainDay.day}.`,
+        severity: "Moderate",
+        urgency: "Future",
+        areas: current.cityName,
+        instruction: "Monitor local meteorological bulletins for localized flash flooding risks.",
+        effective: dateStr,
+        expires: "48 Hours",
+      });
+    }
+  }
 
   // 1. Extreme Heat Advisory
   if (current.temp >= 35 || current.feelsLike >= 38) {
