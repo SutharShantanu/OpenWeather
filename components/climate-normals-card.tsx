@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTemperature } from "@/lib/weather";
+import { useTranslation } from "@/components/language-provider";
 
 interface ClimateRecord {
   temp: number;
@@ -66,6 +67,7 @@ export function ClimateNormalsCard({
   currentTemp,
   unit,
 }: ClimateNormalsCardProps) {
+  const { t } = useTranslation();
   const [data, setData] = useState<ClimateData | null>(null);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"daily" | "annual">("daily");
@@ -131,7 +133,7 @@ export function ClimateNormalsCard({
           <div className="flex items-center gap-2">
             <History className="size-3.5 text-primary" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Historical Climate & Normals
+              {t.tabs.climate}
             </CardTitle>
             <Badge variant="outline" className="font-mono text-tiny">
               {data.sampleYears}-Year Baseline

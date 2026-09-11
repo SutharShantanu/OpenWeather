@@ -6,12 +6,14 @@ import { Sparkles, ShieldCheck } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AirQualityData, getAQIClassification } from "@/lib/weather";
+import { useTranslation } from "@/components/language-provider";
 
 interface AirQualityWidgetProps {
   airQuality?: AirQualityData;
 }
 
 export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
+  const { t } = useTranslation();
   const aqi = airQuality?.aqi ?? 1;
   const classification = getAQIClassification(aqi);
 
@@ -29,11 +31,11 @@ export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
           <div className="flex items-center gap-2">
             <Sparkles className="size-3.5 text-emerald-500" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Air Quality Index (AQI)
+              {t.widgets.airQuality.title}
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            Atmospheric particulate matter and gases
+            {t.widgets.airQuality.subtitle}
           </CardDescription>
         </div>
         <Badge variant="outline" className={`font-mono text-tiny ${classification.color}`}>

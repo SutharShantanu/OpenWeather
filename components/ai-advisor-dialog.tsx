@@ -14,13 +14,7 @@ import {
   X,
   Bot,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import { UniversalDialog } from "@/components/universal-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -100,23 +94,16 @@ export function AiAdvisorDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl w-full max-h-[88vh] h-[88vh] sm:h-[85vh] sm:max-h-[85vh] flex flex-col overflow-hidden p-0 gap-0 font-mono text-xs">
-        <DialogHeader className="p-4 pr-12 pb-3 border-b border-border shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="size-7 bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
-              <Sparkles className="size-3.5" />
-            </div>
-            <DialogTitle className="text-base font-heading font-semibold tracking-tight text-foreground">
-              AI Synoptic Weather Intelligence
-            </DialogTitle>
-          </div>
-          <DialogDescription className="text-xs">
-            Predictive pattern analytics for sudden shifts, lifestyle planning & advisory for {current.cityName}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-6 space-y-4">
+    <UniversalDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={<Sparkles className="size-3.5" />}
+      title="AI Synoptic Weather Intelligence"
+      description={`Predictive pattern analytics for sudden shifts, lifestyle planning & advisory for ${current.cityName}`}
+      contentClassName="font-mono"
+      bodyClassName="space-y-4"
+      scrollable={true}
+    >
           {/* Sudden Shifts Section */}
           <div className="space-y-2">
             <div className="text-tiny font-mono uppercase text-muted-foreground font-bold tracking-wider">
@@ -228,8 +215,6 @@ export function AiAdvisorDialog({
               ))}
             </div>
           )}
-        </div>
-      </DialogContent>
-    </Dialog>
+    </UniversalDialog>
   );
 }

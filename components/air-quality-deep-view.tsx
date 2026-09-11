@@ -12,12 +12,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, ShieldCheck, HeartPulse, Activity, AlertCircle } from "lucide-react";
 import { AirQualityData, getAQIClassification } from "@/lib/weather";
+import { useTranslation } from "@/components/language-provider";
 
 interface AirQualityDeepViewProps {
   airQuality?: AirQualityData;
 }
 
 export function AirQualityDeepView({ airQuality }: AirQualityDeepViewProps) {
+  const { t } = useTranslation();
   const aqi = airQuality?.aqi ?? 1;
   const classification = getAQIClassification(aqi);
 
@@ -37,7 +39,7 @@ export function AirQualityDeepView({ airQuality }: AirQualityDeepViewProps) {
           <div className="flex items-center gap-2">
             <Sparkles className="size-3.5 text-emerald-500" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Comprehensive Atmospheric Pollution Spectrum
+              {t.tabs.airQuality}
             </CardTitle>
           </div>
           <CardDescription className="text-xs">

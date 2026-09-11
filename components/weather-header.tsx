@@ -33,6 +33,7 @@ import { WeatherTtsButton } from "@/components/weather-tts-button"
 import { NotificationsPopover } from "@/components/notifications-popover"
 import { ButtonGroup } from "@/components/ui/button-group"
 import type { ExtendedSettings } from "@/components/settings-dialog"
+import { useTranslation } from "@/components/language-provider"
 
 interface GeocodingResult {
   name: string
@@ -77,6 +78,7 @@ export function WeatherHeader({
   settings,
   isLoading = false,
 }: WeatherHeaderProps) {
+  const { t } = useTranslation()
   const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [query, setQuery] = useState("")
@@ -161,7 +163,7 @@ export function WeatherHeader({
       setIsSearching(true)
       try {
         const res = await fetch(
-          `/api/search?q=${encodeURIComponent(query.trim())}`
+          `/api/search?q=${encodeURIComponent(query.trim())}&lang=${settings?.language || "en"}`
         )
         if (res.ok) {
           const data = await res.json()
@@ -243,7 +245,7 @@ export function WeatherHeader({
                 setIsOpen(true)
               }}
               onFocus={handleSearchFocus}
-              placeholder="Search station or coordinates… (Press /)"
+              placeholder={t.common.searchPlaceholder}
               className="pr-16 pl-8 font-mono text-xs"
             />
             <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1">
@@ -266,12 +268,12 @@ export function WeatherHeader({
                     onClick={onLocate}
                     disabled={isLoading}
                     className="p-1 text-muted-foreground transition-colors hover:text-primary"
-                    title="GPS Auto-Detect"
+                    title={t.common.locateMe}
                   >
                     <MapPin className="size-3.5" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>GPS Auto-Detect Location</TooltipContent>
+                <TooltipContent>{t.common.locateMe}</TooltipContent>
               </Tooltip>
               <kbd className="hidden border border-border px-1 py-0.5 font-mono text-micro text-muted-foreground sm:inline-flex">
                 /
@@ -449,14 +451,14 @@ export function WeatherHeader({
                     }
                   }}
                   className="h-8 gap-1.5 px-2.5 font-mono text-xs"
-                  title="Change Weather Provider & Forecast Station"
+                  title={t.common.source}
                 >
                   <Radio className="size-3.5 text-primary" />
-                  <span className="hidden text-mini sm:inline">Station</span>
+                  <span className="hidden text-mini sm:inline">{t.common.source}</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                Change Weather Provider & Forecast Station
+                {t.common.source}
               </TooltipContent>
             </Tooltip>
           </ButtonGroup>
@@ -479,13 +481,13 @@ export function WeatherHeader({
                     size="icon-sm"
                     onClick={() => onOpenSettings()}
                     className="size-8"
-                    title="Configure Station Settings"
+                    title={t.settingsDialog.title}
                   >
                     <Settings className="size-3.5" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  Station & Application Preferences
+                  {t.settingsDialog.title}
                 </TooltipContent>
               </Tooltip>
             )}

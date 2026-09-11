@@ -6,6 +6,7 @@ import { Droplets, ThermometerSun } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { calculateHeatIndex, formatTemperature } from "@/lib/weather";
+import { useTranslation } from "@/components/language-provider";
 
 interface HumidityWidgetProps {
   humidity: number; // %
@@ -14,6 +15,7 @@ interface HumidityWidgetProps {
 }
 
 export function HumidityWidget({ humidity, tempC, unit }: HumidityWidgetProps) {
+  const { t } = useTranslation();
   const heatIndexC = calculateHeatIndex(tempC, humidity);
   const displayHeatIndex = formatTemperature(heatIndexC, unit);
 
@@ -25,10 +27,10 @@ export function HumidityWidget({ humidity, tempC, unit }: HumidityWidgetProps) {
   const displayDewPoint = formatTemperature(dewPointC, unit);
 
   const getComfortLevel = (rh: number) => {
-    if (rh < 30) return { label: "Arid", color: "text-amber-500" };
-    if (rh <= 60) return { label: "Optimal", color: "text-emerald-500" };
-    if (rh <= 80) return { label: "Humid", color: "text-sky-500" };
-    return { label: "Saturated", color: "text-indigo-500" };
+    if (rh < 30) return { label: t.widgets.humidity.dry || "Arid", color: "text-amber-500" };
+    if (rh <= 60) return { label: t.widgets.humidity.comfortable || "Optimal", color: "text-emerald-500" };
+    if (rh <= 80) return { label: t.widgets.humidity.humid || "Humid", color: "text-sky-500" };
+    return { label: t.widgets.humidity.veryHumid || "Saturated", color: "text-indigo-500" };
   };
 
   const comfort = getComfortLevel(humidity);
@@ -40,11 +42,11 @@ export function HumidityWidget({ humidity, tempC, unit }: HumidityWidgetProps) {
           <div className="flex items-center gap-2">
             <Droplets className="size-3.5 text-sky-500" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Humidity & Thermal Comfort
+              {t.widgets.humidity.title}
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            Relative moisture content and dewpoint
+            {t.widgets.humidity.subtitle}
           </CardDescription>
         </div>
         <Badge variant="outline" className={`font-mono text-tiny ${comfort.color}`}>
@@ -62,7 +64,7 @@ export function HumidityWidget({ humidity, tempC, unit }: HumidityWidgetProps) {
           </div>
 
           <div className="text-right text-xs font-mono">
-            <span className="text-muted-foreground">Dew Point: </span>
+            <span className="text-muted-foreground">{t.widgets.humidity.dewPoint}: </span>
             <span className="font-bold text-foreground">
               <NumberFlow value={displayDewPoint} />°{unit}
             </span>

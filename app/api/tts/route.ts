@@ -44,6 +44,11 @@ export async function POST(request: NextRequest) {
             ? "MALE"
             : ssmlGender || "FEMALE";
 
+        // Extract full BCP-47 locale from voiceName if present (e.g. "en-US-Studio-Q" -> "en-US")
+        const voiceLocale = voiceName.includes("-")
+          ? voiceName.split("-").slice(0, 2).join("-")
+          : languageCode || "en-US";
+
         const cloudRes = await fetch(cloudUrl, {
           method: "POST",
           headers: {
@@ -52,7 +57,7 @@ export async function POST(request: NextRequest) {
           body: JSON.stringify({
             input: { text: trimmedText },
             voice: {
-              languageCode: languageCode || "en-US",
+              languageCode: voiceLocale,
               name: voiceName,
               ssmlGender: mappedGender,
             },

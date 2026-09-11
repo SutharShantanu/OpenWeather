@@ -15,6 +15,7 @@ import { WeatherIcon } from "@/components/weather-icon";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/components/language-provider";
 
 interface HourlyForecastProps {
   hourly: HourlyForecastItem[];
@@ -22,6 +23,7 @@ interface HourlyForecastProps {
 }
 
 export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
+  const { t, translateCondition } = useTranslation();
   const [showChart, setShowChart] = useState(false);
   const [hoursLimit, setHoursLimit] = useState<24 | 48>(24);
 
@@ -43,14 +45,14 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
           <div className="flex items-center gap-2">
             <Clock className="size-3.5 text-primary" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Hourly Trajectory
+              {t.forecast.hourlyTitle}
             </CardTitle>
             <Badge variant="outline" className="text-tiny font-mono">
               1-Hour Precision
             </Badge>
           </div>
           <CardDescription className="text-xs">
-            Chronological thermal, precipitation and wind sequence
+            {t.forecast.hourlyDesc}
           </CardDescription>
         </div>
 
@@ -114,10 +116,10 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
                           <div className="text-primary font-bold">{data.temp}°{unit}</div>
-                          <div className="text-tiny text-muted-foreground">Precip: {data.pop}%</div>
-                          <div className="text-tiny text-muted-foreground">Wind: {data.wind} m/s</div>
+                          <div className="text-tiny text-muted-foreground">{t.common.precip}: {data.pop}%</div>
+                          <div className="text-tiny text-muted-foreground">{t.hero.wind}: {data.wind} m/s</div>
                           {data.uv > 0 && (
-                            <div className="text-tiny text-amber-500">UV: {data.uv}</div>
+                            <div className="text-tiny text-amber-500">{t.hero.uvIndex}: {data.uv}</div>
                           )}
                         </div>
                       );

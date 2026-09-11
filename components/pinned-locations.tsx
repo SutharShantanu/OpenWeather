@@ -8,6 +8,7 @@ import { WeatherIcon } from "@/components/weather-icon";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/components/language-provider";
 
 interface PinnedLocationsProps {
   pinnedCities: string[];
@@ -22,6 +23,7 @@ export function PinnedLocations({
   onSelectCity,
   onUnpinCity,
 }: PinnedLocationsProps) {
+  const { language, translateCondition } = useTranslation();
   const [cityData, setCityData] = useState<Record<string, CurrentWeather>>({});
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export function PinnedLocations({
     Promise.all(
       pinnedCities.map(async (city) => {
         try {
-          const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
+          const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}&lang=${encodeURIComponent(language || "en")}`);
           if (res.ok) {
             const data = await res.json();
             return { city, weather: data.current as CurrentWeather };
@@ -56,7 +58,7 @@ export function PinnedLocations({
     return () => {
       isMounted = false;
     };
-  }, [pinnedCities]);
+  }, [pinnedCities, language]);
 
   if (pinnedCities.length === 0) {
     return null;
@@ -101,7 +103,7 @@ export function PinnedLocations({
                       <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </h4>
                     <p className="text-mini text-muted-foreground capitalize">
-                      {weather?.condition.description || "Loading telemetry…"}
+                      {weather?.condition.description ? translateCondition(weather.condition.description) : "Loading telemetry…"}
                     </p>
                   </div>
 

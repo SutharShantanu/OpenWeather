@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/components/language-provider";
 import {
   Play,
   Pause,
@@ -58,6 +59,7 @@ export function EmbeddedRadarCard({
   heightClass = "h-[360px]",
   onExpand,
 }: EmbeddedRadarCardProps) {
+  const { t } = useTranslation();
   const [radarFrames, setRadarFrames] = useState<RadarFrame[]>([]);
   const [currentFrameIndex, setCurrentFrameIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -133,7 +135,7 @@ export function EmbeddedRadarCard({
           <div className="flex items-center gap-2">
             <CloudRain className="size-3.5 text-primary" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight flex items-center gap-2">
-              <span>Doppler Radar & Atmospheric Layers</span>
+              <span>{t.tabs.radar}</span>
               <Badge variant="outline" className="text-tiny font-mono">
                 {cityName}
               </Badge>

@@ -23,6 +23,7 @@ import { WeatherIcon } from "@/components/weather-icon";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/components/language-provider";
 
 interface WeatherHeroProps {
   current: CurrentWeather;
@@ -37,6 +38,7 @@ export function WeatherHero({
   isPinned,
   onTogglePin,
 }: WeatherHeroProps) {
+  const { t, translateCondition } = useTranslation();
   const displayTemp = formatTemperature(current.temp, unit);
   const displayFeelsLike = formatTemperature(current.feelsLike, unit);
   const displayMin = formatTemperature(current.tempMin, unit);
@@ -71,7 +73,7 @@ export function WeatherHero({
               </span>
             </Badge>
             <Badge variant="secondary" className="font-mono text-tiny">
-              {current.country || "Station Telemetry"}
+              {current.country || t.common.stationTelemetry}
             </Badge>
             {uvClass && (
               <Badge variant="outline" className={`font-mono text-tiny ${uvClass.color}`}>
@@ -79,7 +81,7 @@ export function WeatherHero({
               </Badge>
             )}
             <span className="text-tiny font-mono text-muted-foreground hidden sm:inline">
-              Synoptic Time: {localTime}
+              {t.common.synopticTime}: {localTime}
             </span>
           </div>
 
@@ -88,10 +90,10 @@ export function WeatherHero({
           </CardTitle>
 
           <CardDescription className="capitalize flex items-center gap-1.5">
-            <span>{current.condition.description}</span>
+            <span>{translateCondition(current.condition.description)}</span>
             <span>•</span>
             <span>
-              Feels like{" "}
+              {t.common.feelsLike}{" "}
               <span className="font-mono font-semibold text-foreground">
                 <NumberFlow value={displayFeelsLike} />°{unit}
               </span>
@@ -105,17 +107,17 @@ export function WeatherHero({
             size="sm"
             onClick={handleShare}
             className="font-mono text-xs gap-1.5"
-            title="Share Station Deep Link (Copies Current URL)"
+            title={t.common.shareStation}
           >
             {copied ? (
               <>
                 <Check className="size-3.5 text-emerald-500" />
-                <span className="text-emerald-500">COPIED</span>
+                <span className="text-emerald-500">{t.common.copied}</span>
               </>
             ) : (
               <>
                 <Share2 className="size-3.5 text-muted-foreground" />
-                <span>SHARE</span>
+                <span className="uppercase">{t.common.shareStation}</span>
               </>
             )}
           </Button>
@@ -126,7 +128,7 @@ export function WeatherHero({
             className="font-mono text-xs gap-1.5"
           >
             {isPinned ? <BookmarkCheck className="size-3.5 text-primary" /> : <Bookmark className="size-3.5" />}
-            <span>{isPinned ? "PINNED" : "PIN STATION"}</span>
+            <span className="uppercase">{isPinned ? t.common.saved : t.common.save}</span>
           </Button>
         </CardAction>
       </CardHeader>
@@ -151,14 +153,14 @@ export function WeatherHero({
             <div className="flex flex-col gap-1 text-xs font-mono text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <ArrowDown className="size-3 text-sky-500" />
-                <span>Min: </span>
+                <span>{t.hero.min}: </span>
                 <span className="font-semibold text-foreground">
                   <NumberFlow value={displayMin} />°{unit}
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <ArrowUp className="size-3 text-amber-500" />
-                <span>Max: </span>
+                <span>{t.hero.max}: </span>
                 <span className="font-semibold text-foreground">
                   <NumberFlow value={displayMax} />°{unit}
                 </span>
@@ -174,7 +176,7 @@ export function WeatherHero({
               <Droplets className="size-3.5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-tiny font-mono text-muted-foreground uppercase">Humidity</span>
+              <span className="text-tiny font-mono text-muted-foreground uppercase">{t.hero.humidity}</span>
               <span className="text-sm font-mono font-semibold text-foreground">
                 <NumberFlow value={current.humidity} />%
               </span>
@@ -186,7 +188,7 @@ export function WeatherHero({
               <Wind className="size-3.5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-tiny font-mono text-muted-foreground uppercase">Wind Velocity</span>
+              <span className="text-tiny font-mono text-muted-foreground uppercase">{t.hero.wind}</span>
               <span className="text-sm font-mono font-semibold text-foreground">
                 <NumberFlow value={current.windSpeed} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} /> m/s
               </span>
@@ -198,7 +200,7 @@ export function WeatherHero({
               <Gauge className="size-3.5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-tiny font-mono text-muted-foreground uppercase">Barometer</span>
+              <span className="text-tiny font-mono text-muted-foreground uppercase">{t.hero.barometer}</span>
               <span className="text-sm font-mono font-semibold text-foreground">
                 <NumberFlow value={current.pressure} /> hPa
               </span>
@@ -210,7 +212,7 @@ export function WeatherHero({
               <Eye className="size-3.5" />
             </div>
             <div className="flex flex-col">
-              <span className="text-tiny font-mono text-muted-foreground uppercase">Visibility</span>
+              <span className="text-tiny font-mono text-muted-foreground uppercase">{t.hero.visibility}</span>
               <span className="text-sm font-mono font-semibold text-foreground">
                 <NumberFlow value={Math.round(current.visibility / 1000)} /> km
               </span>
@@ -224,7 +226,7 @@ export function WeatherHero({
             <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
                 <SunMedium className="size-3 text-amber-500" />
-                <span>UV INDEX</span>
+                <span className="uppercase">{t.hero.uvIndex}</span>
               </div>
               <span className="font-bold text-foreground">{current.uvIndex.toFixed(1)}</span>
             </div>
@@ -234,7 +236,7 @@ export function WeatherHero({
             <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
                 <Thermometer className="size-3 text-sky-500" />
-                <span>DEW POINT</span>
+                <span className="uppercase">{t.hero.dewPoint}</span>
               </div>
               <span className="font-bold text-foreground">{displayDewPoint}°{unit}</span>
             </div>
@@ -243,7 +245,7 @@ export function WeatherHero({
           <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
               <Cloud className="size-3 text-muted-foreground" />
-              <span>CLOUD COVER</span>
+              <span className="uppercase">{t.hero.clouds}</span>
             </div>
             <span className="font-bold text-foreground">{current.clouds}%</span>
           </div>
@@ -252,7 +254,7 @@ export function WeatherHero({
             <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
                 <Wind className="size-3 text-teal-500" />
-                <span>WIND GUSTS</span>
+                <span className="uppercase">{t.widgets.wind.gusts}</span>
               </div>
               <span className="font-bold text-foreground">{current.windGusts.toFixed(1)} m/s</span>
             </div>

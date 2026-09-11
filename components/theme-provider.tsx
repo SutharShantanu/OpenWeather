@@ -3,6 +3,29 @@
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
+// Suppress the React 19 / Next.js 16 script tag warning emitted by next-themes
+const globalObj = typeof window !== "undefined" ? window : globalThis
+if (
+  typeof console !== "undefined" &&
+  console.error &&
+  !(globalObj as any).__theme_script_suppressed__
+) {
+  ;(globalObj as any).__theme_script_suppressed__ = true
+  const originalError = console.error
+  console.error = (...args: unknown[]) => {
+    const isScriptTagWarning = args.some(
+      (arg) =>
+        typeof arg === "string" &&
+        (arg.includes("Encountered a script tag while rendering React component") ||
+          arg.includes("Scripts inside React components are never executed"))
+    )
+    if (isScriptTagWarning) {
+      return
+    }
+    originalError.apply(console, args)
+  }
+}
+
 function ThemeProvider({
   children,
   ...props

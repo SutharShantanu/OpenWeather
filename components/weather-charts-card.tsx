@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { HourlyForecastItem, formatTemperature } from "@/lib/weather";
 import { TrendingUp, CloudRain, Wind, Droplets, SunMedium } from "lucide-react";
+import { useTranslation } from "@/components/language-provider";
 
 interface WeatherChartsCardProps {
   hourly: HourlyForecastItem[];
@@ -33,6 +34,7 @@ interface WeatherChartsCardProps {
 }
 
 export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
+  const { t } = useTranslation();
   const [metric, setMetric] = useState<"temp" | "precip" | "wind" | "humidity" | "uv">("temp");
 
   const chartData = hourly.slice(0, 24).map((item) => ({
@@ -52,7 +54,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
           <div className="flex items-center gap-2">
             <TrendingUp className="size-3.5 text-primary" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Atmospheric Progression Analytics
+              {t.tabs.charts}
             </CardTitle>
             <Badge variant="outline" className="text-tiny font-mono">
               24-Hour Graph
@@ -82,7 +84,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
               className="gap-1 font-mono text-xs h-6 px-2"
             >
               <CloudRain className="size-3" />
-              <span>Precip</span>
+              <span>{t.common.precip}</span>
             </Button>
             <Button
               variant={metric === "wind" ? "default" : "ghost"}
@@ -91,7 +93,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
               className="gap-1 font-mono text-xs h-6 px-2"
             >
               <Wind className="size-3" />
-              <span>Wind</span>
+              <span>{t.hero.wind}</span>
             </Button>
             <Button
               variant={metric === "humidity" ? "default" : "ghost"}
@@ -100,7 +102,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
               className="gap-1 font-mono text-xs h-6 px-2"
             >
               <Droplets className="size-3" />
-              <span>Moisture</span>
+              <span>{t.hero.humidity}</span>
             </Button>
             <Button
               variant={metric === "uv" ? "default" : "ghost"}
@@ -109,7 +111,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
               className="gap-1 font-mono text-xs h-6 px-2"
             >
               <SunMedium className="size-3" />
-              <span>UV</span>
+              <span>{t.hero.uvIndex}</span>
             </Button>
           </div>
         </CardAction>

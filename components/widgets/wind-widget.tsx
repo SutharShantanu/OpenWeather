@@ -6,6 +6,7 @@ import { Wind, Navigation2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getBeaufortScale, getWindDirection } from "@/lib/weather";
+import { useTranslation } from "@/components/language-provider";
 
 interface WindWidgetProps {
   speed: number; // m/s
@@ -13,6 +14,7 @@ interface WindWidgetProps {
 }
 
 export function WindWidget({ speed, deg }: WindWidgetProps) {
+  const { t } = useTranslation();
   const kmh = Math.round(speed * 3.6);
   const direction = getWindDirection(deg);
   const beaufort = getBeaufortScale(speed);
@@ -24,11 +26,11 @@ export function WindWidget({ speed, deg }: WindWidgetProps) {
           <div className="flex items-center gap-2">
             <Wind className="size-3.5 text-teal-500" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Wind Vector & Dynamics
+              {t.widgets.wind.title}
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            Kinetic atmospheric velocity and angle
+            {t.widgets.wind.subtitle}
           </CardDescription>
         </div>
         <Badge variant="outline" className="font-mono text-tiny">

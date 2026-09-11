@@ -14,6 +14,7 @@ import {
   calculateMoonInfo,
   OPENWEATHER_API_KEY,
 } from "@/lib/weather";
+import { translateCondition } from "@/lib/translations";
 
 async function reverseGeocodeCoords(
   lat: number,
@@ -73,6 +74,7 @@ export async function GET(request: NextRequest) {
   const requestedStation = (searchParams.get("station") || "best_match") as ForecastStationModel;
   const customApiKey = searchParams.get("apiKey")?.trim() || "";
   const apiKey = customApiKey || OPENWEATHER_API_KEY;
+  const lang = searchParams.get("lang")?.trim() || "en";
 
   let resolvedLat = latParam ? parseFloat(latParam) : null;
   let resolvedLon = lonParam ? parseFloat(lonParam) : null;
@@ -94,7 +96,7 @@ export async function GET(request: NextRequest) {
     try {
       const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
         resolvedCity
-      )}&count=1&language=en&format=json`;
+      )}&count=1&language=${encodeURIComponent(lang)}&format=json`;
       const geoRes = await fetch(geoUrl, { next: { revalidate: 3600 } });
       if (geoRes.ok) {
         const geoJson = await geoRes.json();
@@ -154,7 +156,8 @@ export async function GET(request: NextRequest) {
       resolvedCountry,
       resolvedLat,
       resolvedLon,
-      requestedStation
+      requestedStation,
+      lang
     );
     if (openMeteoData) {
       return NextResponse.json(openMeteoData);
@@ -181,7 +184,8 @@ async function fetchOpenMeteo(
   resolvedCountry: string,
   resolvedLat: number,
   resolvedLon: number,
-  requestedStation: ForecastStationModel
+  requestedStation: ForecastStationModel,
+  lang: string = "en"
 ): Promise<WeatherData | null> {
   try {
     let weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${resolvedLat}&longitude=${resolvedLon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,surface_pressure,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timezone=auto&forecast_days=10&wind_speed_unit=ms`;
@@ -278,8 +282,8 @@ async function fetchOpenMeteo(
       dewPoint: currentDewPoint,
       condition: {
         type: cond.type,
-        main: cond.label,
-        description: cond.label.toLowerCase(),
+        main: translateCondition(cond.label, lang),
+        description: translateCondition(cond.label, lang),
         icon: "02d",
       },
       sunrise: sunriseTs,
@@ -312,7 +316,7 @@ async function fetchOpenMeteo(
         dewPoint: hourlyMeteo.dew_point_2m?.[i] ?? 10,
         cloudCover: hourlyMeteo.cloud_cover?.[i] ?? 20,
         conditionType: hCond.type,
-        description: hCond.label,
+        description: translateCondition(hCond.label, lang),
         pop: (hourlyMeteo.precipitation_probability?.[i] ?? 0) / 100,
       });
     }
@@ -342,7 +346,7 @@ async function fetchOpenMeteo(
         tempMin: dailyMeteo.temperature_2m_min[i],
         tempMax: dailyMeteo.temperature_2m_max[i],
         conditionType: dCond.type,
-        description: dCond.label,
+        description: translateCondition(dCond.label, lang),
         pop: (dailyMeteo.precipitation_probability_max?.[i] ?? 0) / 100,
         humidity: Math.round(hourlyMeteo.relative_humidity_2m?.[i * 24 + 12] ?? 60),
         windSpeed: parseFloat((dailyMeteo.wind_speed_10m_max?.[i] ?? 4).toFixed(1)),

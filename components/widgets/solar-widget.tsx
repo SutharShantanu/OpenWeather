@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoonInfo } from "@/lib/weather";
+import { useTranslation } from "@/components/language-provider";
 
 interface SolarWidgetProps {
   sunrise: number; // Unix seconds
@@ -15,6 +16,7 @@ interface SolarWidgetProps {
 }
 
 export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"sun" | "moon">("sun");
 
   const sunriseTime = new Date(sunrise * 1000).toLocaleTimeString([], {
@@ -32,13 +34,13 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
 
   const isDaylight = currentDt >= sunrise && currentDt <= sunset;
 
-  const t = Math.max(0, Math.min(1, progressRatio));
+  const curveT = Math.max(0, Math.min(1, progressRatio));
   const p0 = { x: 15, y: 75 };
   const p1 = { x: 100, y: 15 };
   const p2 = { x: 185, y: 75 };
 
-  const sunX = Math.round((1 - t) * (1 - t) * p0.x + 2 * (1 - t) * t * p1.x + t * t * p2.x);
-  const sunY = Math.round((1 - t) * (1 - t) * p0.y + 2 * (1 - t) * t * p1.y + t * t * p2.y);
+  const sunX = Math.round((1 - curveT) * (1 - curveT) * p0.x + 2 * (1 - curveT) * curveT * p1.x + curveT * curveT * p2.x);
+  const sunY = Math.round((1 - curveT) * (1 - curveT) * p0.y + 2 * (1 - curveT) * curveT * p1.y + curveT * curveT * p2.y);
 
   const daylightHours = Math.floor(totalDaylightSeconds / 3600);
   const daylightMinutes = Math.floor((totalDaylightSeconds % 3600) / 60);
@@ -60,11 +62,11 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
               <Moon className="size-3.5 text-indigo-400" />
             )}
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Celestial Ephemeris
+              {t.widgets.solar.title}
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            {activeTab === "sun" ? "Solar arc & diurnal cycle" : "Lunar phase & illumination"}
+            {activeTab === "sun" ? t.widgets.solar.subtitle : "Lunar phase & illumination"}
           </CardDescription>
         </div>
 
@@ -115,7 +117,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
               <div className="flex items-center gap-2.5 p-2 bg-muted/20 border border-border">
                 <Sunrise className="size-4 text-amber-500 shrink-0" />
                 <div className="flex flex-col">
-                  <span className="text-micro font-mono text-muted-foreground uppercase">Sunrise</span>
+                  <span className="text-micro font-mono text-muted-foreground uppercase">{t.widgets.solar.sunrise}</span>
                   <span className="text-xs font-mono font-bold text-foreground">{sunriseTime}</span>
                 </div>
               </div>
@@ -123,14 +125,14 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
               <div className="flex items-center gap-2.5 p-2 bg-muted/20 border border-border">
                 <Sunset className="size-4 text-indigo-400 shrink-0" />
                 <div className="flex flex-col">
-                  <span className="text-micro font-mono text-muted-foreground uppercase">Sunset</span>
+                  <span className="text-micro font-mono text-muted-foreground uppercase">{t.widgets.solar.sunset}</span>
                   <span className="text-xs font-mono font-bold text-foreground">{sunsetTime}</span>
                 </div>
               </div>
             </div>
 
             <div className="flex justify-between items-center text-tiny font-mono text-muted-foreground pt-1">
-              <span>Daylight: {daylightHours}h {daylightMinutes}m</span>
+              <span>{t.widgets.solar.dayLength}: {daylightHours}h {daylightMinutes}m</span>
               <Badge variant="outline" className="font-mono text-micro">
                 {isDaylight ? "Sun Above Horizon" : "Night Cycle"}
               </Badge>

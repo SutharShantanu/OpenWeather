@@ -9,6 +9,7 @@ import { generateWeatherBriefing, WeatherSpeechSynthesizer } from "@/lib/speech"
 
 import { cn } from "@/lib/utils";
 import type { ExtendedSettings } from "@/components/settings-dialog";
+import { useTranslation } from "@/components/language-provider";
 
 interface WeatherTtsButtonProps {
   current?: CurrentWeather;
@@ -27,6 +28,7 @@ export function WeatherTtsButton({
   settings,
   className,
 }: WeatherTtsButtonProps) {
+  const { t } = useTranslation();
   const [isPlaying, setIsPlaying] = useState(false);
   const [supported, setSupported] = useState(false);
 
@@ -43,7 +45,13 @@ export function WeatherTtsButton({
       return;
     }
 
-    const script = generateWeatherBriefing(current, daily, hourly, unit);
+    const script = generateWeatherBriefing(
+      current,
+      daily,
+      hourly,
+      unit,
+      settings?.language || "en"
+    );
     WeatherSpeechSynthesizer.speak(script, {
       rate: settings?.speechRate,
       pitch: settings?.googleTtsPitch,
@@ -74,23 +82,23 @@ export function WeatherTtsButton({
             isPlaying && "bg-primary text-primary-foreground animate-pulse",
             className
           )}
-          title={isPlaying ? "Stop Audio Briefing" : "Listen to Weather Briefing"}
+          title={isPlaying ? t.common.playing : t.common.briefing}
         >
           {isPlaying ? (
             <>
               <Square className="size-3 fill-current" />
-              <span className="hidden sm:inline text-mini">Speaking...</span>
+              <span className="hidden sm:inline text-mini">{t.common.playing}</span>
             </>
           ) : (
             <>
               <Volume2 className="size-3.5 text-primary" />
-              <span className="hidden sm:inline text-mini">Briefing</span>
+              <span className="hidden sm:inline text-mini">{t.common.briefing}</span>
             </>
           )}
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        {isPlaying ? "Click to Stop Audio Briefing" : "Listen to Spoken Weather Briefing"}
+        {isPlaying ? t.common.playing : t.common.briefing}
       </TooltipContent>
     </Tooltip>
   );

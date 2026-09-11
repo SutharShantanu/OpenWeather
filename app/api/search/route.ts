@@ -4,6 +4,7 @@ import { OPENWEATHER_API_KEY } from "@/lib/weather";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim();
+  const lang = searchParams.get("lang")?.trim() || "en";
 
   if (!q || q.length < 2) {
     return NextResponse.json({ results: [] });
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
   try {
     const openMeteoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
       q
-    )}&count=6&language=en&format=json`;
+    )}&count=6&language=${encodeURIComponent(lang)}&format=json`;
     const res = await fetch(openMeteoUrl, { next: { revalidate: 3600 } });
     if (res.ok) {
       const data = await res.json();

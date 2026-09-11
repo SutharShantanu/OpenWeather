@@ -30,6 +30,8 @@ import {
   ForecastStationModel,
 } from "@/lib/weather"
 import { generateWeatherBriefing, WeatherSpeechSynthesizer } from "@/lib/speech"
+import { LanguageProvider } from "@/components/language-provider"
+import { getTranslation } from "@/lib/translations"
 import { useLenis } from "@/components/lenis-provider"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -466,6 +468,7 @@ export default function WeatherDashboardPage() {
         }
         params.set("source", src)
         params.set("station", stn)
+        params.set("lang", settings.language || "en")
         if (apiKey) {
           params.set("apiKey", apiKey)
         }
@@ -495,6 +498,7 @@ export default function WeatherDashboardPage() {
       settings.weatherSource,
       settings.forecastStation,
       settings.customApiKey,
+      settings.language,
     ]
   )
 
@@ -511,6 +515,7 @@ export default function WeatherDashboardPage() {
     settings.weatherSource,
     settings.forecastStation,
     settings.customApiKey,
+    settings.language,
   ])
 
   // Automatic meteorological briefing with Google TTS on station load
@@ -725,139 +730,142 @@ export default function WeatherDashboardPage() {
     }
   }, [])
 
+  const t = getTranslation(settings.language || "en")
+
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground transition-colors duration-150">
-      <WeatherHeader
-        onSearch={handleSelectCity}
-        onLocate={handleLocate}
-        onHome={handleHome}
-        onOpenAiAdvisor={handleOpenAiAdvisor}
-        onChangeStation={() => handleOpenSettings("source")}
-        onOpenSettings={handleOpenSettings}
-        showNotifications={showNotifications}
-        onNotificationsOpenChange={handleNotificationsOpenChange}
-        current={weather?.current}
-        daily={weather?.daily}
-        hourly={weather?.hourly}
-        alerts={weather?.alerts}
-        unit={unit}
-        settings={settings}
-        isLoading={loading}
-      />
+    <LanguageProvider language={settings.language || "en"}>
+      <div className="flex min-h-screen flex-col bg-background text-foreground transition-colors duration-150">
+        <WeatherHeader
+          onSearch={handleSelectCity}
+          onLocate={handleLocate}
+          onHome={handleHome}
+          onOpenAiAdvisor={handleOpenAiAdvisor}
+          onChangeStation={() => handleOpenSettings("source")}
+          onOpenSettings={handleOpenSettings}
+          showNotifications={showNotifications}
+          onNotificationsOpenChange={handleNotificationsOpenChange}
+          current={weather?.current}
+          daily={weather?.daily}
+          hourly={weather?.hourly}
+          alerts={weather?.alerts}
+          unit={unit}
+          settings={settings}
+          isLoading={loading}
+        />
 
-      <main className="mx-auto w-full max-w-7xl flex-1 space-y-4 px-4 py-4 sm:px-6 lg:px-8">
-        {/* Status Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-2.5 font-mono text-xs text-muted-foreground">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="size-2 shrink-0 animate-pulse bg-emerald-500" />
-            <span className="font-semibold text-foreground uppercase">
-              Station Telemetry Active
-            </span>
-            <span>•</span>
-            <button
-              type="button"
-              onClick={() => handleOpenSettings("source")}
-              className="group inline-flex cursor-pointer items-center gap-1.5 text-left uppercase transition-colors hover:text-foreground"
-              title="Click to choose weather data source & forecast station"
-            >
-              <span className="text-muted-foreground group-hover:text-foreground">
-                Source:{" "}
-                <strong className="text-foreground">
-                  {weather?.providerName ||
-                    (weather?.dataSource === "LIVE_API"
-                      ? "Open-Meteo"
-                      : "Simulated Sensor")}
-                </strong>
-                {weather?.stationName && (
-                  <span className="ml-1 font-semibold text-primary">
-                    [{weather.stationName}]
-                  </span>
-                )}
+        <main className="mx-auto w-full max-w-7xl flex-1 space-y-4 px-4 py-4 sm:px-6 lg:px-8">
+          {/* Status Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-2.5 font-mono text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="size-2 shrink-0 animate-pulse bg-emerald-500" />
+              <span className="font-semibold text-foreground uppercase">
+                {t.common.stationTelemetryActive}
               </span>
-              <span className="border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                CHANGE
-              </span>
-            </button>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => handleOpenSettings("source")}
+                className="group inline-flex cursor-pointer items-center gap-1.5 text-left uppercase transition-colors hover:text-foreground"
+                title="Click to choose weather data source & forecast station"
+              >
+                <span className="text-muted-foreground group-hover:text-foreground">
+                  {t.common.source}:{" "}
+                  <strong className="text-foreground">
+                    {weather?.providerName ||
+                      (weather?.dataSource === "LIVE_API"
+                        ? "Open-Meteo"
+                        : "Simulated Sensor")}
+                  </strong>
+                  {weather?.stationName && (
+                    <span className="ml-1 font-semibold text-primary">
+                      [{weather.stationName}]
+                    </span>
+                  )}
+                </span>
+                <span className="border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  {t.common.change}
+                </span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={() => fetchWeather(city, coords || undefined)}
+                disabled={loading}
+                className="gap-1.5 font-mono text-xs"
+              >
+                <RefreshCw
+                  className={`size-3 ${loading ? "animate-spin text-primary" : ""}`}
+                />
+                <span>{t.common.refresh}</span>
+              </Button>
+              <Badge variant="outline" className="font-mono text-tiny">
+                <Radio className="mr-1 size-2.5 text-primary" />
+                1013.25 hPa
+              </Badge>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => fetchWeather(city, coords || undefined)}
-              disabled={loading}
-              className="gap-1.5 font-mono text-xs"
-            >
-              <RefreshCw
-                className={`size-3 ${loading ? "animate-spin text-primary" : ""}`}
-              />
-              <span>Refresh</span>
-            </Button>
-            <Badge variant="outline" className="font-mono text-tiny">
-              <Radio className="mr-1 size-2.5 text-primary" />
-              1013.25 hPa
-            </Badge>
-          </div>
-        </div>
+          {/* Inline Active Weather Advisories Banner */}
+          {weather && !loading && (
+            <InlineAlertBanner
+              current={weather.current}
+              alerts={weather.alerts}
+            />
+          )}
 
-        {/* Inline Active Weather Advisories Banner */}
-        {weather && !loading && (
-          <InlineAlertBanner
-            current={weather.current}
-            alerts={weather.alerts}
-          />
-        )}
-
-        {/* MSN Weather Navigation Tabs */}
-        <Tabs
-          value={activeTab}
-          onValueChange={handleTabChange}
-          className="w-full space-y-4"
-        >
-          <TabsList className="h-9 w-full [scrollbar-width:none] justify-start overflow-x-auto overflow-y-hidden border-b border-border bg-transparent p-0 [&::-webkit-scrollbar]:hidden">
-            <TabsTrigger
-              value="overview"
-              className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
-            >
-              <LayoutGrid className="size-3.5" />
-              <span>Overview</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="charts"
-              className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
-            >
-              <TrendingUp className="size-3.5" />
-              <span>Graphs & Trends</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="radar"
-              className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
-            >
-              <CloudRain className="size-3.5" />
-              <span>Radar & Satellite</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="air-quality"
-              className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
-            >
-              <Sparkles className="size-3.5" />
-              <span>Air Quality & Health</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="climate"
-              className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
-            >
-              <History className="size-3.5" />
-              <span>Historical & Climate</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="compare"
-              className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
-            >
-              <ArrowRightLeft className="size-3.5" />
-              <span>Station Comparison</span>
-            </TabsTrigger>
-          </TabsList>
+          {/* MSN Weather Navigation Tabs */}
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full space-y-4"
+          >
+            <TabsList className="h-9 w-full [scrollbar-width:none] justify-start overflow-x-auto overflow-y-hidden border-b border-border bg-transparent p-0 [&::-webkit-scrollbar]:hidden">
+              <TabsTrigger
+                value="overview"
+                className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
+              >
+                <LayoutGrid className="size-3.5" />
+                <span>{t.tabs.overview}</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="charts"
+                className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
+              >
+                <TrendingUp className="size-3.5" />
+                <span>{t.tabs.charts}</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="radar"
+                className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
+              >
+                <CloudRain className="size-3.5" />
+                <span>{t.tabs.radar}</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="air-quality"
+                className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
+              >
+                <Sparkles className="size-3.5" />
+                <span>{t.tabs.airQuality}</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="climate"
+                className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
+              >
+                <History className="size-3.5" />
+                <span>{t.tabs.climate}</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="compare"
+                className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
+              >
+                <ArrowRightLeft className="size-3.5" />
+                <span>{t.tabs.compare}</span>
+              </TabsTrigger>
+            </TabsList>
 
           {/* TAB 1: OVERVIEW */}
           <TabsContent
@@ -1110,6 +1118,9 @@ export default function WeatherDashboardPage() {
         onAddPinnedCity={handleAddPinnedCity}
         onRemovePinnedCity={handleRemovePinnedCity}
         onSelectCity={handleSelectCity}
+        currentTemp={weather?.current?.temp}
+        city={city}
+        coords={coords}
       />
 
       {/* Footer */}
@@ -1117,5 +1128,6 @@ export default function WeatherDashboardPage() {
         <p>OpenWeather Precision Meteorological Console</p>
       </footer>
     </div>
-  )
+  </LanguageProvider>
+)
 }

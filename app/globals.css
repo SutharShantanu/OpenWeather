@@ -92,6 +92,7 @@
 }
 
 @theme {
+    --breakpoint-xs: 30rem;
     --text-mini: 0.6875rem;
     --text-mini--line-height: calc(0.9375 / 0.6875);
     --text-tiny: 0.625rem;

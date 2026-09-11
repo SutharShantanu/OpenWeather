@@ -7,6 +7,7 @@ import { DailyForecastItem, formatTemperature } from "@/lib/weather";
 import { WeatherIcon } from "@/components/weather-icon";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/components/language-provider";
 
 interface DailyForecastProps {
   daily: DailyForecastItem[];
@@ -14,11 +15,16 @@ interface DailyForecastProps {
 }
 
 export function DailyForecast({ daily, unit }: DailyForecastProps) {
+  const { t, translateCondition, translateDay } = useTranslation();
   const allMins = daily.map((d) => formatTemperature(d.tempMin, unit));
   const allMaxs = daily.map((d) => formatTemperature(d.tempMax, unit));
   const globalMin = Math.min(...allMins);
   const globalMax = Math.max(...allMaxs);
   const spreadRange = Math.max(1, globalMax - globalMin);
+
+  const titleText = t.forecast.dailyTitle.includes("{n}")
+    ? t.forecast.dailyTitle.replace("{n}", String(daily.length))
+    : `${daily.length} ${t.forecast.dailyTitle}`;
 
   return (
     <Card className="w-full h-full">
@@ -27,15 +33,15 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
           <div className="flex items-center gap-2">
             <Calendar className="size-3.5 text-primary" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              {daily.length}-Day Meteorological Outlook
+              {titleText}
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            Extended synoptic outlook & thermal trajectory
+            {t.forecast.dailyDesc}
           </CardDescription>
         </div>
         <Badge variant="outline" className="text-tiny font-mono">
-          10-Day Synoptic
+          {t.forecast.tenDayOutlook}
         </Badge>
       </CardHeader>
 
@@ -56,7 +62,7 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
               {/* Day Name & Precip */}
               <div className="w-24 sm:w-28 flex flex-col shrink-0">
                 <span className="text-xs font-mono font-bold text-foreground">
-                  {day.day}
+                  {translateDay(day.day)}
                 </span>
                 {popPercent > 10 ? (
                   <span className="flex items-center gap-1 text-tiny font-mono text-sky-500 font-semibold">
@@ -64,7 +70,7 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
                     {popPercent}%
                   </span>
                 ) : (
-                  <span className="text-tiny font-mono text-muted-foreground">0% precip</span>
+                  <span className="text-tiny font-mono text-muted-foreground">0% {t.common.precip}</span>
                 )}
               </div>
 
@@ -74,7 +80,7 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
                   <WeatherIcon type={day.conditionType} size={15} />
                 </div>
                 <span className="text-xs text-muted-foreground truncate hidden sm:inline capitalize">
-                  {day.description}
+                  {translateCondition(day.description)}
                 </span>
                 {day.uvIndexMax !== undefined && (
                   <span className="hidden md:flex items-center gap-0.5 text-micro font-mono text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1 py-0.5">

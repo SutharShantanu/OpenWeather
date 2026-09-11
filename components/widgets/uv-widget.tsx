@@ -5,6 +5,7 @@ import { SunMedium, ShieldAlert, Clock, Sparkles } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getUvClassification } from "@/lib/weather";
+import { useTranslation } from "@/components/language-provider";
 
 interface UvWidgetProps {
   uvIndex?: number;
@@ -12,6 +13,7 @@ interface UvWidgetProps {
 }
 
 export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
+  const { t } = useTranslation();
   const currentVal = Math.max(0, uvIndex);
   const maxVal = Math.max(currentVal, uvMax);
   const classification = getUvClassification(currentVal);
@@ -35,11 +37,11 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
           <div className="flex items-center gap-2">
             <SunMedium className="size-3.5 text-amber-500" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Ultraviolet Index
+              {t.widgets.uv.title}
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            Solar radiation intensity & photoprotection
+            {t.widgets.uv.subtitle}
           </CardDescription>
         </div>
         <Badge variant="outline" className={`font-mono text-tiny ${classification.color}`}>

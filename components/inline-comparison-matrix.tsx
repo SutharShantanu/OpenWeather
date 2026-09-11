@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { CurrentWeather, formatTemperature } from "@/lib/weather";
 import { WeatherIcon } from "@/components/weather-icon";
+import { useTranslation } from "@/components/language-provider";
 
 interface InlineComparisonMatrixProps {
   baseCurrent: CurrentWeather;
@@ -46,6 +47,7 @@ export function InlineComparisonMatrix({
   unit,
   onSwitchCity,
 }: InlineComparisonMatrixProps) {
+  const { t, language, translateCondition } = useTranslation();
   const [targetCity, setTargetCity] = useState("Tokyo");
   const [targetWeather, setTargetWeather] = useState<CurrentWeather | null>(null);
   const [loading, setLoading] = useState(false);
@@ -54,7 +56,7 @@ export function InlineComparisonMatrix({
     let isMounted = true;
     setLoading(true);
 
-    fetch(`/api/weather?city=${encodeURIComponent(targetCity)}`)
+    fetch(`/api/weather?city=${encodeURIComponent(targetCity)}&lang=${encodeURIComponent(language || "en")}`)
       .then((res) => res.json())
       .then((data) => {
         if (isMounted && data.current) {
@@ -69,7 +71,7 @@ export function InlineComparisonMatrix({
     return () => {
       isMounted = false;
     };
-  }, [targetCity]);
+  }, [targetCity, language]);
 
   const baseTemp = formatTemperature(baseCurrent.temp, unit);
   const targetTemp = targetWeather ? formatTemperature(targetWeather.temp, unit) : 0;
@@ -109,7 +111,7 @@ export function InlineComparisonMatrix({
           <div className="flex items-center gap-2">
             <ArrowRightLeft className="size-3.5 text-primary" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Comparative Station Telemetry Matrix
+              {t.tabs.compare}
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
@@ -148,7 +150,7 @@ export function InlineComparisonMatrix({
               </div>
               <h3 className="text-base font-heading font-semibold text-foreground">{baseCurrent.cityName}</h3>
               <p className="text-xs text-muted-foreground capitalize">
-                {baseCurrent.condition.description}
+                {translateCondition(baseCurrent.condition.description)}
               </p>
             </div>
 
@@ -173,7 +175,7 @@ export function InlineComparisonMatrix({
                 {targetWeather?.cityName || targetCity}
               </h3>
               <p className="text-xs text-muted-foreground capitalize">
-                {loading ? "Syncing telemetry…" : targetWeather?.condition.description || "Connected"}
+                {loading ? "Syncing telemetry…" : targetWeather?.condition.description ? translateCondition(targetWeather.condition.description) : "Connected"}
               </p>
             </div>
 
