@@ -193,42 +193,107 @@ export interface WeatherDataProviderInfo {
   status: "active" | "ready";
   requiresApiKey: boolean;
   description: string;
+  badge?: string;
+  latencyMs?: number;
 }
 
-export const WEATHER_DATA_PROVIDERS: WeatherDataProviderInfo[] = [
-  {
-    id: "open-meteo",
-    name: "Open-Meteo High-Resolution",
-    provider: "Open-Meteo GmbH & WMO Consensus",
-    status: "active",
-    requiresApiKey: false,
-    description: "10-day outlook, 1-hour resolution, hourly UV & air quality. No API key required.",
-  },
-  {
-    id: "openweathermap",
-    name: "OpenWeatherMap Live API",
-    provider: "OpenWeather Ltd (OWM 2.5)",
-    status: "ready",
-    requiresApiKey: true,
-    description: "Global weather station network, 5-day forecast, air pollution telemetry.",
-  },
-  {
-    id: "simulation",
-    name: "Autonomous Synoptic Simulator",
-    provider: "Local Mathematical Physics Engine",
-    status: "ready",
-    requiresApiKey: false,
-    description: "Deterministic atmospheric modeling for offline testing and calibration.",
-  },
-  {
-    id: "auto",
-    name: "Auto Consensus & Failover",
-    provider: "Dynamic Multi-Engine Failover",
-    status: "active",
-    requiresApiKey: false,
-    description: "Attempts Open-Meteo with chosen station model, then OWM, then simulator.",
-  },
+export interface ProviderConfigOptions {
+  customApiKey?: string;
+  isOnline?: boolean;
+}
+
+/**
+ * Dynamically builds a WeatherDataProviderInfo instance based on live configuration:
+ * 1. Checks API key presence for OpenWeatherMap (custom or environment)
+ * 2. Inspects browser/system online connectivity (navigator.onLine)
+ * 3. Dynamically computes operational status and active failover chains
+ */
+export function buildWeatherProvider(
+  id: WeatherDataSource,
+  options?: ProviderConfigOptions
+): WeatherDataProviderInfo {
+  const isOnline =
+    options?.isOnline ?? (typeof navigator !== "undefined" ? navigator.onLine : true);
+  const hasOwmKey = Boolean(
+    options?.customApiKey?.trim() ||
+      (typeof process !== "undefined" && process.env?.OPENWEATHER_API_KEY)
+  );
+
+  switch (id) {
+    case "open-meteo":
+      return {
+        id: "open-meteo",
+        name: "Open-Meteo High-Resolution",
+        provider: "Open-Meteo GmbH & WMO Consensus",
+        status: isOnline ? "active" : "ready",
+        requiresApiKey: false,
+        description: isOnline
+          ? "10-day outlook, 1-hour resolution, hourly UV & air quality. Free open telemetry."
+          : "Offline mode detected. Telemetry cached until network reconnection.",
+        badge: isOnline ? "Keyless • Active" : "Offline",
+      };
+
+    case "openweathermap":
+      return {
+        id: "openweathermap",
+        name: "OpenWeatherMap Live API",
+        provider: "OpenWeather Ltd (OWM 2.5)",
+        status: hasOwmKey && isOnline ? "active" : "ready",
+        requiresApiKey: !hasOwmKey,
+        description: hasOwmKey
+          ? "Authenticated with API Key. Global synoptic stations, 5-day forecast, air pollution telemetry."
+          : "Global weather station network, 5-day forecast, air pollution telemetry. Requires API Key.",
+        badge: hasOwmKey ? "Key Configured" : "API Key Required",
+      };
+
+    case "simulation":
+      return {
+        id: "simulation",
+        name: "Autonomous Synoptic Simulator",
+        provider: "Local Mathematical Physics Engine",
+        status: !isOnline ? "active" : "ready",
+        requiresApiKey: false,
+        description: !isOnline
+          ? "Primary active offline engine synthesizing barometric and atmospheric telemetry."
+          : "Deterministic atmospheric modeling for offline testing, calibration, and zero-latency simulation.",
+        badge: !isOnline ? "Primary Engine" : "Zero Quota",
+      };
+
+    case "auto":
+    default: {
+      const activeEngines = [
+        isOnline ? "Open-Meteo" : null,
+        hasOwmKey && isOnline ? "OpenWeatherMap" : null,
+        "Simulator",
+      ].filter(Boolean);
+
+      return {
+        id: "auto",
+        name: "Auto Consensus & Failover",
+        provider: "Dynamic Multi-Engine Failover",
+        status: "active",
+        requiresApiKey: false,
+        description: `Automated multi-engine consensus: Cascades ${activeEngines.join(" → ")}.`,
+        badge: "Smart Failover",
+      };
+    }
+  }
+}
+
+export const WEATHER_PROVIDER_IDS: WeatherDataSource[] = [
+  "open-meteo",
+  "openweathermap",
+  "simulation",
+  "auto",
 ];
+
+export function getWeatherDataProviders(
+  options?: ProviderConfigOptions
+): WeatherDataProviderInfo[] {
+  return WEATHER_PROVIDER_IDS.map((id) => buildWeatherProvider(id, options));
+}
+
+export const WEATHER_DATA_PROVIDERS: WeatherDataProviderInfo[] = getWeatherDataProviders();
 
 export interface WeatherData {
   current: CurrentWeather;

@@ -400,14 +400,323 @@ export const GOOGLE_TTS_VOICES: GoogleTtsVoiceInfo[] = [
     accent: "日本語",
     description: "落ち着いたニュース解説風",
   },
+
+  // Italian
+  {
+    id: "it-IT-Neural2-A",
+    name: "Neural2 A (Femminile)",
+    model: "Neural2",
+    languageCode: "it",
+    gender: "FEMALE",
+    accent: "Italiano",
+    description: "Voce fluida per previsioni meteo",
+  },
+  {
+    id: "it-IT-Neural2-C",
+    name: "Neural2 C (Maschile)",
+    model: "Neural2",
+    languageCode: "it",
+    gender: "MALE",
+    accent: "Italiano",
+    description: "Voce radiofonica chiara e precisa",
+  },
+  {
+    id: "it-IT-Standard-A",
+    name: "Standard A (Femminile)",
+    model: "Standard",
+    languageCode: "it",
+    gender: "FEMALE",
+    accent: "Italiano",
+    description: "Sintesi standard per bollettini",
+  },
+
+  // Portuguese (Brazil)
+  {
+    id: "pt-BR-Journey-F",
+    name: "Journey F (Feminino)",
+    model: "Journey",
+    languageCode: "pt",
+    gender: "FEMALE",
+    accent: "Português Brasil",
+    description: "Voz calorosa e expressiva para previsão",
+  },
+  {
+    id: "pt-BR-Neural2-A",
+    name: "Neural2 A (Feminino)",
+    model: "Neural2",
+    languageCode: "pt",
+    gender: "FEMALE",
+    accent: "Português Brasil",
+    description: "Pronúncia nítida para notícias meteorológicas",
+  },
+  {
+    id: "pt-BR-Neural2-B",
+    name: "Neural2 B (Masculino)",
+    model: "Neural2",
+    languageCode: "pt",
+    gender: "MALE",
+    accent: "Português Brasil",
+    description: "Tom firme e profissional",
+  },
+
+  // Russian
+  {
+    id: "ru-RU-Neural2-C",
+    name: "Neural2 C (Женский)",
+    model: "Neural2",
+    languageCode: "ru",
+    gender: "FEMALE",
+    accent: "Русский",
+    description: "Четкое метеорологическое звучание",
+  },
+  {
+    id: "ru-RU-Neural2-D",
+    name: "Neural2 D (Мужской)",
+    model: "Neural2",
+    languageCode: "ru",
+    gender: "MALE",
+    accent: "Русский",
+    description: "Уверенный дикторский голос",
+  },
+  {
+    id: "ru-RU-Standard-C",
+    name: "Standard C (Женский)",
+    model: "Standard",
+    languageCode: "ru",
+    gender: "FEMALE",
+    accent: "Русский",
+    description: "Быстрый синтез синоптической сводки",
+  },
+
+  // Korean
+  {
+    id: "ko-KR-Neural2-A",
+    name: "Neural2 A (여성)",
+    model: "Neural2",
+    languageCode: "ko",
+    gender: "FEMALE",
+    accent: "한국어",
+    description: "자연스럽고 부드러운 기상 예보",
+  },
+  {
+    id: "ko-KR-Neural2-B",
+    name: "Neural2 B (여성)",
+    model: "Neural2",
+    languageCode: "ko",
+    gender: "FEMALE",
+    accent: "한국어",
+    description: "명확한 전달력의 아나운서 톤",
+  },
+  {
+    id: "ko-KR-Neural2-C",
+    name: "Neural2 C (남성)",
+    model: "Neural2",
+    languageCode: "ko",
+    gender: "MALE",
+    accent: "한국어",
+    description: "신뢰감 있는 남성 내레이션",
+  },
+
+  // Chinese (Mandarin)
+  {
+    id: "cmn-CN-Neural2-A",
+    name: "Neural2 A (女声)",
+    model: "Neural2",
+    languageCode: "zh",
+    gender: "FEMALE",
+    accent: "普通话",
+    description: "清晰流畅的气象广播",
+  },
+  {
+    id: "cmn-CN-Neural2-B",
+    name: "Neural2 B (男声)",
+    model: "Neural2",
+    languageCode: "zh",
+    gender: "MALE",
+    accent: "普通话",
+    description: "沉稳专业的新闻配音",
+  },
+  {
+    id: "cmn-CN-Neural2-C",
+    name: "Neural2 C (男声)",
+    model: "Neural2",
+    languageCode: "zh",
+    gender: "MALE",
+    accent: "普通话",
+    description: "权威气象台专职音色",
+  },
+
+  // Arabic
+  {
+    id: "ar-XA-Neural2-A",
+    name: "Neural2 A (أنثى)",
+    model: "Neural2",
+    languageCode: "ar",
+    gender: "FEMALE",
+    accent: "العربية الفصحى",
+    description: "نبرة إذاعية واضحة ومخارج دقيقة",
+  },
+  {
+    id: "ar-XA-Neural2-B",
+    name: "Neural2 B (ذكر)",
+    model: "Neural2",
+    languageCode: "ar",
+    gender: "MALE",
+    accent: "العربية الفصحى",
+    description: "صوت إخباري جهوري ورصين",
+  },
+
+  // Dutch
+  {
+    id: "nl-NL-Neural2-A",
+    name: "Neural2 A (Vrouwelijk)",
+    model: "Neural2",
+    languageCode: "nl",
+    gender: "FEMALE",
+    accent: "Nederlands",
+    description: "Natuurlijke stem voor weersverwachting",
+  },
+  {
+    id: "nl-NL-Neural2-B",
+    name: "Neural2 B (Mannelijk)",
+    model: "Neural2",
+    languageCode: "nl",
+    gender: "MALE",
+    accent: "Nederlands",
+    description: "Helder radiostudio bericht",
+  },
+
+  // Turkish
+  {
+    id: "tr-TR-Neural2-A",
+    name: "Neural2 A (Kadın)",
+    model: "Neural2",
+    languageCode: "tr",
+    gender: "FEMALE",
+    accent: "Türkçe",
+    description: "Net ve doğal hava durumu sunumu",
+  },
+  {
+    id: "tr-TR-Neural2-B",
+    name: "Neural2 B (Erkek)",
+    model: "Neural2",
+    languageCode: "tr",
+    gender: "MALE",
+    accent: "Türkçe",
+    description: "Otoriter radyo spikeri tonu",
+  },
+
+  // Polish
+  {
+    id: "pl-PL-Neural2-A",
+    name: "Neural2 A (Żeński)",
+    model: "Neural2",
+    languageCode: "pl",
+    gender: "FEMALE",
+    accent: "Polski",
+    description: "Czysty i naturalny komunikat synoptyczny",
+  },
+  {
+    id: "pl-PL-Neural2-B",
+    name: "Neural2 B (Męski)",
+    model: "Neural2",
+    languageCode: "pl",
+    gender: "MALE",
+    accent: "Polski",
+    description: "Spokojna narracja pogodowa",
+  },
+
+  // Indonesian
+  {
+    id: "id-ID-Neural2-A",
+    name: "Neural2 A (Wanita)",
+    model: "Neural2",
+    languageCode: "id",
+    gender: "FEMALE",
+    accent: "Bahasa Indonesia",
+    description: "Siaran cuaca ramah dan jernih",
+  },
+  {
+    id: "id-ID-Neural2-B",
+    name: "Neural2 B (Pria)",
+    model: "Neural2",
+    languageCode: "id",
+    gender: "MALE",
+    accent: "Bahasa Indonesia",
+    description: "Penyampaian data meteorologi akurat",
+  },
+
+  // Vietnamese
+  {
+    id: "vi-VN-Neural2-A",
+    name: "Neural2 A (Nữ)",
+    model: "Neural2",
+    languageCode: "vi",
+    gender: "FEMALE",
+    accent: "Tiếng Việt",
+    description: "Giọng đọc bản tin khí tượng truyền cảm",
+  },
+
+  // Thai
+  {
+    id: "th-TH-Neural2-C",
+    name: "Neural2 C (หญิง)",
+    model: "Neural2",
+    languageCode: "th",
+    gender: "FEMALE",
+    accent: "ไทย",
+    description: "เสียงรายงานสภาพอากาศธรรมชาติ",
+  },
+
+  // Swedish
+  {
+    id: "sv-SE-Neural2-A",
+    name: "Neural2 A (Kvinna)",
+    model: "Neural2",
+    languageCode: "sv",
+    gender: "FEMALE",
+    accent: "Svenska",
+    description: "Tydlig och professionell väderprognos",
+  },
 ];
 
 export function getAvailableGoogleVoices(lang: string, model?: GoogleTtsModel): GoogleTtsVoiceInfo[] {
   const shortLang = (lang || "en").split("-")[0].toLowerCase();
   let filtered = GOOGLE_TTS_VOICES.filter((v) => v.languageCode === shortLang);
+  
   if (filtered.length === 0) {
-    filtered = GOOGLE_TTS_VOICES.filter((v) => v.languageCode === "en");
+    const langUpper = shortLang.toUpperCase();
+    filtered = [
+      {
+        id: `${shortLang}-Neural2-A`,
+        name: `Neural2 A (${langUpper})`,
+        model: "Neural2",
+        languageCode: shortLang,
+        gender: "FEMALE",
+        accent: `${langUpper} Standard`,
+        description: `Google Neural2 voice for ${langUpper}`,
+      },
+      {
+        id: `${shortLang}-Neural2-B`,
+        name: `Neural2 B (${langUpper})`,
+        model: "Neural2",
+        languageCode: shortLang,
+        gender: "MALE",
+        accent: `${langUpper} Standard`,
+        description: `Google Neural2 voice for ${langUpper}`,
+      },
+      {
+        id: `${shortLang}-Standard-A`,
+        name: `Standard A (${langUpper})`,
+        model: "Standard",
+        languageCode: shortLang,
+        gender: "FEMALE",
+        accent: `${langUpper} Standard`,
+        description: `Google Standard speech for ${langUpper}`,
+      },
+    ];
   }
+
   if (model) {
     const modelFiltered = filtered.filter((v) => v.model === model);
     if (modelFiltered.length > 0) return modelFiltered;

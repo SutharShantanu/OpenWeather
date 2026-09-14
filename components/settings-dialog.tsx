@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import {
   Settings,
   MapPin,
@@ -87,6 +87,8 @@ import {
   ForecastStationModel,
   FORECAST_STATION_MODELS,
   WEATHER_DATA_PROVIDERS,
+  WeatherDataProviderInfo,
+  getWeatherDataProviders,
   cToF,
 } from "@/lib/weather"
 import {
@@ -105,6 +107,12 @@ import { useMounted } from "@/hooks/use-mount"
 import { useTranslation } from "@/components/language-provider"
 import { format } from "date-fns"
 import { UniversalDialog } from "@/components/universal-dialog"
+import {
+  type RegionalLanguageOption,
+  GOOGLE_LANGUAGES,
+  getGoogleLanguage,
+  fetchLiveGoogleLanguages,
+} from "@/lib/google-languages"
 
 // ============================================================================
 // TYPES & CONFIGURATIONS
@@ -217,136 +225,7 @@ export const POPULAR_CITIES = [
 
 export type PopularCity = (typeof POPULAR_CITIES)[number]
 
-export interface RegionalLanguageOption {
-  code: string
-  label: string
-  englishName: string
-  region: string
-  scriptGlyph: string
-  flag: string
-  weatherConditionSample: string
-  speechPreviewText: string
-  voiceHighlights: string
-  advisoryPreview: string
-  lexicon: { key: string; val: string }[]
-}
-
-const REGIONAL_LANGUAGES: RegionalLanguageOption[] = [
-  {
-    code: "en",
-    label: "English",
-    englishName: "International English",
-    region: "WMO Global & Aviation Standard",
-    scriptGlyph: "Aa",
-    flag: "🌐",
-    weatherConditionSample: "Partly Cloudy • 22°C • WNW 14 km/h",
-    speechPreviewText:
-      "Google Text-to-Speech: Atmospheric barometric pressure is steady at 1013 millibars with partly cloudy skies.",
-    voiceHighlights: "13 Voices • Journey & Studio",
-    advisoryPreview:
-      "High-pressure ridge maintaining stable tropospheric stratification. Moderate UV irradiance index across metropolitan observation basin during peak solar hours.",
-    lexicon: [
-      { key: "Precipitation", val: "Precipitation Probability" },
-      { key: "Severe Alert", val: "Severe Thunderstorm Warning" },
-      { key: "Barometer", val: "Barometric Tendency" },
-    ],
-  },
-  {
-    code: "es",
-    label: "Español",
-    englishName: "Spanish",
-    region: "España & Latinoamérica",
-    scriptGlyph: "Ñ",
-    flag: "🇪🇸",
-    weatherConditionSample: "Parcialmente Nublado • 22°C • ONO 14 km/h",
-    speechPreviewText:
-      "Google Text-to-Speech: Presión atmosférica estable en 1013 milibares con cielos parcialmente cubiertos.",
-    voiceHighlights: "5 Voices • Journey & Neural2",
-    advisoryPreview:
-      "Dorsal de alta presión manteniendo condiciones troposféricas estables. Índice de radiación UV moderado en la cuenca metropolitana durante las horas solares pico.",
-    lexicon: [
-      { key: "Precipitación", val: "Probabilidad de Precipitación" },
-      { key: "Alerta Severa", val: "Alerta de Tormenta Severa" },
-      { key: "Barómetro", val: "Tendencia Barométrica" },
-    ],
-  },
-  {
-    code: "fr",
-    label: "Français",
-    englishName: "French",
-    region: "France & Francophonie",
-    scriptGlyph: "Ç",
-    flag: "🇫🇷",
-    weatherConditionSample: "Partiellement Nuageux • 22°C • ONO 14 km/h",
-    speechPreviewText:
-      "Google Text-to-Speech: Pression barométrique stable à 1013 millibars avec passages nuageux modérés.",
-    voiceHighlights: "5 Voices • Journey & Studio",
-    advisoryPreview:
-      "Dorsale anticyclonique maintenant des conditions troposphériques stables. Indice de rayonnement UV modéré sur le bassin métropolitain aux heures solaires de pointe.",
-    lexicon: [
-      { key: "Précipitations", val: "Probabilité de Précipitations" },
-      { key: "Alerte Météo", val: "Alerte aux Orages Violents" },
-      { key: "Baromètre", val: "Tendance de la Pression" },
-    ],
-  },
-  {
-    code: "de",
-    label: "Deutsch",
-    englishName: "German",
-    region: "Deutschland, Österreich & Schweiz",
-    scriptGlyph: "Ä",
-    flag: "🇩🇪",
-    weatherConditionSample: "Teilweise Bewölkt • 22°C • WNW 14 km/h",
-    speechPreviewText:
-      "Google Text-to-Speech: Luftdruck stabil bei 1013 Millibar mit wechselnder Bewölkung.",
-    voiceHighlights: "3 Voices • Journey & Studio",
-    advisoryPreview:
-      "Hochdruckkeil sorgt für stabile troposphärische Verhältnisse. Mäßiger UV-Strahlungsindex im großstädtischen Beobachtungsbecken während der Sonnenhöchststände.",
-    lexicon: [
-      { key: "Niederschlag", val: "Niederschlagswahrscheinlichkeit" },
-      { key: "Unwetter", val: "Schwere Unwetterwarnung" },
-      { key: "Barometer", val: "Luftdruck-Entwicklungstendenz" },
-    ],
-  },
-  {
-    code: "ja",
-    label: "日本語",
-    englishName: "Japanese",
-    region: "日本・東日本 & 西日本",
-    scriptGlyph: "あ",
-    flag: "🇯🇵",
-    weatherConditionSample: "時々曇り • 22°C • 西北西 14 km/h",
-    speechPreviewText:
-      "Google Text-to-Speech: 気圧は1013ミリバールで安定しており、時々雲が広がる概況です。",
-    voiceHighlights: "2 Voices • Neural2 Studio",
-    advisoryPreview:
-      "高気圧の気圧稜が安定した対流圏状態を維持しています。日中の日照ピーク時には大都市観測盆地全体で中程度の紫外線指数が予測されます。",
-    lexicon: [
-      { key: "降水確率", val: "雨・雪の発生確率" },
-      { key: "気象警報", val: "激しい雷雨警報" },
-      { key: "気圧配置", val: "気圧変化傾向" },
-    ],
-  },
-  {
-    code: "hi",
-    label: "हिन्दी",
-    englishName: "Hindi",
-    region: "भारत (India Synoptic Telemetry)",
-    scriptGlyph: "अ",
-    flag: "🇮🇳",
-    weatherConditionSample: "आंशिक रूप से बादल • 22°C • प.उ.प. 14 किमी/घं",
-    speechPreviewText:
-      "गूगल टेक्स्ट-टू-स्पीच: वायुमंडलीय दबाव 1013 मिलीबार पर स्थिर एवं आंशिक रूप से बादल छाए रहेंगे।",
-    voiceHighlights: "5 Voices • Neural2 & WaveNet",
-    advisoryPreview:
-      "उच्च दबाव कटक स्थिर क्षोभमंडलीय स्थिति बनाए हुए है। सौर चरम घंटों के दौरान महानगरीय अवलोकन बेसिन में मध्यम पराबैंगनी विकिरण सूचकांक दर्ज किया गया।",
-    lexicon: [
-      { key: "वर्षा संभावना", val: "वर्षा की संभावना" },
-      { key: "मौसम चेतावनी", val: "भीषण आंधी-तूफान चेतावनी" },
-      { key: "वायुदाब", val: "वायुमंडलीय दबाव प्रवृत्ति" },
-    ],
-  },
-]
+export const REGIONAL_LANGUAGES: RegionalLanguageOption[] = GOOGLE_LANGUAGES
 
 export const DATE_FORMAT_OPTIONS = [
   {
@@ -394,7 +273,8 @@ export const COORDINATE_FORMAT_OPTIONS = [
   },
 ] as const
 
-export type CoordinateFormatOption = (typeof COORDINATE_FORMAT_OPTIONS)[number]["id"]
+export type CoordinateFormatOption =
+  (typeof COORDINATE_FORMAT_OPTIONS)[number]["id"]
 
 export const THEME_OPTIONS = [
   {
@@ -622,7 +502,7 @@ function UnitSettingCard<T extends string>({
             if (val) onValueChange(val as T)
           }}
         >
-          <SelectTrigger className="h-8.5 w-full justify-between border-border bg-background/60 font-mono text-xs">
+          <SelectTrigger className="w-full justify-between border-border bg-background/60 font-mono text-xs">
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -805,6 +685,40 @@ function SourceTabContent({ settings, onUpdateSettings }: TabBaseProps) {
     }
   }
 
+  const [serverState, setServerState] = useState<{
+    apiKey: string | undefined
+    providers: WeatherDataProviderInfo[]
+  } | null>(null)
+
+  useEffect(() => {
+    let isSubscribed = true
+    const currentApiKey = settings.customApiKey
+    fetch(
+      `/api/weather?action=providers&apiKey=${encodeURIComponent(currentApiKey || "")}`
+    )
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (isSubscribed && data?.providers && Array.isArray(data.providers)) {
+          setServerState({ apiKey: currentApiKey, providers: data.providers })
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      isSubscribed = false
+    }
+  }, [settings.customApiKey])
+
+  const providers = useMemo(() => {
+    if (serverState && serverState.apiKey === settings.customApiKey) {
+      return serverState.providers
+    }
+    return getWeatherDataProviders({
+      customApiKey: settings.customApiKey,
+      isOnline: typeof navigator !== "undefined" ? navigator.onLine : true,
+    })
+  }, [serverState, settings.customApiKey])
+
   const activeForecastModel =
     FORECAST_STATION_MODELS.find(
       (m) => m.id === (settings.forecastStation || "best_match")
@@ -880,7 +794,7 @@ function SourceTabContent({ settings, onUpdateSettings }: TabBaseProps) {
               }}
               spacing={0}
             >
-              {WEATHER_DATA_PROVIDERS.map((provider) => {
+              {providers.map((provider) => {
                 const isSelected =
                   (settings.weatherSource || "open-meteo") === provider.id
                 return (
@@ -888,17 +802,17 @@ function SourceTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                     key={provider.id}
                     value={provider.id}
                     className={cn(
-                      "group relative flex h-full w-full cursor-pointer flex-col justify-between overflow-hidden p-2.5 text-left whitespace-normal transition-all sm:flex-1",
+                      "group relative flex h-full w-full cursor-pointer flex-col justify-between overflow-hidden p-3 text-left whitespace-normal transition-all",
                       isSelected && "bg-primary/5 data-[state=on]:bg-primary/5"
                     )}
                   >
                     {/* Card Info */}
                     <div className="w-full">
-                      <div className="flex items-start justify-between gap-1.5">
-                        <div className="flex min-w-0 items-center gap-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2">
                           <div
                             className={cn(
-                              "flex size-6 shrink-0 items-center justify-center border transition-colors",
+                              "flex size-7 items-center justify-center border transition-colors",
                               isSelected
                                 ? "border-primary/40 bg-primary/10 text-primary"
                                 : "border-border bg-muted/60 text-muted-foreground group-hover:border-primary/30 group-hover:text-foreground"
@@ -906,11 +820,11 @@ function SourceTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                           >
                             {getProviderIcon(provider.id)}
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate font-heading text-xs font-semibold text-foreground">
+                          <div>
+                            <div className="font-heading text-xs font-semibold text-nowrap text-foreground">
                               {provider.name}
                             </div>
-                            <div className="truncate font-mono text-nano text-muted-foreground">
+                            <div className="font-mono text-tiny text-nowrap text-muted-foreground">
                               {provider.provider}
                             </div>
                           </div>
@@ -918,22 +832,27 @@ function SourceTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                         <SelectionCheckIndicator isSelected={isSelected} />
                       </div>
 
-                      <p className="mt-1.5 line-clamp-2 font-mono text-nano leading-tight text-muted-foreground">
+                      <p className="mt-2 line-clamp-3 text-tiny leading-relaxed text-muted-foreground">
                         {provider.description}
                       </p>
                     </div>
 
                     {/* Footer Profile Badge */}
-                    <div className="mt-2 flex w-full items-center justify-between">
+                    <div className="flex w-full items-center justify-between font-mono text-tiny">
                       <Badge
                         variant={isSelected ? "primary-light" : "outline"}
-                        size="xs"
-                        className="h-4 px-1.5 py-0 font-mono text-nano tracking-wider uppercase"
+                        className="font-mono text-tiny tracking-wider uppercase"
                       >
-                        {provider.requiresApiKey
-                          ? "API Key Required"
-                          : "Keyless"}
+                        {provider.badge ||
+                          (provider.requiresApiKey
+                            ? "API Key Required"
+                            : "Keyless")}
                       </Badge>
+                      {provider.latencyMs !== undefined && provider.latencyMs > 0 && (
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                          {provider.latencyMs}ms
+                        </span>
+                      )}
                     </div>
                   </ToggleGroupItem>
                 )
@@ -1461,12 +1380,11 @@ function getGoogleModelPreviewText(
   lang: string
 ): string {
   const modelInfo = GOOGLE_TTS_MODELS.find((m) => m.id === model)
-  const langConfig =
-    REGIONAL_LANGUAGES.find(
-      (l) => l.code === (lang || "en").split("-")[0].toLowerCase()
-    ) || REGIONAL_LANGUAGES[0]
+  const langConfig = getGoogleLanguage(lang)
 
-  const modelLabel = modelInfo ? `${modelInfo.name} (${modelInfo.badge})` : model
+  const modelLabel = modelInfo
+    ? `${modelInfo.name} (${modelInfo.badge})`
+    : model
   return `${modelLabel}: ${langConfig.speechPreviewText}`
 }
 
@@ -1474,12 +1392,7 @@ function getGoogleVoicePreviewText(
   voice: GoogleTtsVoiceInfo,
   lang: string
 ): string {
-  const langConfig =
-    REGIONAL_LANGUAGES.find(
-      (l) =>
-        l.code ===
-        (lang || voice.languageCode || "en").split("-")[0].toLowerCase()
-    ) || REGIONAL_LANGUAGES[0]
+  const langConfig = getGoogleLanguage(lang || voice.languageCode)
 
   return `${voice.name}. ${voice.description}. ${langConfig.speechPreviewText}`
 }
@@ -1489,19 +1402,29 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
   const { t } = useTranslation()
   const currentTime = useLiveTime()
   const now = currentTime || new Date()
-  const currentLang =
-    REGIONAL_LANGUAGES.find((l) => l.code === settings.language) ||
-    REGIONAL_LANGUAGES[0]
+  const currentLang = getGoogleLanguage(settings.language)
 
-  const zuluDate = new Date(now.getTime() + now.getTimezoneOffset() * 60000)
-  const zuluTime = format(zuluDate, "HH:mm:ss'Z'")
   const liveTime24 = format(now, "HH:mm:ss")
   const liveTime12 = format(now, "hh:mm:ss a")
 
   const activeDateFormat =
     DATE_FORMAT_OPTIONS.find((opt) => opt.id === settings.dateFormat) ||
     DATE_FORMAT_OPTIONS[0]
-  const datePreview = format(now, activeDateFormat.dateFnsPattern)
+
+  const [availableLanguages, setAvailableLanguages] =
+    React.useState<RegionalLanguageOption[]>(REGIONAL_LANGUAGES)
+
+  React.useEffect(() => {
+    let isMounted = true
+    fetchLiveGoogleLanguages(settings.googleApiKey).then((list) => {
+      if (isMounted && list && list.length > 0) {
+        setAvailableLanguages(list)
+      }
+    })
+    return () => {
+      isMounted = false
+    }
+  }, [settings.googleApiKey])
 
   const handleSelectLanguage = (val: string) => {
     if (!val) return
@@ -1552,7 +1475,7 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                   variant="primary-outline"
                   className="font-mono text-xs uppercase"
                 >
-                  {currentLang.flag} {settings.language.toUpperCase()}
+                  {settings.language.toUpperCase()}
                 </Badge>
               </CardAction>
             </CardHeader>
@@ -1569,8 +1492,8 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                     }
                   />
                 </SelectTrigger>
-                <SelectContent>
-                  {REGIONAL_LANGUAGES.map((lang) => (
+                <SelectContent className="max-h-72 overflow-y-auto">
+                  {availableLanguages.map((lang) => (
                     <SelectItem key={lang.code} value={lang.code}>
                       <span className="flex items-center gap-2 font-mono">
                         <span>{lang.flag}</span>
@@ -1578,21 +1501,23 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                           {lang.label}
                         </span>
                         <span className="text-tiny text-muted-foreground">
-                          ({lang.region})
+                          ({lang.englishName} • {lang.region})
                         </span>
                       </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Badge
-                variant="outline"
-                className="h-auto w-full justify-start truncate border-border/60 bg-muted/20 px-2.5 py-1.5 font-mono text-tiny font-normal text-muted-foreground"
-              >
-                <strong className="font-semibold text-foreground">
-                  {currentLang.weatherConditionSample}
-                </strong>
-              </Badge>
+              <div className="flex justify-end">
+                <Badge
+                  variant="secondary"
+                  className="w-fit truncate font-mono text-tiny font-normal text-muted-foreground"
+                >
+                  <strong className="font-semibold text-foreground">
+                    {currentLang.weatherConditionSample}
+                  </strong>
+                </Badge>
+              </div>
             </CardContent>
           </Card>
 
@@ -1619,11 +1544,10 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
               <Select
                 value={settings.timeFormat}
                 onValueChange={(val) => {
-                  if (val)
-                    onUpdateSettings({ timeFormat: val as TimeFormat })
+                  if (val) onUpdateSettings({ timeFormat: val as TimeFormat })
                 }}
               >
-                <SelectTrigger className="h-8.5 w-full justify-between border-border bg-background/60 font-mono text-xs">
+                <SelectTrigger className="w-full justify-between border-border bg-background/60 font-mono text-xs">
                   <SelectValue placeholder="Select Time Format" />
                 </SelectTrigger>
                 <SelectContent position="popper">
@@ -1632,9 +1556,6 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                       <span className="font-semibold text-foreground">
                         {t.settingsDialog.regional.time24Label}
                       </span>
-                      <span className="text-tiny text-muted-foreground">
-                        ({t.settingsDialog.regional.time24Desc})
-                      </span>
                     </span>
                   </SelectItem>
                   <SelectItem value="12h">
@@ -1642,24 +1563,22 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                       <span className="font-semibold text-foreground">
                         {t.settingsDialog.regional.time12Label}
                       </span>
-                      <span className="text-tiny text-muted-foreground">
-                        ({t.settingsDialog.regional.time12Desc})
-                      </span>
                     </span>
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <div className="flex items-center justify-between border border-border/60 bg-muted/20 px-2.5 py-1.5 font-mono text-tiny text-muted-foreground">
-                <span>
-                  {t.settingsDialog.regional.clock || "Clock"}:{" "}
-                  <strong className="font-bold tracking-wider text-foreground">
-                    {settings.timeFormat === "24h" ? liveTime24 : liveTime12}
-                  </strong>
-                </span>
-                <span>
-                  {t.settingsDialog.regional.zulu || "Zulu"}:{" "}
-                  <strong className="text-foreground">{zuluTime}</strong>
-                </span>
+              <div className="flex justify-end">
+                <Badge
+                  variant="secondary"
+                  className="w-fit truncate font-mono text-tiny font-normal text-muted-foreground"
+                >
+                  <span>
+                    {t.settingsDialog.regional.clock || "Clock"}:{" "}
+                    <strong className="font-bold tracking-wider text-foreground">
+                      {settings.timeFormat === "24h" ? liveTime24 : liveTime12}
+                    </strong>
+                  </span>
+                </Badge>
               </div>
             </CardContent>
           </Card>
@@ -1679,13 +1598,13 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                   variant="primary-outline"
                   className="font-mono text-xs uppercase"
                 >
-                  {settings.dateFormat?.toUpperCase() || "ISO"}
+                  {settings.dateFormat?.toUpperCase()}
                 </Badge>
               </CardAction>
             </CardHeader>
             <CardContent className="space-y-2">
               <Select
-                value={settings.dateFormat || "iso"}
+                value={settings.dateFormat}
                 onValueChange={(val) => {
                   if (val)
                     onUpdateSettings({
@@ -1693,7 +1612,7 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                     })
                 }}
               >
-                <SelectTrigger className="h-8.5 w-full justify-between border-border bg-background/60 font-mono text-xs">
+                <SelectTrigger className="w-full justify-between border-border bg-background/60 font-mono text-xs">
                   <SelectValue placeholder="Select Date Format" />
                 </SelectTrigger>
                 <SelectContent position="popper">
@@ -1703,27 +1622,26 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                         <span className="font-semibold text-foreground">
                           {opt.label}
                         </span>
-                        <span className="text-tiny text-muted-foreground">
+                        {/* <span className="text-tiny text-muted-foreground">
                           ({opt.format})
-                        </span>
+                        </span> */}
                       </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <div className="flex items-center justify-between border border-border/60 bg-muted/20 px-2.5 py-1.5 font-mono text-tiny text-muted-foreground">
-                <span>
-                  Pattern:{" "}
-                  <strong className="text-foreground">
-                    {activeDateFormat.format}
-                  </strong>
-                </span>
-                <span>
-                  Preview:{" "}
-                  <strong className="text-foreground">
-                    {datePreview}
-                  </strong>
-                </span>
+              <div className="flex justify-end">
+                <Badge
+                  variant="secondary"
+                  className="w-fit truncate font-mono text-tiny font-normal text-muted-foreground"
+                >
+                  <span>
+                    Pattern:{" "}
+                    <strong className="font-bold tracking-wider text-foreground">
+                      {activeDateFormat.format}
+                    </strong>
+                  </span>
+                </Badge>
               </div>
             </CardContent>
           </Card>
@@ -1757,7 +1675,7 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                     })
                 }}
               >
-                <SelectTrigger className="h-8.5 w-full justify-between border-border bg-background/60 font-mono text-xs">
+                <SelectTrigger className="w-full justify-between border-border bg-background/60 font-mono text-xs">
                   <SelectValue placeholder="Select Coordinate Format" />
                 </SelectTrigger>
                 <SelectContent position="popper">
@@ -1767,37 +1685,28 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                         <span className="font-semibold text-foreground">
                           {opt.label}
                         </span>
-                        <span className="text-tiny text-muted-foreground">
-                          ({opt.example})
-                        </span>
                       </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <div className="flex items-center justify-between border border-border/60 bg-muted/20 px-2.5 py-1.5 font-mono text-tiny text-muted-foreground">
-                <span>
-                  System:{" "}
-                  <strong className="text-foreground">
-                    {COORDINATE_FORMAT_OPTIONS.find(
-                      (opt) =>
-                        opt.id ===
-                        (settings.coordinateFormat ||
-                          COORDINATE_FORMAT_OPTIONS[0].id)
-                    )?.subtitle || COORDINATE_FORMAT_OPTIONS[0].subtitle}
-                  </strong>
-                </span>
-                <span>
-                  Sample:{" "}
-                  <strong className="text-foreground">
-                    {COORDINATE_FORMAT_OPTIONS.find(
-                      (opt) =>
-                        opt.id ===
-                        (settings.coordinateFormat ||
-                          COORDINATE_FORMAT_OPTIONS[0].id)
-                    )?.example || COORDINATE_FORMAT_OPTIONS[0].example}
-                  </strong>
-                </span>
+              <div className="flex justify-end">
+                <Badge
+                  variant="secondary"
+                  className="w-fit truncate font-mono text-tiny font-normal text-muted-foreground"
+                >
+                  <span>
+                    Sample:{" "}
+                    <strong className="font-bold tracking-wider text-foreground">
+                      {COORDINATE_FORMAT_OPTIONS.find(
+                        (opt) =>
+                          opt.id ===
+                          (settings.coordinateFormat ||
+                            COORDINATE_FORMAT_OPTIONS[0].id)
+                      )?.example || COORDINATE_FORMAT_OPTIONS[0].example}
+                    </strong>
+                  </span>
+                </Badge>
               </div>
             </CardContent>
           </Card>
@@ -1840,7 +1749,7 @@ function VoicePlayButton({
       variant={variant ?? (isPlaying ? "default" : "outline")}
       size={buttonSize}
       className={cn(
-        "shrink-0 shadow-2xs transition-all select-none cursor-pointer",
+        "shrink-0 cursor-pointer shadow-2xs transition-all select-none",
         isPlaying
           ? "animate-pulse shadow-xs ring-2 ring-primary/40"
           : "border-border/80 bg-background/80 text-foreground group-hover:border-primary/40 hover:scale-105 hover:border-primary hover:bg-primary/15 hover:text-primary active:scale-95",

@@ -67,13 +67,101 @@ async function reverseGeocodeCoords(
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const customApiKey = searchParams.get("apiKey")?.trim() || "";
+  const apiKey = customApiKey || OPENWEATHER_API_KEY;
+
+  // Dynamic Provider Health & Capability Inspection
+  if (searchParams.get("action") === "providers") {
+    let openMeteoLatency = 0;
+    let openMeteoActive = true;
+    try {
+      const t0 = performance.now();
+      const omCheck = await fetch(
+        "https://api.open-meteo.com/v1/forecast?latitude=51.5&longitude=-0.12&current=temperature_2m",
+        { signal: AbortSignal.timeout(2500) }
+      );
+      openMeteoLatency = Math.round(performance.now() - t0);
+      openMeteoActive = omCheck.ok;
+    } catch {
+      openMeteoActive = false;
+    }
+
+    let owmLatency: number | undefined;
+    let owmActive = false;
+    if (apiKey) {
+      try {
+        const t0 = performance.now();
+        const owmCheck = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?lat=51.5&lon=-0.12&appid=${encodeURIComponent(apiKey)}`,
+          { signal: AbortSignal.timeout(2500) }
+        );
+        owmLatency = Math.round(performance.now() - t0);
+        owmActive = owmCheck.ok;
+      } catch {
+        owmActive = false;
+      }
+    }
+
+    const activeChain = [
+      openMeteoActive ? "Open-Meteo" : null,
+      owmActive ? "OpenWeatherMap" : null,
+      "Simulator",
+    ].filter(Boolean);
+
+    const providers = [
+      {
+        id: "open-meteo",
+        name: "Open-Meteo High-Resolution",
+        provider: "Open-Meteo GmbH & WMO Consensus",
+        status: openMeteoActive ? "active" : "ready",
+        requiresApiKey: false,
+        description:
+          "10-day outlook, 1-hour resolution, hourly UV & air quality. Free open telemetry.",
+        badge: openMeteoActive ? "Keyless • Active" : "Degraded",
+        latencyMs: openMeteoLatency,
+      },
+      {
+        id: "openweathermap",
+        name: "OpenWeatherMap Live API",
+        provider: "OpenWeather Ltd (OWM 2.5)",
+        status: owmActive ? "active" : "ready",
+        requiresApiKey: !apiKey,
+        description: owmActive
+          ? "Authenticated with API Key. Global synoptic stations, 5-day forecast, air pollution telemetry."
+          : "Global weather station network, 5-day forecast, air pollution telemetry. Requires API Key.",
+        badge: owmActive ? "Key Verified" : apiKey ? "Auth Failed" : "API Key Required",
+        latencyMs: owmLatency,
+      },
+      {
+        id: "simulation",
+        name: "Autonomous Synoptic Simulator",
+        provider: "Local Mathematical Physics Engine",
+        status: "ready",
+        requiresApiKey: false,
+        description:
+          "Deterministic atmospheric modeling for offline testing, calibration, and zero-latency simulation.",
+        badge: "Zero Quota",
+        latencyMs: 1,
+      },
+      {
+        id: "auto",
+        name: "Auto Consensus & Failover",
+        provider: "Dynamic Multi-Engine Failover",
+        status: "active",
+        requiresApiKey: false,
+        description: `Automated multi-engine consensus: Cascades ${activeChain.join(" → ")}.`,
+        badge: "Smart Failover",
+      },
+    ];
+
+    return NextResponse.json({ providers });
+  }
+
   const city = searchParams.get("city");
   const latParam = searchParams.get("lat");
   const lonParam = searchParams.get("lon");
   const requestedSource = (searchParams.get("source") || "open-meteo") as WeatherDataSource;
   const requestedStation = (searchParams.get("station") || "best_match") as ForecastStationModel;
-  const customApiKey = searchParams.get("apiKey")?.trim() || "";
-  const apiKey = customApiKey || OPENWEATHER_API_KEY;
   const lang = searchParams.get("lang")?.trim() || "en";
 
   let resolvedLat = latParam ? parseFloat(latParam) : null;

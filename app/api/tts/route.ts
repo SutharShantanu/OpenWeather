@@ -150,3 +150,56 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Internal TTS Route Error" }, { status: 500 });
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userApiKey = searchParams.get("apiKey")?.trim();
+    const googleCloudKey =
+      userApiKey ||
+      process.env.GOOGLE_TTS_API_KEY ||
+      process.env.GOOGLE_API_KEY ||
+      process.env.GEMINI_API_KEY;
+
+    if (googleCloudKey) {
+      try {
+        const cloudUrl = `https://texttospeech.googleapis.com/v1/voices?key=${encodeURIComponent(
+          googleCloudKey
+        )}`;
+        const res = await fetch(cloudUrl, {
+          headers: { Accept: "application/json" },
+          next: { revalidate: 3600 },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.voices)) {
+            const languageCodes = Array.from(
+              new Set(
+                data.voices.flatMap((v: { languageCodes?: string[] }) => v.languageCodes || [])
+              )
+            ).filter(Boolean);
+
+            return NextResponse.json({
+              provider: "google-cloud-live",
+              languageCodes,
+              voiceCount: data.voices.length,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch Google Cloud TTS voices:", err);
+      }
+    }
+
+    return NextResponse.json({
+      provider: "google-tts-keyless",
+      status: "ok",
+    });
+  } catch (err: unknown) {
+    return NextResponse.json(
+      { error: "Failed to retrieve voice list", details: String(err) },
+      { status: 500 }
+    );
+  }
+}
