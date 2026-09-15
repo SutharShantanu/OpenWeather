@@ -75,6 +75,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
+} from "@/components/ui/combobox"
 import { Label } from "@/components/ui/label"
 import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
@@ -1480,34 +1490,75 @@ function RegionalTabContent({ settings, onUpdateSettings }: TabBaseProps) {
               </CardAction>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Select
-                value={settings.language}
-                onValueChange={handleSelectLanguage}
+              <Combobox
+                items={availableLanguages}
+                value={currentLang}
+                onValueChange={(lang: RegionalLanguageOption | null) => {
+                  if (lang) handleSelectLanguage(lang.code)
+                }}
+                isItemEqualToValue={(
+                  a: RegionalLanguageOption | null,
+                  b: RegionalLanguageOption | null
+                ) => a?.code === b?.code}
+                itemToStringValue={(lang: RegionalLanguageOption) =>
+                  `${lang.label} ${lang.englishName} ${lang.code} ${lang.region}`
+                }
               >
-                <SelectTrigger className="w-full justify-between font-mono text-xs">
-                  <SelectValue
+                <ComboboxTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between font-mono text-xs"
+                    />
+                  }
+                >
+                  <ComboboxValue>
+                    {(lang: RegionalLanguageOption) =>
+                      lang ? (
+                        <span className="flex items-center gap-2 font-mono truncate">
+                          <span>{lang.flag}</span>
+                          <span className="font-semibold text-foreground">
+                            {lang.label}
+                          </span>
+                          <span className="text-tiny text-muted-foreground">
+                            ({lang.englishName} • {lang.region})
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          {t.settingsDialog.regional.selectLanguagePlaceholder ||
+                            "Select Language"}
+                        </span>
+                      )
+                    }
+                  </ComboboxValue>
+                </ComboboxTrigger>
+                <ComboboxContent className="max-w-(--anchor-width) min-w-(--anchor-width)">
+                  <ComboboxInput
+                    showTrigger={false}
                     placeholder={
                       t.settingsDialog.regional.selectLanguagePlaceholder ||
-                      "Select Language"
+                      "Search language..."
                     }
                   />
-                </SelectTrigger>
-                <SelectContent className="max-h-72 overflow-y-auto">
-                  {availableLanguages.map((lang) => (
-                    <SelectItem key={lang.code} value={lang.code}>
-                      <span className="flex items-center gap-2 font-mono">
-                        <span>{lang.flag}</span>
-                        <span className="font-semibold text-foreground">
-                          {lang.label}
+                  <ComboboxEmpty>No language found.</ComboboxEmpty>
+                  <ComboboxList className="mt-1">
+                    {(lang: RegionalLanguageOption) => (
+                      <ComboboxItem key={lang.code} value={lang}>
+                        <span className="flex items-center gap-2 font-mono">
+                          <span>{lang.flag}</span>
+                          <span className="font-semibold text-foreground">
+                            {lang.label}
+                          </span>
+                          <span className="text-tiny text-muted-foreground">
+                            ({lang.englishName} • {lang.region})
+                          </span>
                         </span>
-                        <span className="text-tiny text-muted-foreground">
-                          ({lang.englishName} • {lang.region})
-                        </span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
               <div className="flex justify-end">
                 <Badge
                   variant="secondary"
