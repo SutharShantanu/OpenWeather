@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { CONFIG } from "@/lib/config";
 
 interface RadarMapInnerProps {
   lat: number;
@@ -32,12 +33,12 @@ export function RadarMapInner({
   const getBaseTileUrl = (style: string) => {
     switch (style) {
       case "voyager":
-        return "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+        return `${CONFIG.api.cartoCdnTileBaseUrl}/rastertiles/voyager/{z}/{x}/{y}{r}.png`;
       case "osm":
-        return "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+        return `${CONFIG.api.openStreetMapTileBaseUrl}/{z}/{x}/{y}.png`;
       case "dark":
       default:
-        return "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+        return `${CONFIG.api.cartoCdnTileBaseUrl}/dark_all/{z}/{x}/{y}{r}.png`;
     }
   };
 
@@ -118,10 +119,10 @@ export function RadarMapInner({
     let tileUrl = "";
     if (activeLayer === "radar") {
       // 2 = Universal Blue-Green-Yellow-Red palette
-      tileUrl = `https://tilecache.rainviewer.com${currentFrame.path}/256/{z}/{x}/{y}/2/1_1.png`;
+      tileUrl = `${CONFIG.api.rainViewerTileBaseUrl}${currentFrame.path}/256/{z}/{x}/{y}/2/1_1.png`;
     } else if (activeLayer === "satellite") {
       // 0 = infrared
-      tileUrl = `https://tilecache.rainviewer.com${currentFrame.path}/256/{z}/{x}/{y}/0/0_0.png`;
+      tileUrl = `${CONFIG.api.rainViewerTileBaseUrl}${currentFrame.path}/256/{z}/{x}/{y}/0/0_0.png`;
     }
 
     const overlay = L.tileLayer(tileUrl, {

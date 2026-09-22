@@ -1,3 +1,29 @@
+import { CONFIG } from "./config";
+import {
+  WIND_CONVERSIONS,
+  PRESSURE_CONVERSIONS,
+  PRECIPITATION_CONVERSIONS,
+} from "./constants";
+
+export interface GeocodingResult {
+  name: string;
+  lat: number;
+  lon: number;
+  country: string;
+  state?: string;
+  population?: number;
+}
+
+export interface NearbyCity {
+  name: string;
+  country: string;
+  state: string;
+  lat: number;
+  lon: number;
+  distance: number;
+  population?: number;
+}
+
 export type WeatherConditionType =
   | "SUNNY"
   | "CLEAR_NIGHT"
@@ -215,8 +241,7 @@ export function buildWeatherProvider(
   const isOnline =
     options?.isOnline ?? (typeof navigator !== "undefined" ? navigator.onLine : true);
   const hasOwmKey = Boolean(
-    options?.customApiKey?.trim() ||
-      (typeof process !== "undefined" && process.env?.OPENWEATHER_API_KEY)
+    options?.customApiKey?.trim() || CONFIG.keys.openWeatherApiKey
   );
 
   switch (id) {
@@ -305,7 +330,7 @@ export interface WeatherData {
   stationName?: string;
 }
 
-export const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || "";
+export const OPENWEATHER_API_KEY = CONFIG.keys.openWeatherApiKey;
 
 export function mapOpenWeatherCondition(icon: string, main: string): WeatherConditionType {
   const isNight = icon.endsWith("n");
@@ -521,11 +546,11 @@ export type TimeFormat = "12h" | "24h";
 export function formatWind(mps: number, unit: WindSpeedUnit = "m/s"): { val: number; unitStr: string } {
   switch (unit) {
     case "km/h":
-      return { val: Math.round(mps * 3.6 * 10) / 10, unitStr: "km/h" };
+      return { val: Math.round(mps * WIND_CONVERSIONS.MS_TO_KMH * 10) / 10, unitStr: "km/h" };
     case "mph":
-      return { val: Math.round(mps * 2.23694 * 10) / 10, unitStr: "mph" };
+      return { val: Math.round(mps * WIND_CONVERSIONS.MS_TO_MPH * 10) / 10, unitStr: "mph" };
     case "knots":
-      return { val: Math.round(mps * 1.94384 * 10) / 10, unitStr: "kn" };
+      return { val: Math.round(mps * WIND_CONVERSIONS.MS_TO_KNOTS * 10) / 10, unitStr: "kn" };
     case "m/s":
     default:
       return { val: Math.round(mps * 10) / 10, unitStr: "m/s" };
@@ -535,9 +560,9 @@ export function formatWind(mps: number, unit: WindSpeedUnit = "m/s"): { val: num
 export function formatPressure(hpa: number, unit: PressureUnit = "hPa"): { val: number; unitStr: string } {
   switch (unit) {
     case "inHg":
-      return { val: Math.round(hpa * 0.02953 * 100) / 100, unitStr: "inHg" };
+      return { val: Math.round(hpa * PRESSURE_CONVERSIONS.HPA_TO_INHG * 100) / 100, unitStr: "inHg" };
     case "mmHg":
-      return { val: Math.round(hpa * 0.75006), unitStr: "mmHg" };
+      return { val: Math.round(hpa * PRESSURE_CONVERSIONS.HPA_TO_MMHG), unitStr: "mmHg" };
     case "hPa":
     default:
       return { val: Math.round(hpa), unitStr: "hPa" };
@@ -547,7 +572,7 @@ export function formatPressure(hpa: number, unit: PressureUnit = "hPa"): { val: 
 export function formatPrecip(mm: number, unit: PrecipitationUnit = "mm"): { val: number; unitStr: string } {
   switch (unit) {
     case "in":
-      return { val: Math.round(mm * 0.03937 * 100) / 100, unitStr: "in" };
+      return { val: Math.round(mm * PRECIPITATION_CONVERSIONS.MM_TO_INCHES * 100) / 100, unitStr: "in" };
     case "mm":
     default:
       return { val: Math.round(mm * 10) / 10, unitStr: "mm" };

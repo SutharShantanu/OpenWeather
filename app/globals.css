@@ -46,6 +46,8 @@
     --warning-foreground: var(--color-yellow-900);
     --invert: var(--color-zinc-900);
     --invert-foreground: var(--color-zinc-50);
+    --rating: var(--color-amber-500);
+    --rating-foreground: var(--color-amber-900);
 }
 
 .dark {
@@ -89,6 +91,8 @@
     --warning-foreground: var(--color-yellow-600);
     --invert: var(--color-zinc-700);
     --invert-foreground: var(--color-zinc-50);
+    --rating: var(--color-amber-400);
+    --rating-foreground: var(--color-amber-500);
 }
 
 @theme {

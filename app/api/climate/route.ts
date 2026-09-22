@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { CONFIG } from "@/lib/config";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // 10-year historical climate sample (2014 to 2024)
-    const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=2014-01-01&end_date=2024-12-31&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`;
+    const url = `${CONFIG.api.openMeteoArchiveBaseUrl}/archive?latitude=${latitude}&longitude=${longitude}&start_date=2014-01-01&end_date=2024-12-31&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`;
 
     const res = await fetch(url, { next: { revalidate: 86400 } });
     if (!res.ok) {

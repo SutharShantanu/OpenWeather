@@ -37,6 +37,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { CONFIG } from "@/lib/config"
+import { MAX_PINNED_CITIES } from "@/lib/constants"
 import {
   RefreshCw,
   Radio,
@@ -49,10 +51,14 @@ import {
 } from "lucide-react"
 
 export default function WeatherDashboardPage() {
-  const [city, setCity] = useState("London")
+  const [city, setCity] = useState("")
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(
     null
   )
+  const cityRef = useRef(city)
+  useEffect(() => {
+    cityRef.current = city
+  }, [city])
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [loading, setLoading] = useState(true)
   const [settings, setSettings] = useState<ExtendedSettings>(
@@ -215,6 +221,211 @@ export default function WeatherDashboardPage() {
     }
   }, [])
 
+  const lastFetchKeyRef = useRef<string>("")
+
+  // Fetch weather data with dynamic source and NWP forecast station model
+  const fetchWeather = useCallback(
+    async (
+      targetCity?: string,
+      targetCoords?: { lat: number; lon: number },
+      sourceOverride?: WeatherDataSource,
+      stationOverride?: ForecastStationModel,
+      keyOverride?: string
+    ) => {
+      const src = sourceOverride ?? settings.weatherSource ?? "open-meteo"
+      const stn = stationOverride ?? settings.forecastStation ?? "best_match"
+      const apiKey = keyOverride ?? settings.customApiKey ?? ""
+      const lang = settings.language || "en"
+      const query = targetCity !== undefined ? targetCity : cityRef.current
+
+      const fetchKey = `${targetCoords ? `${targetCoords.lat.toFixed(4)},${targetCoords.lon.toFixed(4)}` : query || "auto"}:${src}:${stn}:${lang}:${apiKey}`
+
+      if (lastFetchKeyRef.current === fetchKey && weather) {
+        return
+      }
+
+      setLoading(true)
+      try {
+        const params = new URLSearchParams()
+        if (targetCoords) {
+          params.set("lat", targetCoords.lat.toString())
+          params.set("lon", targetCoords.lon.toString())
+        } else if (query) {
+          params.set("city", query)
+        }
+        params.set("source", src)
+        params.set("station", stn)
+        params.set("lang", lang)
+        if (apiKey) {
+          params.set("apiKey", apiKey)
+        }
+
+        const res = await fetch(`/api/weather?${params.toString()}`)
+        if (res.ok) {
+          const data: WeatherData = await res.json()
+          setWeather(data)
+          lastFetchKeyRef.current = fetchKey
+          if (data.current?.cityName) {
+            setCity(data.current.cityName)
+            cityRef.current = data.current.cityName
+          }
+          if (data.current?.lat && data.current?.lon && !targetCoords) {
+            setCoords({ lat: data.current.lat, lon: data.current.lon })
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load meteorological telemetry", err)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      settings.weatherSource,
+      settings.forecastStation,
+      settings.customApiKey,
+      settings.language,
+      weather,
+    ]
+  )
+
+  // Fetch location region from network call (/api/location with client-side BigDataCloud fallback)
+  const fetchLocationRegionFromNetwork = useCallback(async (): Promise<{
+    city: string
+    region: string
+    country: string
+    lat: number
+    lon: number
+    displayName: string
+  } | null> => {
+    try {
+      const res = await fetch("/api/location")
+      if (res.ok) {
+        const data = await res.json()
+        if (
+          data.lat !== undefined &&
+          data.lon !== undefined &&
+          !isNaN(data.lat) &&
+          !isNaN(data.lon)
+        ) {
+          const region = data.region || ""
+          const city = data.city || region || ""
+          const country = data.country || ""
+          const displayName = city || region
+          return {
+            city,
+            region,
+            country,
+            lat: data.lat,
+            lon: data.lon,
+            displayName,
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Network call to /api/location failed, trying direct network fallback:", e)
+    }
+
+    // Direct network fallback via BigDataCloud IP reverse-geocoding
+    try {
+      const bdcRes = await fetch(
+        "https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en"
+      )
+      if (bdcRes.ok) {
+        const bdcData = await bdcRes.json()
+        const region = bdcData.principalSubdivision || ""
+        const city = bdcData.city || bdcData.locality || region || ""
+        const country = bdcData.countryName || bdcData.countryCode || ""
+        const lat = bdcData.latitude
+        const lon = bdcData.longitude
+        if (lat !== undefined && lon !== undefined && !isNaN(lat) && !isNaN(lon)) {
+          return {
+            city,
+            region,
+            country,
+            lat,
+            lon,
+            displayName: city || region,
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Direct network geolocation call failed:", e)
+    }
+
+    return null
+  }, [])
+
+  // Apply location region resolved from network call when location request is denied or unavailable
+  const applyLocationFromNetwork = useCallback(async () => {
+    setLoading(true)
+    try {
+      const netLoc = await fetchLocationRegionFromNetwork()
+      if (netLoc) {
+        const nextCoords = { lat: netLoc.lat, lon: netLoc.lon }
+        setCoords(nextCoords)
+        const locName = netLoc.displayName || netLoc.city || netLoc.region
+        if (locName) {
+          setCity(locName)
+          cityRef.current = locName
+        }
+        await fetchWeather(locName || undefined, nextCoords)
+        return true
+      }
+    } catch (e) {
+      console.warn("Failed to apply location region from network call:", e)
+    }
+    await fetchWeather()
+    return false
+  }, [fetchLocationRegionFromNetwork, fetchWeather])
+
+  // Automatically choose default city based on user's location.
+  // If location request is denied, take the location region from the network call.
+  const detectAndApplyUserLocation = useCallback(async () => {
+    setLoading(true)
+
+    // Check if location permission is already denied in browser permissions API
+    if (typeof navigator !== "undefined" && navigator.permissions?.query) {
+      try {
+        const perm = await navigator.permissions.query({ name: "geolocation" })
+        if (perm.state === "denied") {
+          console.info(
+            "Browser location request denied. Taking location region from network call..."
+          )
+          await applyLocationFromNetwork()
+          return
+        }
+      } catch {
+        // Permissions API query not supported; proceed to request
+      }
+    }
+
+    // Request browser location
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          // Location request granted: use accurate GPS coordinates
+          const gpsCoords = {
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude,
+          }
+          setCoords(gpsCoords)
+          fetchWeather(undefined, gpsCoords)
+        },
+        async (err) => {
+          // Location request denied or failed: take location region from network call
+          console.warn(
+            `Location request denied or unavailable (code ${err.code}: ${err.message}). Taking location region from network call...`
+          )
+          await applyLocationFromNetwork()
+        },
+        { timeout: 5000, maximumAge: 300000, enableHighAccuracy: false }
+      )
+    } else {
+      // Geolocation not supported: take location region from network call
+      await applyLocationFromNetwork()
+    }
+  }, [applyLocationFromNetwork, fetchWeather])
+
   // 1. Initial Mount: Read URL query parameters to restore location, tab, and dialog state
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -233,64 +444,45 @@ export default function WeatherDashboardPage() {
     const rawSettingsTab = params.get("settingsTab") || params.get("setting")
     const urlUnit = params.get("unit")
 
+    // Check if user manually searched London previously
+    const userManuallySearched =
+      typeof window !== "undefined"
+        ? localStorage.getItem("openweather_user_searched") === "true"
+        : false
+
+    // Treat London as legacy default unless explicitly searched by user
+    const isLegacyLondon =
+      urlCity?.toLowerCase() === "london" && !userManuallySearched
+
     if (urlLat && urlLon) {
       const pLat = parseFloat(urlLat)
       const pLon = parseFloat(urlLon)
       if (!isNaN(pLat) && !isNaN(pLon)) {
-        setCoords({ lat: pLat, lon: pLon })
+        const nextCoords = { lat: pLat, lon: pLon }
+        setCoords(nextCoords)
+        fetchWeather(undefined, nextCoords)
       }
-    } else if (urlCity) {
+    } else if (urlCity && !isLegacyLondon) {
       setCity(urlCity)
+      cityRef.current = urlCity
+      fetchWeather(urlCity)
     } else {
       const savedLastCity =
         typeof window !== "undefined"
           ? localStorage.getItem("openweather_last_city")
           : null
-      if (savedLastCity) {
+
+      if (
+        savedLastCity &&
+        savedLastCity.toLowerCase() !== "london" &&
+        userManuallySearched
+      ) {
         setCity(savedLastCity)
-        const p = new URLSearchParams(window.location.search)
-        p.set("city", savedLastCity)
-        window.history.replaceState(
-          null,
-          "",
-          `${window.location.pathname}?${p.toString()}`
-        )
-      } else if (typeof navigator !== "undefined" && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const locCoords = {
-              lat: pos.coords.latitude,
-              lon: pos.coords.longitude,
-            }
-            setCoords(locCoords)
-            const p = new URLSearchParams(window.location.search)
-            p.set("lat", locCoords.lat.toFixed(4))
-            p.set("lon", locCoords.lon.toFixed(4))
-            window.history.replaceState(
-              null,
-              "",
-              `${window.location.pathname}?${p.toString()}`
-            )
-          },
-          () => {
-            const p = new URLSearchParams(window.location.search)
-            p.set("city", "London")
-            window.history.replaceState(
-              null,
-              "",
-              `${window.location.pathname}?${p.toString()}`
-            )
-          },
-          { timeout: 5000, maximumAge: 300000 }
-        )
+        cityRef.current = savedLastCity
+        fetchWeather(savedLastCity)
       } else {
-        const p = new URLSearchParams(window.location.search)
-        p.set("city", "London")
-        window.history.replaceState(
-          null,
-          "",
-          `${window.location.pathname}?${p.toString()}`
-        )
+        // Default city is chosen by user's location
+        detectAndApplyUserLocation()
       }
     }
 
@@ -324,10 +516,16 @@ export default function WeatherDashboardPage() {
             ? "appearance"
             : rawSettingsTab === "station" || rawSettingsTab === "sources"
               ? "source"
-              : rawSettingsTab
+              : rawSettingsTab === "favorites" || rawSettingsTab === "location" || rawSettingsTab === "stations"
+                ? "locations"
+                : rawSettingsTab === "keys" || rawSettingsTab === "apis"
+                  ? "api"
+                  : rawSettingsTab
       if (
         [
+          "locations",
           "source",
+          "api",
           "units",
           "favorites",
           "localization",
@@ -344,7 +542,7 @@ export default function WeatherDashboardPage() {
     }
 
     isInitializedRef.current = true
-  }, [])
+  }, [detectAndApplyUserLocation, fetchWeather])
 
   // 2. Popstate Listener: Seamless browser Back/Forward support for dialogs and location history
   useEffect(() => {
@@ -369,11 +567,17 @@ export default function WeatherDashboardPage() {
         const pLat = parseFloat(urlLat)
         const pLon = parseFloat(urlLon)
         if (!isNaN(pLat) && !isNaN(pLon)) {
-          setCoords({ lat: pLat, lon: pLon })
+          const nextCoords = { lat: pLat, lon: pLon }
+          setCoords(nextCoords)
+          fetchWeather(undefined, nextCoords)
         }
       } else if (urlCity) {
         setCoords(null)
         setCity(urlCity)
+        cityRef.current = urlCity
+        fetchWeather(urlCity)
+      } else {
+        detectAndApplyUserLocation()
       }
 
       if (
@@ -406,10 +610,16 @@ export default function WeatherDashboardPage() {
               ? "appearance"
               : rawSettingsTab === "station" || rawSettingsTab === "sources"
                 ? "source"
-                : rawSettingsTab
+                : rawSettingsTab === "favorites" || rawSettingsTab === "location" || rawSettingsTab === "stations"
+                  ? "locations"
+                  : rawSettingsTab === "keys" || rawSettingsTab === "apis"
+                    ? "api"
+                    : rawSettingsTab
         if (
           [
+            "locations",
             "source",
+            "api",
             "units",
             "favorites",
             "localization",
@@ -424,7 +634,7 @@ export default function WeatherDashboardPage() {
 
     window.addEventListener("popstate", handlePopState)
     return () => window.removeEventListener("popstate", handlePopState)
-  }, [])
+  }, [detectAndApplyUserLocation, fetchWeather])
 
   // 3. Keep URL query synced with active state
   useEffect(() => {
@@ -443,115 +653,29 @@ export default function WeatherDashboardPage() {
     }
   }, [buildCurrentUrl])
 
-  // Fetch weather data with dynamic source and NWP forecast station model
-  const fetchWeather = useCallback(
-    async (
-      targetCity?: string,
-      targetCoords?: { lat: number; lon: number },
-      sourceOverride?: WeatherDataSource,
-      stationOverride?: ForecastStationModel,
-      keyOverride?: string
-    ) => {
-      setLoading(true)
-      try {
-        const src = sourceOverride ?? settings.weatherSource ?? "open-meteo"
-        const stn = stationOverride ?? settings.forecastStation ?? "best_match"
-        const apiKey = keyOverride ?? settings.customApiKey ?? ""
-
-        const params = new URLSearchParams()
-        if (targetCoords) {
-          params.set("lat", targetCoords.lat.toString())
-          params.set("lon", targetCoords.lon.toString())
-        } else {
-          const query = targetCity || city
-          params.set("city", query)
-        }
-        params.set("source", src)
-        params.set("station", stn)
-        params.set("lang", settings.language || "en")
-        if (apiKey) {
-          params.set("apiKey", apiKey)
-        }
-
-        const res = await fetch(`/api/weather?${params.toString()}`)
-        if (res.ok) {
-          const data: WeatherData = await res.json()
-          setWeather(data)
-          if (data.current?.cityName) {
-            setCity(data.current.cityName)
-            try {
-              localStorage.setItem(
-                "openweather_last_city",
-                data.current.cityName
-              )
-            } catch {}
-          }
-        }
-      } catch (err) {
-        console.warn("Failed to load meteorological telemetry", err)
-      } finally {
-        setLoading(false)
-      }
-    },
-    [
-      city,
-      settings.weatherSource,
-      settings.forecastStation,
-      settings.customApiKey,
-      settings.language,
-    ]
-  )
-
+  // Re-fetch when provider settings change
   useEffect(() => {
+    if (!isInitializedRef.current) return
     if (coords) {
       fetchWeather(undefined, coords)
+    } else if (cityRef.current) {
+      fetchWeather(cityRef.current)
     } else {
-      fetchWeather(city)
+      fetchWeather()
     }
   }, [
-    city,
-    coords,
-    fetchWeather,
     settings.weatherSource,
     settings.forecastStation,
     settings.customApiKey,
     settings.language,
+    coords,
+    fetchWeather,
   ])
 
-  // Automatic meteorological briefing with Google TTS on station load
-  const lastSpokenCityRef = useRef<string>("")
-  useEffect(() => {
-    if (
-      settings.autoSpeakOnLoad &&
-      weather?.current &&
-      weather.current.cityName &&
-      weather.current.cityName !== lastSpokenCityRef.current &&
-      isInitializedRef.current
-    ) {
-      lastSpokenCityRef.current = weather.current.cityName
-      const script = generateWeatherBriefing(
-        weather.current,
-        weather.daily || [],
-        weather.hourly || [],
-        unit
-      )
-      WeatherSpeechSynthesizer.speak(script, {
-        rate: settings.speechRate,
-        pitch: settings.googleTtsPitch,
-        lang: settings.language,
-        voiceName: settings.googleTtsVoice,
-        model: settings.googleTtsModel,
-        audioProfile: settings.googleTtsAudioProfile,
-        volumeGainDb: settings.googleTtsVolumeGain,
-        googleApiKey: settings.googleApiKey,
-      })
-    }
-  }, [weather, settings, unit])
-
-  // GPS Locate with URL update
-  const handleLocate = () => {
+  // GPS Locate with URL update. If location request is denied, take location region from network call.
+  const handleLocate = useCallback(() => {
+    setLoading(true)
     if (typeof navigator !== "undefined" && navigator.geolocation) {
-      setLoading(true)
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const nextCoords = {
@@ -559,30 +683,77 @@ export default function WeatherDashboardPage() {
             lon: pos.coords.longitude,
           }
           setCoords(nextCoords)
+          fetchWeather(undefined, nextCoords)
           if (typeof window !== "undefined") {
             const nextUrl = buildCurrentUrl({ coords: nextCoords, city: null })
             window.history.pushState(nextCoords, "", nextUrl)
           }
         },
-        (err) => {
-          console.warn("Geolocation denied or unavailable", err)
-          fetchWeather(city)
-        }
+        async (err) => {
+          console.warn(
+            `Location request denied (code ${err.code}: ${err.message}). Taking location region from network call...`
+          )
+          const netLoc = await fetchLocationRegionFromNetwork()
+          if (netLoc) {
+            const nextCoords = { lat: netLoc.lat, lon: netLoc.lon }
+            setCoords(nextCoords)
+            const locName = netLoc.displayName || netLoc.city || netLoc.region
+            if (locName) {
+              setCity(locName)
+              cityRef.current = locName
+            }
+            await fetchWeather(locName || undefined, nextCoords)
+            if (typeof window !== "undefined") {
+              const nextUrl = buildCurrentUrl({
+                coords: nextCoords,
+                city: locName || null,
+              })
+              window.history.pushState(nextCoords, "", nextUrl)
+            }
+          } else if (cityRef.current) {
+            fetchWeather(cityRef.current)
+          } else {
+            setLoading(false)
+          }
+        },
+        { timeout: 7000, enableHighAccuracy: true, maximumAge: 60000 }
       )
+    } else {
+      ;(async () => {
+        const netLoc = await fetchLocationRegionFromNetwork()
+        if (netLoc) {
+          const nextCoords = { lat: netLoc.lat, lon: netLoc.lon }
+          setCoords(nextCoords)
+          const locName = netLoc.displayName || netLoc.city || netLoc.region
+          if (locName) {
+            setCity(locName)
+            cityRef.current = locName
+          }
+          await fetchWeather(locName || undefined, nextCoords)
+        } else {
+          setLoading(false)
+        }
+      })()
     }
-  }
+  }, [buildCurrentUrl, fetchLocationRegionFromNetwork, fetchWeather])
 
   // User Actions: City selection with URL history push
   const handleSelectCity = useCallback(
     (newCity: string) => {
       setCoords(null)
       setCity(newCity)
+      cityRef.current = newCity
+      try {
+        localStorage.setItem("openweather_last_city", newCity)
+        localStorage.setItem("openweather_user_searched", "true")
+      } catch {}
+      fetchWeather(newCity, undefined)
       if (typeof window !== "undefined") {
         const nextUrl = buildCurrentUrl({ city: newCity, coords: null })
         window.history.pushState({ city: newCity }, "", nextUrl)
       }
     },
-    [buildCurrentUrl]
+    [buildCurrentUrl, fetchWeather]
   )
 
   // Tab change with shallow URL update
@@ -694,6 +865,7 @@ export default function WeatherDashboardPage() {
         (c) => c.toLowerCase() !== cityName.toLowerCase()
       )
     } else {
+      if (pinnedCities.length >= MAX_PINNED_CITIES) return
       next = [...pinnedCities, cityName]
     }
     setPinnedCities(next)
@@ -709,6 +881,7 @@ export default function WeatherDashboardPage() {
   }
 
   const handleAddPinnedCity = (newCity: string) => {
+    if (pinnedCities.length >= MAX_PINNED_CITIES) return
     if (pinnedCities.some((c) => c.toLowerCase() === newCity.toLowerCase()))
       return
     const next = [...pinnedCities, newCity]
@@ -725,10 +898,15 @@ export default function WeatherDashboardPage() {
     setShowSettings(false)
     setShowAiAdvisor(false)
     setShowNotifications(false)
+    try {
+      localStorage.removeItem("openweather_user_searched")
+      localStorage.removeItem("openweather_last_city")
+    } catch {}
     if (typeof window !== "undefined") {
       window.history.pushState(null, "", "/")
     }
-  }, [])
+    detectAndApplyUserLocation()
+  }, [detectAndApplyUserLocation])
 
   const t = getTranslation(settings.language || "en")
 
@@ -822,7 +1000,7 @@ export default function WeatherDashboardPage() {
             onValueChange={handleTabChange}
             className="w-full space-y-4"
           >
-            <TabsList className="h-9 w-full [scrollbar-width:none] justify-start overflow-x-auto overflow-y-hidden border-b border-border bg-transparent p-0 [&::-webkit-scrollbar]:hidden">
+            <TabsList className="h-9 w-full scrollbar-none justify-start overflow-x-auto overflow-y-hidden border-b border-border bg-transparent p-0 [&::-webkit-scrollbar]:hidden">
               <TabsTrigger
                 value="overview"
                 className="gap-1.5 rounded-none border-b-2 border-transparent px-3 font-heading text-xs font-medium data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-foreground"
@@ -1019,7 +1197,7 @@ export default function WeatherDashboardPage() {
                 </div>
               </>
             ) : (
-              <Skeleton className="h-[560px] w-full" />
+              <Skeleton className="h-140 w-full" />
             )}
           </TabsContent>
 

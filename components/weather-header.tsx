@@ -27,6 +27,7 @@ import {
   DailyForecastItem,
   HourlyForecastItem,
   WeatherAlert,
+  GeocodingResult,
 } from "@/lib/weather"
 import { cn } from "@/lib/utils"
 import { WeatherTtsButton } from "@/components/weather-tts-button"
@@ -34,14 +35,8 @@ import { NotificationsPopover } from "@/components/notifications-popover"
 import { ButtonGroup } from "@/components/ui/button-group"
 import type { ExtendedSettings } from "@/components/settings-dialog"
 import { useTranslation } from "@/components/language-provider"
-
-interface GeocodingResult {
-  name: string
-  lat: number
-  lon: number
-  country: string
-  state?: string
-}
+import { CONFIG } from "@/lib/config"
+import { SEARCH_DEBOUNCE_MS, SEARCH_MIN_QUERY_LENGTH } from "@/lib/constants"
 
 interface WeatherHeaderProps {
   onSearch: (city: string) => void
@@ -153,7 +148,7 @@ export function WeatherHeader({
 
   // Keyless Geocoding API search via internal Next.js route
   useEffect(() => {
-    if (!query.trim() || query.trim().length < 2) {
+    if (!query.trim() || query.trim().length < SEARCH_MIN_QUERY_LENGTH) {
       setResults([])
       setIsSearching(false)
       return
@@ -179,10 +174,10 @@ export function WeatherHeader({
       } finally {
         setIsSearching(false)
       }
-    }, 280)
+    }, SEARCH_DEBOUNCE_MS)
 
     return () => clearTimeout(timer)
-  }, [query])
+  }, [query, settings?.language])
 
   const handleSelect = (cityName: string) => {
     onSearch(cityName)
@@ -378,15 +373,7 @@ export function WeatherHeader({
                     Popular Hubs
                   </div>
                   <div className="flex flex-wrap gap-1">
-                    {[
-                      "Tokyo",
-                      "New York",
-                      "London",
-                      "Paris",
-                      "Sydney",
-                      "Dubai",
-                      "Singapore",
-                    ].map((c) => (
+                    {CONFIG.location.popularCities.slice(0, 8).map((c) => (
                       <Button
                         key={c}
                         variant="secondary"

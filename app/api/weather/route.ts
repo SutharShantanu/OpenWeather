@@ -15,6 +15,7 @@ import {
   OPENWEATHER_API_KEY,
 } from "@/lib/weather";
 import { translateCondition } from "@/lib/translations";
+import { CONFIG } from "@/lib/config";
 
 async function reverseGeocodeCoords(
   lat: number,
@@ -24,7 +25,7 @@ async function reverseGeocodeCoords(
   // 1. Try OpenWeatherMap reverse geocoding if API key is configured
   if (apiKey) {
     try {
-      const owmGeoUrl = `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`;
+      const owmGeoUrl = `${CONFIG.api.openWeatherGeoBaseUrl}/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`;
       const res = await fetch(owmGeoUrl, { next: { revalidate: 86400 } });
       if (res.ok) {
         const data = await res.json();
@@ -42,7 +43,7 @@ async function reverseGeocodeCoords(
 
   // 2. Try BigDataCloud reverse geocoding (fast, accurate, keyless global API)
   try {
-    const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+    const bdcUrl = `${CONFIG.api.bigDataCloudGeoBaseUrl}/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
     const res = await fetch(bdcUrl, { next: { revalidate: 86400 } });
     if (res.ok) {
       const data = await res.json();
@@ -65,6 +66,92 @@ async function reverseGeocodeCoords(
   };
 }
 
+async function detectUserLocationFromRequest(request: NextRequest): Promise<{
+  city: string;
+  country: string;
+  lat: number;
+  lon: number;
+} | null> {
+  try {
+    const vercelCity = request.headers.get("x-vercel-ip-city");
+    const vercelCountry = request.headers.get("x-vercel-ip-country");
+    const vercelLat = request.headers.get("x-vercel-ip-latitude");
+    const vercelLon = request.headers.get("x-vercel-ip-longitude");
+
+    if (vercelCity && vercelLat && vercelLon) {
+      const lat = parseFloat(vercelLat);
+      const lon = parseFloat(vercelLon);
+      if (!isNaN(lat) && !isNaN(lon)) {
+        return {
+          city: decodeURIComponent(vercelCity),
+          country: vercelCountry ? decodeURIComponent(vercelCountry) : "",
+          lat,
+          lon,
+        };
+      }
+    }
+
+    const cfCity = request.headers.get("cf-ipcity");
+    const cfCountry = request.headers.get("cf-ipcountry");
+    const cfLat = request.headers.get("cf-iplatitude");
+    const cfLon = request.headers.get("cf-iplongitude");
+
+    if (cfCity && cfLat && cfLon) {
+      const lat = parseFloat(cfLat);
+      const lon = parseFloat(cfLon);
+      if (!isNaN(lat) && !isNaN(lon)) {
+        return {
+          city: decodeURIComponent(cfCity),
+          country: cfCountry ? decodeURIComponent(cfCountry) : "",
+          lat,
+          lon,
+        };
+      }
+    }
+
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const realIp = request.headers.get("x-real-ip");
+    let clientIp = "";
+    if (forwardedFor) {
+      clientIp = forwardedFor.split(",")[0].trim();
+    } else if (realIp) {
+      clientIp = realIp.trim();
+    }
+
+    const isPrivateIp =
+      !clientIp ||
+      clientIp === "127.0.0.1" ||
+      clientIp === "::1" ||
+      clientIp.startsWith("192.168.") ||
+      clientIp.startsWith("10.") ||
+      clientIp.startsWith("172.16.") ||
+      clientIp.startsWith("172.31.");
+
+    const bdcUrl = isPrivateIp
+      ? `${CONFIG.api.bigDataCloudGeoBaseUrl}/reverse-geocode-client?localityLanguage=en`
+      : `${CONFIG.api.bigDataCloudGeoBaseUrl}/reverse-geocode-client?ip=${encodeURIComponent(
+          clientIp
+        )}&localityLanguage=en`;
+
+    const res = await fetch(bdcUrl, { next: { revalidate: 3600 } });
+    if (res.ok) {
+      const data = await res.json();
+      const city =
+        data.city || data.locality || data.principalSubdivision || "";
+      const country = data.countryName || data.countryCode || "";
+      const lat = data.latitude;
+      const lon = data.longitude;
+
+      if (lat !== undefined && lon !== undefined && !isNaN(lat) && !isNaN(lon)) {
+        return { city, country, lat, lon };
+      }
+    }
+  } catch (err) {
+    console.warn("User location auto-detection error:", err);
+  }
+  return null;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const customApiKey = searchParams.get("apiKey")?.trim() || "";
@@ -77,7 +164,7 @@ export async function GET(request: NextRequest) {
     try {
       const t0 = performance.now();
       const omCheck = await fetch(
-        "https://api.open-meteo.com/v1/forecast?latitude=51.5&longitude=-0.12&current=temperature_2m",
+        `${CONFIG.api.openMeteoApiBaseUrl}/forecast?latitude=${CONFIG.location.defaultLat}&longitude=${CONFIG.location.defaultLon}&current=temperature_2m`,
         { signal: AbortSignal.timeout(2500) }
       );
       openMeteoLatency = Math.round(performance.now() - t0);
@@ -92,7 +179,7 @@ export async function GET(request: NextRequest) {
       try {
         const t0 = performance.now();
         const owmCheck = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=51.5&lon=-0.12&appid=${encodeURIComponent(apiKey)}`,
+          `${CONFIG.api.openWeatherApiBaseUrl}/data/2.5/weather?lat=${CONFIG.location.defaultLat}&lon=${CONFIG.location.defaultLon}&appid=${encodeURIComponent(apiKey)}`,
           { signal: AbortSignal.timeout(2500) }
         );
         owmLatency = Math.round(performance.now() - t0);
@@ -160,9 +247,9 @@ export async function GET(request: NextRequest) {
   const city = searchParams.get("city");
   const latParam = searchParams.get("lat");
   const lonParam = searchParams.get("lon");
-  const requestedSource = (searchParams.get("source") || "open-meteo") as WeatherDataSource;
-  const requestedStation = (searchParams.get("station") || "best_match") as ForecastStationModel;
-  const lang = searchParams.get("lang")?.trim() || "en";
+  const requestedSource = (searchParams.get("source") || CONFIG.settings.defaultWeatherSource) as WeatherDataSource;
+  const requestedStation = (searchParams.get("station") || CONFIG.settings.defaultForecastStation) as ForecastStationModel;
+  const lang = searchParams.get("lang")?.trim() || CONFIG.settings.defaultLanguage;
 
   let resolvedLat = latParam ? parseFloat(latParam) : null;
   let resolvedLon = lonParam ? parseFloat(lonParam) : null;
@@ -176,13 +263,23 @@ export async function GET(request: NextRequest) {
       resolvedCity = rev.city;
       resolvedCountry = rev.country;
     }
-  } else {
-    // 2. If coordinates are NOT provided: forward geocode the city name (default to London if empty)
-    if (!resolvedCity) {
-      resolvedCity = "London";
+  } else if (!resolvedCity) {
+    // 2. If neither coordinates nor city are provided: auto-detect from user's location via IP / geo headers
+    const detected = await detectUserLocationFromRequest(request);
+    if (detected) {
+      resolvedCity = detected.city;
+      resolvedCountry = detected.country;
+      resolvedLat = detected.lat;
+      resolvedLon = detected.lon;
+    } else {
+      resolvedCity = CONFIG.location.defaultCity || "New York";
     }
+  }
+
+  // 3. If coordinates are still NOT resolved: forward geocode the city name
+  if (resolvedLat === null || resolvedLon === null || isNaN(resolvedLat) || isNaN(resolvedLon)) {
     try {
-      const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+      const geoUrl = `${CONFIG.api.openMeteoGeoBaseUrl}/search?name=${encodeURIComponent(
         resolvedCity
       )}&count=1&language=${encodeURIComponent(lang)}&format=json`;
       const geoRes = await fetch(geoUrl, { next: { revalidate: 3600 } });
@@ -276,13 +373,13 @@ async function fetchOpenMeteo(
   lang: string = "en"
 ): Promise<WeatherData | null> {
   try {
-    let weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${resolvedLat}&longitude=${resolvedLon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,surface_pressure,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timezone=auto&forecast_days=10&wind_speed_unit=ms`;
+    let weatherUrl = `${CONFIG.api.openMeteoApiBaseUrl}/forecast?latitude=${resolvedLat}&longitude=${resolvedLon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,surface_pressure,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,sunrise,sunset,uv_index_max,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timezone=auto&forecast_days=10&wind_speed_unit=ms`;
 
     if (requestedStation && requestedStation !== "best_match") {
       weatherUrl += `&models=${requestedStation}`;
     }
 
-    const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${resolvedLat}&longitude=${resolvedLon}&current=european_aqi,us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
+    const aqiUrl = `${CONFIG.api.openMeteoAirQualityBaseUrl}/air-quality?latitude=${resolvedLat}&longitude=${resolvedLon}&current=european_aqi,us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
 
     const [weatherRes, aqiRes] = await Promise.all([
       fetch(weatherUrl, { next: { revalidate: 180 } }),
@@ -477,12 +574,12 @@ async function fetchOpenWeather(
     let forecastUrl = "";
 
     if (lat !== null && lon !== null && !isNaN(lat) && !isNaN(lon)) {
-      queryUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
-      forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+      queryUrl = `${CONFIG.api.openWeatherApiBaseUrl}/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+      forecastUrl = `${CONFIG.api.openWeatherApiBaseUrl}/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
     } else {
-      const q = targetCity || "London";
-      queryUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(q)}&units=metric&appid=${apiKey}`;
-      forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(q)}&units=metric&appid=${apiKey}`;
+      const q = targetCity || CONFIG.location.defaultCity;
+      queryUrl = `${CONFIG.api.openWeatherApiBaseUrl}/data/2.5/weather?q=${encodeURIComponent(q)}&units=metric&appid=${apiKey}`;
+      forecastUrl = `${CONFIG.api.openWeatherApiBaseUrl}/data/2.5/forecast?q=${encodeURIComponent(q)}&units=metric&appid=${apiKey}`;
     }
 
     const [currentRes, forecastRes] = await Promise.all([
@@ -498,7 +595,7 @@ async function fetchOpenWeather(
     let airQuality: AirQualityData | undefined;
     try {
       const aqiRes = await fetch(
-        `https://api.openweathermap.org/data/2.5/air_pollution?lat=${currentJson.coord.lat}&lon=${currentJson.coord.lon}&appid=${apiKey}`,
+        `${CONFIG.api.openWeatherApiBaseUrl}/data/2.5/air_pollution?lat=${currentJson.coord.lat}&lon=${currentJson.coord.lon}&appid=${apiKey}`,
         { next: { revalidate: 600 } }
       );
       if (aqiRes.ok) {
@@ -687,9 +784,9 @@ function generateFallbackWeather(
 
   const current: CurrentWeather = {
     cityName: cleanName,
-    country: country || "GLOBAL",
-    lat: lat ?? 51.5074,
-    lon: lon ?? -0.1278,
+    country: country || CONFIG.location.defaultCountry,
+    lat: lat ?? CONFIG.location.defaultLat,
+    lon: lon ?? CONFIG.location.defaultLon,
     temp: 21.4,
     feelsLike: 20.8,
     tempMin: 16.0,

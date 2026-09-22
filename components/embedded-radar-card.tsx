@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "@/components/language-provider";
+import { CONFIG } from "@/lib/config";
 import {
   Play,
   Pause,
@@ -72,7 +73,7 @@ export function EmbeddedRadarCard({
   const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    fetch("https://api.rainviewer.com/public/weather-maps.json")
+    fetch(`${CONFIG.api.rainViewerApiBaseUrl}/public/weather-maps.json`)
       .then((res) => {
         if (!res.ok) throw new Error("Radar API failed");
         return res.json();

@@ -29,6 +29,87 @@ export interface GoogleAudioProfileInfo {
   description: string;
 }
 
+export interface GeminiVoiceInfo {
+  id: string;
+  name: string;
+  gender: "FEMALE" | "MALE";
+  tone: string;
+  description: string;
+}
+
+export const GEMINI_TTS_VOICES: GeminiVoiceInfo[] = [
+  // Male voices (5)
+  { id: "Puck", name: "Puck", gender: "MALE", tone: "Upbeat", description: "Upbeat, energetic and charismatic broadcast delivery" },
+  { id: "Charon", name: "Charon", gender: "MALE", tone: "Informative", description: "Informative, steady, meteorological authority" },
+  { id: "Orus", name: "Orus", gender: "MALE", tone: "Firm", description: "Firm, structured and crisp articulation" },
+  { id: "Fenrir", name: "Fenrir", gender: "MALE", tone: "Bright", description: "Bright, dynamic and charismatic cadence" },
+  { id: "Enceladus", name: "Enceladus", gender: "MALE", tone: "Smooth", description: "Smooth, relaxed and soothing cadence" },
+
+  // Female voices (5)
+  { id: "Kore", name: "Kore", gender: "FEMALE", tone: "Firm", description: "Firm, decisive and authoritative weather broadcast" },
+  { id: "Zephyr", name: "Zephyr", gender: "FEMALE", tone: "Bright", description: "Bright, cheerful, sunny and highly expressive" },
+  { id: "Laomedeia", name: "Laomedeia", gender: "FEMALE", tone: "Upbeat", description: "Upbeat, optimistic morning forecast delivery" },
+  { id: "Erinome", name: "Erinome", gender: "FEMALE", tone: "Informative", description: "Informative, articulate broadcast telemetry" },
+  { id: "Algieba", name: "Algieba", gender: "FEMALE", tone: "Smooth", description: "Smooth, velvety, calm and serene evening reports" },
+];
+
+export const VALID_GEMINI_VOICES = new Set(GEMINI_TTS_VOICES.map((v) => v.id));
+
+/**
+ * Maps any legacy voice name, generic gender token, or Google Cloud voice id
+ * to a canonical Gemini neural voice persona.
+ */
+export function resolveGeminiVoice(name?: string): string {
+  if (!name) return "Kore";
+  // Exact match
+  for (const v of VALID_GEMINI_VOICES) {
+    if (v.toLowerCase() === name.toLowerCase()) return v;
+  }
+  // Heuristic mappings
+  const lower = name.toLowerCase();
+  if (lower.includes("puck") || lower.includes("cheerful") || lower.includes("upbeat")) return "Puck";
+  if (lower.includes("charon") || lower.includes("broadcast") || lower.includes("studio") || lower.includes("rasalgethi")) return "Charon";
+  if (lower.includes("orus") || lower.includes("alnilam") || lower.includes("firm")) return "Orus";
+  if (lower.includes("fenrir") || lower.includes("achird") || lower.includes("bright")) return "Fenrir";
+  if (lower.includes("enceladus") || lower.includes("umbriel") || lower.includes("iapetus") || lower.includes("male") || lower.endsWith("-d") || lower.endsWith("-q") || lower.endsWith("-b")) return "Enceladus";
+
+  if (lower.includes("kore") || lower.includes("authoritative")) return "Kore";
+  if (lower.includes("zephyr") || lower.includes("autonoe") || lower.includes("sunny") || lower.includes("journey")) return "Zephyr";
+  if (lower.includes("laomedeia") || lower.includes("leda") || lower.includes("lively")) return "Laomedeia";
+  if (lower.includes("erinome") || lower.includes("clear") || lower.includes("despina")) return "Erinome";
+  if (lower.includes("algieba") || lower.includes("calm") || lower.includes("smooth") || lower.includes("gentle")) return "Algieba";
+
+  return "Kore";
+}
+
+export interface GeminiModelInfo {
+  id: string;
+  name: string;
+  badge: string;
+  description: string;
+}
+
+export const GEMINI_TTS_MODELS: GeminiModelInfo[] = [
+  {
+    id: "gemini-2.5-flash-preview-tts",
+    name: "Gemini 2.5 Flash TTS",
+    badge: "Recommended",
+    description: "High-speed neural speech synthesis with natural prosody and dependable generation quotas.",
+  },
+  {
+    id: "gemini-3.1-flash-tts-preview",
+    name: "Gemini 3.1 Flash TTS",
+    badge: "Experimental",
+    description: "Ultra-fast preview neural speech synthesis with fine-grained controllable cadence.",
+  },
+  {
+    id: "gemini-2.5-pro-preview-tts",
+    name: "Gemini 2.5 Pro TTS",
+    badge: "Studio Pro",
+    description: "Deepest acoustic nuance, complex prosody reasoning and high-fidelity pronunciation.",
+  },
+];
+
 export const GOOGLE_TTS_MODELS: GoogleTtsModelInfo[] = [
   {
     id: "Journey",

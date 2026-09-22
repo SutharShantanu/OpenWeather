@@ -24,14 +24,14 @@ export type UniversalDialogSize =
   | "full";
 
 const sizeClasses: Record<UniversalDialogSize, string> = {
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
-  xl: "max-w-xl",
-  "2xl": "max-w-2xl",
-  "3xl": "max-w-3xl",
-  "4xl": "max-w-4xl",
-  full: "max-w-[96vw]",
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+  xl: "sm:max-w-xl",
+  "2xl": "sm:max-w-2xl",
+  "3xl": "sm:max-w-3xl",
+  "4xl": "sm:max-w-4xl",
+  full: "sm:max-w-[96vw]",
 };
 
 export interface UniversalDialogProps {
@@ -137,7 +137,7 @@ export function UniversalDialog({
         {scrollable ? (
           <div
             className={cn(
-              "flex-1 min-h-0 overflow-y-auto p-4 sm:p-6",
+              "flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 pb-6 sm:pb-8",
               bodyClassName
             )}
           >

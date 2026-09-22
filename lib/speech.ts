@@ -1,6 +1,7 @@
 import { CurrentWeather, DailyForecastItem, HourlyForecastItem, formatTemperature } from "./weather";
 import { GoogleTtsAudioProfile, GoogleTtsModel } from "./google-tts";
 import { translateCondition } from "./translations";
+import { CONFIG } from "./config";
 
 export function generateWeatherBriefing(
   current: CurrentWeather,
@@ -132,11 +133,14 @@ export interface WeatherSpeechOptions {
   pitch?: number; // semitones (-4.0 to +4.0)
   lang?: string;
   voiceName?: string;
-  model?: GoogleTtsModel;
+  model?: GoogleTtsModel | string;
   audioProfile?: GoogleTtsAudioProfile;
   volumeGainDb?: number;
   googleApiKey?: string;
   onStart?: () => void;
+  onPause?: () => void;
+  onResume?: () => void;
+  onTimeUpdate?: (currentTime: number, duration: number) => void;
   onEnd?: () => void;
   onError?: (err?: unknown) => void;
 }
@@ -176,13 +180,13 @@ export class WeatherSpeechSynthesizer {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text,
-          voiceName: options?.voiceName || "en-US-Journey-F",
-          model: options?.model || "Journey",
-          languageCode: options?.lang || "en-US",
-          speakingRate: options?.rate ?? 1.0,
-          pitch: options?.pitch ?? 0.0,
-          volumeGainDb: options?.volumeGainDb ?? 0.0,
-          effectsProfileId: options?.audioProfile || "headphone-class-device",
+          voiceName: options?.voiceName || CONFIG.settings.defaultTtsVoice,
+          model: options?.model || CONFIG.settings.defaultTtsModel,
+          languageCode: options?.lang || CONFIG.settings.defaultLanguage,
+          speakingRate: options?.rate ?? CONFIG.settings.defaultTtsSpeed,
+          pitch: options?.pitch ?? CONFIG.settings.defaultTtsPitch,
+          volumeGainDb: options?.volumeGainDb ?? CONFIG.settings.defaultTtsVolume,
+          effectsProfileId: options?.audioProfile || CONFIG.settings.defaultTtsAudioProfile,
           apiKey: options?.googleApiKey,
         }),
         signal: this.abortController.signal,
@@ -191,7 +195,8 @@ export class WeatherSpeechSynthesizer {
       if (res.ok) {
         const data = await res.json();
         if (data.audioContent) {
-          const audio = new Audio("data:audio/mp3;base64," + data.audioContent);
+          const mime = data.mimeType || "audio/mpeg";
+          const audio = new Audio(`data:${mime};base64,` + data.audioContent);
           if (options?.rate && options.rate !== 1.0) {
             audio.playbackRate = Math.max(0.5, Math.min(2.0, options.rate));
           }
@@ -202,6 +207,17 @@ export class WeatherSpeechSynthesizer {
 
           audio.onplay = () => {
             options?.onStart?.();
+            options?.onResume?.();
+          };
+
+          audio.onpause = () => {
+            if (!audio.ended && audio.currentTime > 0) {
+              options?.onPause?.();
+            }
+          };
+
+          audio.ontimeupdate = () => {
+            options?.onTimeUpdate?.(audio.currentTime, audio.duration || 0);
           };
 
           audio.onended = () => {
@@ -210,13 +226,19 @@ export class WeatherSpeechSynthesizer {
           };
 
           audio.onerror = (e) => {
-            console.warn("Google TTS audio playback error, falling back to Web Speech API:", e);
+            console.warn("TTS audio playback error:", e);
             this.audio = null;
-            this.fallbackWebSpeech(text, options);
+            options?.onError?.(e);
           };
 
           this.audio = audio;
-          await audio.play();
+          try {
+            await audio.play();
+          } catch (playErr) {
+            console.warn("Audio play failed or blocked by policy, falling back to Web Speech:", playErr);
+            this.audio = null;
+            this.fallbackWebSpeech(text, options);
+          }
           return;
         }
       }
@@ -296,6 +318,30 @@ export class WeatherSpeechSynthesizer {
     }
   }
 
+  public static pause(): void {
+    if (this.audio && !this.audio.paused) {
+      this.audio.pause();
+    } else if (typeof window !== "undefined" && window.speechSynthesis?.speaking) {
+      window.speechSynthesis.pause();
+    }
+  }
+
+  public static resume(): void {
+    if (this.audio && this.audio.paused) {
+      this.audio.play().catch(console.warn);
+    } else if (typeof window !== "undefined" && window.speechSynthesis?.paused) {
+      window.speechSynthesis.resume();
+    }
+  }
+
+  public static isPaused(): boolean {
+    if (this.audio) return this.audio.paused;
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      return window.speechSynthesis.paused;
+    }
+    return false;
+  }
+
   public static stop(): void {
     if (typeof window === "undefined") return;
 
@@ -306,9 +352,13 @@ export class WeatherSpeechSynthesizer {
 
     if (this.audio) {
       try {
+        this.audio.onplay = null;
+        this.audio.onpause = null;
+        this.audio.ontimeupdate = null;
+        this.audio.onended = null;
+        this.audio.onerror = null;
         this.audio.pause();
         this.audio.currentTime = 0;
-        this.audio.src = "";
       } catch {}
       this.audio = null;
     }

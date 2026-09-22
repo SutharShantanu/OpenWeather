@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { OPENWEATHER_API_KEY } from "@/lib/weather";
+import { CONFIG } from "@/lib/config";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim();
-  const lang = searchParams.get("lang")?.trim() || "en";
+  const lang = searchParams.get("lang")?.trim() || CONFIG.settings.defaultLanguage;
+  const customApiKey = searchParams.get("apiKey")?.trim() || "";
+  const apiKey = customApiKey || CONFIG.keys.openWeatherApiKey;
 
   if (!q || q.length < 2) {
     return NextResponse.json({ results: [] });
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   // 1. Try Open-Meteo Geocoding (Fast, zero API keys required, global coverage)
   try {
-    const openMeteoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+    const openMeteoUrl = `${CONFIG.api.openMeteoGeoBaseUrl}/search?name=${encodeURIComponent(
       q
     )}&count=6&language=${encodeURIComponent(lang)}&format=json`;
     const res = await fetch(openMeteoUrl, { next: { revalidate: 3600 } });
@@ -57,26 +59,28 @@ export async function GET(request: NextRequest) {
   }
 
   // 2. Fallback to OpenWeather Geocoding
-  try {
-    const owUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(
-      q
-    )}&limit=5&appid=${OPENWEATHER_API_KEY}`;
-    const res = await fetch(owUrl, { next: { revalidate: 3600 } });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        const results = data.map((item: any) => ({
-          name: item.name,
-          country: item.country || "",
-          state: item.state || "",
-          lat: item.lat,
-          lon: item.lon,
-        }));
-        return NextResponse.json({ results });
+  if (apiKey) {
+    try {
+      const owUrl = `${CONFIG.api.openWeatherGeoBaseUrl}/direct?q=${encodeURIComponent(
+        q
+      )}&limit=5&appid=${encodeURIComponent(apiKey)}`;
+      const res = await fetch(owUrl, { next: { revalidate: 3600 } });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          const results = data.map((item: any) => ({
+            name: item.name,
+            country: item.country || "",
+            state: item.state || "",
+            lat: item.lat,
+            lon: item.lon,
+          }));
+          return NextResponse.json({ results });
+        }
       }
+    } catch (err) {
+      console.warn("OpenWeather geocoding fallback failed", err);
     }
-  } catch (err) {
-    console.warn("OpenWeather geocoding fallback failed", err);
   }
 
   return NextResponse.json({ results: [] });

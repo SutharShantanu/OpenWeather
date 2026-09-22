@@ -133,6 +133,8 @@ export interface Translations {
     title: string;
     subtitle: string;
     tabSource: string;
+    tabLocations?: string;
+    tabApi?: string;
     tabUnits: string;
     tabFavorites: string;
     tabRegional: string;
@@ -344,7 +346,9 @@ export const TRANSLATIONS: Record<SupportedLanguage, Translations> = {
     settingsDialog: {
       title: "Station & Application Preferences",
       subtitle: "Configure meteorological data feeds, numerical forecast models, measurement standards & voice telemetry",
-      tabSource: "Source & Station",
+      tabSource: "Source & Models",
+      tabLocations: "Locations",
+      tabApi: "API Keys",
       tabUnits: "Units",
       tabFavorites: "Favorites",
       tabRegional: "Regional",

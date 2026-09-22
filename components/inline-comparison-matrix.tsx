@@ -24,6 +24,7 @@ import {
 import { CurrentWeather, formatTemperature } from "@/lib/weather";
 import { WeatherIcon } from "@/components/weather-icon";
 import { useTranslation } from "@/components/language-provider";
+import { CONFIG } from "@/lib/config";
 
 interface InlineComparisonMatrixProps {
   baseCurrent: CurrentWeather;
@@ -31,16 +32,7 @@ interface InlineComparisonMatrixProps {
   onSwitchCity: (cityName: string) => void;
 }
 
-const POPULAR_TARGETS = [
-  "New York",
-  "Tokyo",
-  "London",
-  "Paris",
-  "Sydney",
-  "Singapore",
-  "Dubai",
-  "Mumbai",
-];
+const POPULAR_TARGETS = CONFIG.location.popularCities;
 
 export function InlineComparisonMatrix({
   baseCurrent,
@@ -48,7 +40,11 @@ export function InlineComparisonMatrix({
   onSwitchCity,
 }: InlineComparisonMatrixProps) {
   const { t, language, translateCondition } = useTranslation();
-  const [targetCity, setTargetCity] = useState("Tokyo");
+  const initialTarget =
+    POPULAR_TARGETS.find((c) => c.toLowerCase() !== baseCurrent.cityName.toLowerCase()) ||
+    POPULAR_TARGETS[0] ||
+    "Tokyo";
+  const [targetCity, setTargetCity] = useState(initialTarget);
   const [targetWeather, setTargetWeather] = useState<CurrentWeather | null>(null);
   const [loading, setLoading] = useState(false);
 
