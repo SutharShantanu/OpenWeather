@@ -24,6 +24,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "@/components/language-provider";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 
 interface WeatherHeroProps {
   current: CurrentWeather;
@@ -39,6 +40,9 @@ export function WeatherHero({
   onTogglePin,
 }: WeatherHeroProps) {
   const { t, translateCondition } = useTranslation();
+  const prefs = useDisplayPreferences();
+  const wind = prefs.wind(current.windSpeed);
+  const pressure = prefs.pressure(current.pressure);
   const displayTemp = formatTemperature(current.temp, unit);
   const displayFeelsLike = formatTemperature(current.feelsLike, unit);
   const displayMin = formatTemperature(current.tempMin, unit);
@@ -55,11 +59,7 @@ export function WeatherHero({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const localTime = new Date(current.dt * 1000).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
+  const localTime = prefs.time(current.dt);
 
   return (
     <Card className="w-full">
@@ -69,7 +69,7 @@ export function WeatherHero({
             <Badge variant="outline" className="font-mono text-tiny gap-1">
               <MapPin className="size-2.5 text-primary" />
               <span>
-                {current.lat.toFixed(2)}°N, {current.lon.toFixed(2)}°E
+                {prefs.coords(current.lat, current.lon)}
               </span>
             </Badge>
             <Badge variant="secondary" className="font-mono text-tiny">
@@ -190,7 +190,7 @@ export function WeatherHero({
             <div className="flex flex-col">
               <span className="text-tiny font-mono text-muted-foreground uppercase">{t.hero.wind}</span>
               <span className="text-sm font-mono font-semibold text-foreground">
-                <NumberFlow value={current.windSpeed} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} /> m/s
+                <NumberFlow value={wind.val} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} /> {wind.unitStr}
               </span>
             </div>
           </div>
@@ -202,7 +202,11 @@ export function WeatherHero({
             <div className="flex flex-col">
               <span className="text-tiny font-mono text-muted-foreground uppercase">{t.hero.barometer}</span>
               <span className="text-sm font-mono font-semibold text-foreground">
-                <NumberFlow value={current.pressure} /> hPa
+                <NumberFlow
+                  value={pressure.val}
+                  format={pressure.unitStr === "inHg" ? { minimumFractionDigits: 2, maximumFractionDigits: 2 } : undefined}
+                />{" "}
+                {pressure.unitStr}
               </span>
             </div>
           </div>
@@ -256,7 +260,7 @@ export function WeatherHero({
                 <Wind className="size-3 text-teal-500" />
                 <span className="uppercase">{t.widgets.wind.gusts}</span>
               </div>
-              <span className="font-bold text-foreground">{current.windGusts.toFixed(1)} m/s</span>
+              <span className="font-bold text-foreground">{prefs.windText(current.windGusts)}</span>
             </div>
           )}
         </div>

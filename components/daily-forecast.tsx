@@ -8,6 +8,7 @@ import { WeatherIcon } from "@/components/weather-icon";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "@/components/language-provider";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 
 interface DailyForecastProps {
   daily: DailyForecastItem[];
@@ -16,6 +17,7 @@ interface DailyForecastProps {
 
 export function DailyForecast({ daily, unit }: DailyForecastProps) {
   const { t, translateCondition, translateDay } = useTranslation();
+  const prefs = useDisplayPreferences();
   const allMins = daily.map((d) => formatTemperature(d.tempMin, unit));
   const allMaxs = daily.map((d) => formatTemperature(d.tempMax, unit));
   const globalMin = Math.min(...allMins);
@@ -64,6 +66,11 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
                 <span className="text-xs font-mono font-bold text-foreground">
                   {translateDay(day.day)}
                 </span>
+                {day.date && (
+                  <span className="text-micro font-mono text-muted-foreground">
+                    {prefs.date(day.date)}
+                  </span>
+                )}
                 {popPercent > 10 ? (
                   <span className="flex items-center gap-1 text-tiny font-mono text-sky-500 font-semibold">
                     <CloudRain className="size-2.5" />

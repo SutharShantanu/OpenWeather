@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CurrentWeather, DailyForecastItem, HourlyForecastItem, formatTemperature } from "@/lib/weather";
 import { analyzeWeatherWithAi, AiWeatherAnalysis } from "@/lib/ai-weather-advisor";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 
 interface AiAdvisorDialogProps {
   open: boolean;
@@ -38,6 +39,7 @@ export function AiAdvisorDialog({
   daily,
   unit,
 }: AiAdvisorDialogProps) {
+  const prefs = useDisplayPreferences();
   const [question, setQuestion] = useState("");
   const [customAnswers, setCustomAnswers] = useState<{ q: string; a: string }[]>([]);
   const analysis: AiWeatherAnalysis = analyzeWeatherWithAi(current, hourly, daily, unit);
@@ -50,7 +52,7 @@ export function AiAdvisorDialog({
       const willRain = hourly.slice(0, 12).some((h) => (h.pop ?? 0) > 0.35);
       const rainHour = hourly.slice(0, 12).find((h) => (h.pop ?? 0) > 0.35);
       reply = willRain
-        ? `Yes, keep an umbrella handy. Precipitation probability exceeds 35% around ${rainHour?.time || "today"}.`
+        ? `Yes, keep an umbrella handy. Precipitation probability exceeds 35% around ${rainHour?.time ? prefs.clock(rainHour.time) : "today"}.`
         : `Precipitation probability is below 20% for the next 12 hours. You likely do not need an umbrella.`;
     } else if (lower.includes("wear") || lower.includes("dress") || lower.includes("clothing") || lower.includes("jacket")) {
       const temp = formatTemperature(current.temp, unit);
@@ -63,7 +65,7 @@ export function AiAdvisorDialog({
       }
     } else if (lower.includes("run") || lower.includes("workout") || lower.includes("exercise") || lower.includes("sport") || lower.includes("cycling")) {
       const bestHour = hourly.slice(0, 12).reduce((best, cur) => (cur.temp < best.temp ? cur : best), hourly[0]);
-      reply = `The best window for outdoor exercise is around ${bestHour?.time || "early morning"}, with cooler temperatures (${formatTemperature(bestHour?.temp || current.temp, unit)}°${unit}) and lower thermal stress.`;
+      reply = `The best window for outdoor exercise is around ${bestHour?.time ? prefs.clock(bestHour.time) : "early morning"}, with cooler temperatures (${formatTemperature(bestHour?.temp || current.temp, unit)}°${unit}) and lower thermal stress.`;
     } else if (lower.includes("tomorrow")) {
       const tom = daily[1];
       if (tom) {
@@ -79,7 +81,7 @@ export function AiAdvisorDialog({
         reply = "The extended weekend forecast will be available as we approach the end of the week.";
       }
     } else {
-      reply = `Synoptic evaluation for ${current.cityName}: Atmospheric pressure is ${current.pressure} hPa with humidity at ${current.humidity}%. Condition is ${current.condition.description}. Expected 24-hour diurnal range is ${formatTemperature(daily[0]?.tempMin || current.temp - 3, unit)}° to ${formatTemperature(daily[0]?.tempMax || current.temp + 4, unit)}°${unit}.`;
+      reply = `Synoptic evaluation for ${current.cityName}: Atmospheric pressure is ${prefs.pressureText(current.pressure)} with humidity at ${current.humidity}%. Condition is ${current.condition.description}. Expected 24-hour diurnal range is ${formatTemperature(daily[0]?.tempMin || current.temp - 3, unit)}° to ${formatTemperature(daily[0]?.tempMax || current.temp + 4, unit)}°${unit}.`;
     }
 
     setCustomAnswers((prev) => [{ q, a: reply }, ...prev]);

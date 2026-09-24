@@ -24,6 +24,7 @@ import {
 import { CurrentWeather, formatTemperature } from "@/lib/weather";
 import { WeatherIcon } from "@/components/weather-icon";
 import { useTranslation } from "@/components/language-provider";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 import { CONFIG } from "@/lib/config";
 
 interface InlineComparisonMatrixProps {
@@ -40,6 +41,7 @@ export function InlineComparisonMatrix({
   onSwitchCity,
 }: InlineComparisonMatrixProps) {
   const { t, language, translateCondition } = useTranslation();
+  const prefs = useDisplayPreferences();
   const initialTarget =
     POPULAR_TARGETS.find((c) => c.toLowerCase() !== baseCurrent.cityName.toLowerCase()) ||
     POPULAR_TARGETS[0] ||
@@ -74,11 +76,16 @@ export function InlineComparisonMatrix({
   const tempDiff = targetTemp - baseTemp;
 
   const humidityDiff = targetWeather ? targetWeather.humidity - baseCurrent.humidity : 0;
-  const windDiff = targetWeather ? targetWeather.windSpeed - baseCurrent.windSpeed : 0;
-  const pressureDiff = targetWeather ? targetWeather.pressure - baseCurrent.pressure : 0;
+  const baseWind = prefs.wind(baseCurrent.windSpeed);
+  const targetWind = targetWeather ? prefs.wind(targetWeather.windSpeed) : baseWind;
+  const windDiff = targetWeather ? targetWind.val - baseWind.val : 0;
+  const basePressure = prefs.pressure(baseCurrent.pressure);
+  const targetPressure = targetWeather ? prefs.pressure(targetWeather.pressure) : basePressure;
+  const pressureDiff = targetWeather ? targetPressure.val - basePressure.val : 0;
+  const pressureDecimals = basePressure.unitStr === "inHg" ? 2 : 1;
 
-  const renderDelta = (delta: number, suffix: string, invertGood = false) => {
-    const isZero = Math.abs(delta) < 0.1;
+  const renderDelta = (delta: number, suffix: string, invertGood = false, decimals = 1) => {
+    const isZero = Math.abs(delta) < Math.pow(10, -decimals);
     if (isZero) {
       return (
         <span className="font-mono text-xs text-muted-foreground">0{suffix}</span>
@@ -94,7 +101,7 @@ export function InlineComparisonMatrix({
         }`}
       >
         {isPositive ? "+" : ""}
-        {delta.toFixed(1)}
+        {delta.toFixed(decimals)}
         {suffix}
       </span>
     );
@@ -237,9 +244,9 @@ export function InlineComparisonMatrix({
                   <Wind className="size-3 text-teal-500" />
                   <span>Wind Velocity</span>
                 </div>
-                <span className="w-1/4 text-center">{baseCurrent.windSpeed.toFixed(1)} m/s</span>
-                <span className="w-1/4 text-center">{targetWeather.windSpeed.toFixed(1)} m/s</span>
-                <div className="w-1/6 flex justify-end">{renderDelta(windDiff, " m/s")}</div>
+                <span className="w-1/4 text-center">{baseWind.val.toFixed(1)} {baseWind.unitStr}</span>
+                <span className="w-1/4 text-center">{targetWind.val.toFixed(1)} {targetWind.unitStr}</span>
+                <div className="w-1/6 flex justify-end">{renderDelta(windDiff, ` ${baseWind.unitStr}`)}</div>
               </div>
 
               <div className="px-3 py-2 flex justify-between items-center font-mono">
@@ -247,9 +254,11 @@ export function InlineComparisonMatrix({
                   <Gauge className="size-3 text-amber-500" />
                   <span>Barometric Pressure</span>
                 </div>
-                <span className="w-1/4 text-center">{baseCurrent.pressure} hPa</span>
-                <span className="w-1/4 text-center">{targetWeather.pressure} hPa</span>
-                <div className="w-1/6 flex justify-end">{renderDelta(pressureDiff, " hPa")}</div>
+                <span className="w-1/4 text-center">{basePressure.val} {basePressure.unitStr}</span>
+                <span className="w-1/4 text-center">{targetPressure.val} {targetPressure.unitStr}</span>
+                <div className="w-1/6 flex justify-end">
+                  {renderDelta(pressureDiff, ` ${basePressure.unitStr}`, false, pressureDecimals)}
+                </div>
               </div>
 
               <div className="px-3 py-2 flex justify-between items-center font-mono">

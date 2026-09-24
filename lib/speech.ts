@@ -1,7 +1,6 @@
 import { CurrentWeather, DailyForecastItem, HourlyForecastItem, formatTemperature } from "./weather";
-import { GoogleTtsAudioProfile, GoogleTtsModel } from "./google-tts";
+import { TTS_VOICES } from "./edge-tts";
 import { translateCondition } from "./translations";
-import { CONFIG } from "./config";
 
 export function generateWeatherBriefing(
   current: CurrentWeather,
@@ -133,10 +132,7 @@ export interface WeatherSpeechOptions {
   pitch?: number; // semitones (-4.0 to +4.0)
   lang?: string;
   voiceName?: string;
-  model?: GoogleTtsModel | string;
-  audioProfile?: GoogleTtsAudioProfile;
   volumeGainDb?: number;
-  googleApiKey?: string;
   onStart?: () => void;
   onPause?: () => void;
   onResume?: () => void;
@@ -149,6 +145,45 @@ export class WeatherSpeechSynthesizer {
   private static utterance: SpeechSynthesisUtterance | null = null;
   private static audio: HTMLAudioElement | null = null;
   private static abortController: AbortController | null = null;
+  /** Incremented on every speak()/stop(); async work from an older session must not play. */
+  private static generation = 0;
+  /** Ends the active session exactly once (fires its onEnd) when it is stopped or superseded. */
+  private static settleActive: (() => void) | null = null;
+
+  /**
+   * Starts a new playback session: invalidates any in-flight request and wraps
+   * onEnd/onError so exactly one of them fires per session, including when
+   * the session is cut short by stop() or a newer speak().
+   */
+  private static beginSession(options?: WeatherSpeechOptions) {
+    this.stop();
+    const generation = ++this.generation;
+    let settled = false;
+    const markSettled = () => {
+      if (settled) return false;
+      settled = true;
+      if (this.settleActive === cancel) this.settleActive = null;
+      return true;
+    };
+    const cancel = () => {
+      if (markSettled()) options?.onEnd?.();
+    };
+    this.settleActive = cancel;
+
+    const sessionOptions: WeatherSpeechOptions = {
+      ...options,
+      onEnd: () => {
+        if (markSettled()) options?.onEnd?.();
+      },
+      onError: (err?: unknown) => {
+        if (markSettled()) options?.onError?.(err);
+      },
+    };
+    return {
+      options: sessionOptions,
+      isCurrent: () => generation === this.generation,
+    };
+  }
 
   public static isSupported(): boolean {
     return typeof window !== "undefined";
@@ -163,94 +198,17 @@ export class WeatherSpeechSynthesizer {
     return isAudioPlaying || isUtteranceSpeaking;
   }
 
-  public static async speak(
+  /**
+   * Speak directly with the browser's Web Speech API, skipping the /api/tts
+   * round trip (e.g. after the route already answered `{ fallback: true }`).
+   */
+  public static speakWithWebSpeech(
     text: string,
     options?: WeatherSpeechOptions
-  ): Promise<void> {
+  ): void {
     if (!this.isSupported() || !text) return;
-
-    this.stop();
-
-    // 1. Try Google Text-to-Speech API route first
-    try {
-      this.abortController = new AbortController();
-
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text,
-          voiceName: options?.voiceName || CONFIG.settings.defaultTtsVoice,
-          model: options?.model || CONFIG.settings.defaultTtsModel,
-          languageCode: options?.lang || CONFIG.settings.defaultLanguage,
-          speakingRate: options?.rate ?? CONFIG.settings.defaultTtsSpeed,
-          pitch: options?.pitch ?? CONFIG.settings.defaultTtsPitch,
-          volumeGainDb: options?.volumeGainDb ?? CONFIG.settings.defaultTtsVolume,
-          effectsProfileId: options?.audioProfile || CONFIG.settings.defaultTtsAudioProfile,
-          apiKey: options?.googleApiKey,
-        }),
-        signal: this.abortController.signal,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.audioContent) {
-          const mime = data.mimeType || "audio/mpeg";
-          const audio = new Audio(`data:${mime};base64,` + data.audioContent);
-          if (options?.rate && options.rate !== 1.0) {
-            audio.playbackRate = Math.max(0.5, Math.min(2.0, options.rate));
-          }
-          if (options?.volumeGainDb !== undefined) {
-            // Convert dB to linear volume gain [0.0 - 1.0]
-            audio.volume = Math.max(0, Math.min(1.0, Math.pow(10, options.volumeGainDb / 20)));
-          }
-
-          audio.onplay = () => {
-            options?.onStart?.();
-            options?.onResume?.();
-          };
-
-          audio.onpause = () => {
-            if (!audio.ended && audio.currentTime > 0) {
-              options?.onPause?.();
-            }
-          };
-
-          audio.ontimeupdate = () => {
-            options?.onTimeUpdate?.(audio.currentTime, audio.duration || 0);
-          };
-
-          audio.onended = () => {
-            this.audio = null;
-            options?.onEnd?.();
-          };
-
-          audio.onerror = (e) => {
-            console.warn("TTS audio playback error:", e);
-            this.audio = null;
-            options?.onError?.(e);
-          };
-
-          this.audio = audio;
-          try {
-            await audio.play();
-          } catch (playErr) {
-            console.warn("Audio play failed or blocked by policy, falling back to Web Speech:", playErr);
-            this.audio = null;
-            this.fallbackWebSpeech(text, options);
-          }
-          return;
-        }
-      }
-    } catch (err: unknown) {
-      if ((err as Error)?.name === "AbortError") {
-        return;
-      }
-      console.warn("Google Cloud TTS fetch error, falling back to Web Speech API:", err);
-    }
-
-    // 2. Fallback to Browser Web Speech API with Google voice preference
-    this.fallbackWebSpeech(text, options);
+    const session = this.beginSession(options);
+    this.fallbackWebSpeech(text, session.options);
   }
 
   private static fallbackWebSpeech(
@@ -278,10 +236,8 @@ export class WeatherSpeechSynthesizer {
       const voices = window.speechSynthesis.getVoices();
       const langPrefix = (options?.lang || "en").split("-")[0].toLowerCase();
       const isMale =
-        options?.voiceName?.endsWith("-D") ||
-        options?.voiceName?.endsWith("-Q") ||
-        options?.voiceName?.endsWith("-B") ||
-        options?.voiceName?.toLowerCase().includes("male");
+        TTS_VOICES.find((v) => v.id === options?.voiceName)?.gender ===
+        "MALE";
 
       const genderKeywords = isMale
         ? ["male", "david", "george", "guy", "james", "richard", "martin", "stefan", "daniel"]
@@ -345,6 +301,10 @@ export class WeatherSpeechSynthesizer {
   public static stop(): void {
     if (typeof window === "undefined") return;
 
+    this.generation++;
+    const settleActive = this.settleActive;
+    this.settleActive = null;
+
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;
@@ -369,5 +329,8 @@ export class WeatherSpeechSynthesizer {
       } catch {}
       this.utterance = null;
     }
+
+    // Tell the stopped session's owner it has ended (its audio handlers were detached above)
+    settleActive?.();
   }
 }

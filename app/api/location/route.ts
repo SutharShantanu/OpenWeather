@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CONFIG } from "@/lib/config";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   // 1. Try Vercel / Cloudflare geolocation headers
   const vercelCity = request.headers.get("x-vercel-ip-city");
@@ -74,7 +76,7 @@ export async function GET(request: NextRequest) {
           clientIp
         )}&localityLanguage=en`;
 
-    const res = await fetch(bdcUrl, { next: { revalidate: 3600 } });
+    const res = await fetch(bdcUrl, { signal: AbortSignal.timeout(3000) });
     if (res.ok) {
       const data = await res.json();
       const region = data.principalSubdivision || "";

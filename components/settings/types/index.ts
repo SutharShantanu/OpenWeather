@@ -8,7 +8,6 @@ import {
   GeocodingResult,
   NearbyCity,
 } from "@/lib/weather"
-import { GoogleTtsModel, GoogleTtsAudioProfile } from "@/lib/google-tts"
 
 export type TemperatureUnit = "C" | "F"
 
@@ -17,12 +16,10 @@ export type StandardUnitPresetId = "metric" | "imperial"
 
 export interface UnitOption<T extends string = string> {
   value: T
-  label: string
 }
 
 export interface UnitPresetConfig {
   id: StandardUnitPresetId
-  label: string
   units: {
     tempUnit: TemperatureUnit
     windUnit: WindSpeedUnit
@@ -37,11 +34,7 @@ export type ThemeOptionId = "dark" | "light" | "system"
 
 export interface TimeFormatOption {
   id: TimeFormat
-  label: string
-  sublabel: string
 }
-
-export type SpeechConfigMode = "basic" | "advanced"
 
 export type SpeechDeliveryStyle =
   | "meteorological"
@@ -65,15 +58,9 @@ export interface ExtendedSettings {
   forecastStation: ForecastStationModel
   customApiKey?: string
   // Speech & Audio configurations
-  speechConfigMode?: SpeechConfigMode
-  googleTtsModel: GoogleTtsModel
-  googleTtsVoice: string
   googleTtsPitch: number
-  googleTtsAudioProfile: GoogleTtsAudioProfile
   googleTtsVolumeGain: number
-  googleApiKey?: string
-  geminiVoice?: string
-  geminiModel?: string
+  ttsVoice: string
   speechDeliveryStyle?: SpeechDeliveryStyle
 }
 

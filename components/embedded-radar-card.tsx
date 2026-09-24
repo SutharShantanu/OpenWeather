@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "@/components/language-provider";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 import { CONFIG } from "@/lib/config";
 import {
   Play,
@@ -61,6 +62,7 @@ export function EmbeddedRadarCard({
   onExpand,
 }: EmbeddedRadarCardProps) {
   const { t } = useTranslation();
+  const prefs = useDisplayPreferences();
   const [radarFrames, setRadarFrames] = useState<RadarFrame[]>([]);
   const [currentFrameIndex, setCurrentFrameIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -123,10 +125,7 @@ export function EmbeddedRadarCard({
 
   const currentFrame = radarFrames[currentFrameIndex] || null;
   const frameTimeStr = currentFrame
-    ? new Date(currentFrame.time * 1000).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+    ? prefs.time(currentFrame.time)
     : "--:--";
 
   return (

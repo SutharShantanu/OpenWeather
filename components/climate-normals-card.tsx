@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatTemperature } from "@/lib/weather";
 import { useTranslation } from "@/components/language-provider";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 
 interface ClimateRecord {
   temp: number;
@@ -68,6 +69,7 @@ export function ClimateNormalsCard({
   unit,
 }: ClimateNormalsCardProps) {
   const { t } = useTranslation();
+  const prefs = useDisplayPreferences();
   const [data, setData] = useState<ClimateData | null>(null);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"daily" | "annual">("daily");
@@ -297,7 +299,7 @@ export function ClimateNormalsCard({
                             <div className="font-semibold text-foreground">{d.month}</div>
                             <div className="text-amber-500">Normal High: {d.high}°{unit}</div>
                             <div className="text-sky-500">Normal Low: {d.low}°{unit}</div>
-                            <div className="text-muted-foreground text-tiny">Monthly Rainfall: ~{d.rainfall} mm</div>
+                            <div className="text-muted-foreground text-tiny">Monthly Rainfall: ~{prefs.precipText(d.rainfall)}</div>
                           </div>
                         );
                       }

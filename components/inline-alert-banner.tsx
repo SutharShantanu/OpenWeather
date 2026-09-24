@@ -12,6 +12,11 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
+  Accordion,
+  AccordionItem,
+  AccordionContent,
+} from "@/components/ui/accordion"
+import {
   Alert,
   AlertTitle,
   AlertDescription,
@@ -31,6 +36,7 @@ import {
 } from "lucide-react"
 import { CurrentWeather, WeatherAlert } from "@/lib/weather"
 import { useTranslation } from "@/components/language-provider"
+import { useDisplayPreferences } from "@/components/display-preferences-provider"
 
 interface InlineAlertBannerProps {
   current: CurrentWeather
@@ -42,6 +48,7 @@ export function InlineAlertBanner({
   alerts: propAlerts,
 }: InlineAlertBannerProps) {
   const { t } = useTranslation()
+  const prefs = useDisplayPreferences()
   const [isPlaying, setIsPlaying] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [checkedProtocols, setCheckedProtocols] = useState<
@@ -93,7 +100,7 @@ export function InlineAlertBanner({
         id: "wind",
         source: "Marine & Terrestrial Wind Service",
         event: "High Wind Velocity Warning",
-        headline: `Sustained wind velocities exceeding ${current.windSpeed.toFixed(1)} m/s.`,
+        headline: `Sustained wind velocities exceeding ${prefs.windText(current.windSpeed)}.`,
         severity: "Moderate",
         instruction:
           "Secure loose exterior items, inspect balcony furniture, watch for falling tree branches.",
@@ -230,76 +237,86 @@ export function InlineAlertBanner({
         </CardAction>
       </CardHeader>
 
-      {isExpanded && (
-        <CardContent className="space-y-3 divide-y divide-border/60 border-t border-border p-3 sm:p-4">
-          {activeAlerts.map((alert) => {
-            const isChecked = checkedProtocols[alert.id] || false
-            return (
-              <div key={alert.id} className="space-y-2 pt-3 first:pt-0">
-                <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-foreground">
-                      {alert.event}
-                    </span>
-                    <Badge
-                      variant={
-                        alert.severity === "Extreme" ||
-                        alert.severity === "Severe"
-                          ? "destructive"
-                          : "outline"
-                      }
-                      className="font-mono text-micro uppercase"
+      <Accordion
+        type="single"
+        collapsible
+        value={isExpanded ? "directives" : ""}
+        onValueChange={(val) => setIsExpanded(val === "directives")}
+        className="w-full"
+      >
+        <AccordionItem value="directives" className="border-none">
+          <AccordionContent className="h-auto p-0">
+            <CardContent className="space-y-3 divide-y divide-border/60 border-t border-border p-3 sm:p-4">
+              {activeAlerts.map((alert) => {
+                const isChecked = checkedProtocols[alert.id] || false
+                return (
+                  <div key={alert.id} className="space-y-2 pt-3 first:pt-0">
+                    <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-center">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-foreground">
+                          {alert.event}
+                        </span>
+                        <Badge
+                          variant={
+                            alert.severity === "Extreme" ||
+                            alert.severity === "Severe"
+                              ? "destructive"
+                              : "outline"
+                          }
+                          className="font-mono text-micro uppercase"
+                        >
+                          {alert.severity}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center gap-2 font-mono text-tiny text-muted-foreground">
+                        <Building2 className="size-2.5 text-primary" />
+                        <span>{alert.source}</span>
+                        {alert.expires && (
+                          <>
+                            <span>•</span>
+                            <Clock className="size-2.5" />
+                            <span>Expires: {alert.expires}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      {alert.headline}
+                    </p>
+
+                    {/* Safety Protocol Checklist */}
+                    <div
+                      onClick={() => toggleProtocol(alert.id)}
+                      className={`flex cursor-pointer items-start gap-2.5 border p-2.5 font-mono text-xs transition-colors ${
+                        isChecked
+                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
+                          : "border-border bg-muted/20 text-foreground hover:bg-muted/40"
+                      }`}
                     >
-                      {alert.severity}
-                    </Badge>
+                      {isChecked ? (
+                        <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
+                      ) : (
+                        <Circle className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                      )}
+                      <div className="flex-1">
+                        <span className="mb-0.5 block text-mini font-semibold">
+                          Safety Protocol:{" "}
+                          {isChecked ? "Acknowledged" : "Action Required"}
+                        </span>
+                        <span className="text-mini leading-relaxed text-muted-foreground">
+                          {alert.instruction}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-
-                  <div className="flex items-center gap-2 font-mono text-tiny text-muted-foreground">
-                    <Building2 className="size-2.5 text-primary" />
-                    <span>{alert.source}</span>
-                    {alert.expires && (
-                      <>
-                        <span>•</span>
-                        <Clock className="size-2.5" />
-                        <span>Expires: {alert.expires}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  {alert.headline}
-                </p>
-
-                {/* Safety Protocol Checklist */}
-                <div
-                  onClick={() => toggleProtocol(alert.id)}
-                  className={`flex cursor-pointer items-start gap-2.5 border p-2.5 font-mono text-xs transition-colors ${
-                    isChecked
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
-                      : "border-border bg-muted/20 text-foreground hover:bg-muted/40"
-                  }`}
-                >
-                  {isChecked ? (
-                    <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
-                  ) : (
-                    <Circle className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
-                  )}
-                  <div className="flex-1">
-                    <span className="mb-0.5 block text-mini font-semibold">
-                      Safety Protocol:{" "}
-                      {isChecked ? "Acknowledged" : "Action Required"}
-                    </span>
-                    <span className="text-mini leading-relaxed text-muted-foreground">
-                      {alert.instruction}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </CardContent>
-      )}
+                )
+              })}
+            </CardContent>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </Card>
   )
 }

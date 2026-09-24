@@ -1,11 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CONFIG } from "@/lib/config";
 
+export const dynamic = "force-dynamic";
+
+interface OpenMeteoGeoResult {
+  name: string;
+  country?: string;
+  country_code?: string;
+  admin1?: string;
+  latitude: number;
+  longitude: number;
+  population?: number;
+}
+
+interface OpenWeatherGeoResult {
+  name: string;
+  country?: string;
+  state?: string;
+  lat: number;
+  lon: number;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim();
   const lang = searchParams.get("lang")?.trim() || CONFIG.settings.defaultLanguage;
-  const customApiKey = searchParams.get("apiKey")?.trim() || "";
+  const customApiKey = request.headers.get("x-owm-api-key")?.trim() || "";
   const apiKey = customApiKey || CONFIG.keys.openWeatherApiKey;
 
   if (!q || q.length < 2) {
@@ -39,11 +59,11 @@ export async function GET(request: NextRequest) {
     const openMeteoUrl = `${CONFIG.api.openMeteoGeoBaseUrl}/search?name=${encodeURIComponent(
       q
     )}&count=6&language=${encodeURIComponent(lang)}&format=json`;
-    const res = await fetch(openMeteoUrl, { next: { revalidate: 3600 } });
+    const res = await fetch(openMeteoUrl, { signal: AbortSignal.timeout(4000) });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data.results) && data.results.length > 0) {
-        const results = data.results.map((item: any) => ({
+        const results = data.results.map((item: OpenMeteoGeoResult) => ({
           name: item.name,
           country: item.country || item.country_code || "",
           state: item.admin1 || "",
@@ -64,11 +84,11 @@ export async function GET(request: NextRequest) {
       const owUrl = `${CONFIG.api.openWeatherGeoBaseUrl}/direct?q=${encodeURIComponent(
         q
       )}&limit=5&appid=${encodeURIComponent(apiKey)}`;
-      const res = await fetch(owUrl, { next: { revalidate: 3600 } });
+      const res = await fetch(owUrl, { signal: AbortSignal.timeout(4000) });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          const results = data.map((item: any) => ({
+          const results = data.map((item: OpenWeatherGeoResult) => ({
             name: item.name,
             country: item.country || "",
             state: item.state || "",

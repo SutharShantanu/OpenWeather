@@ -5,8 +5,9 @@ import NumberFlow from "@number-flow/react";
 import { Wind, Navigation2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getBeaufortScale, getWindDirection } from "@/lib/weather";
+import { formatWind, getBeaufortScale, getWindDirection } from "@/lib/weather";
 import { useTranslation } from "@/components/language-provider";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 
 interface WindWidgetProps {
   speed: number; // m/s
@@ -15,7 +16,11 @@ interface WindWidgetProps {
 
 export function WindWidget({ speed, deg }: WindWidgetProps) {
   const { t } = useTranslation();
-  const kmh = Math.round(speed * 3.6);
+  const { wind, windUnit } = useDisplayPreferences();
+  const primary = wind(speed);
+  // Secondary readout: km/h unless that is already the primary unit, then m/s.
+  const secondaryUnit = windUnit === "km/h" ? "m/s" : "km/h";
+  const secondary = formatWind(speed, secondaryUnit);
   const direction = getWindDirection(deg);
   const beaufort = getBeaufortScale(speed);
 
@@ -58,14 +63,14 @@ export function WindWidget({ speed, deg }: WindWidgetProps) {
         <div className="flex-1 flex flex-col gap-2.5 w-full">
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-mono font-bold text-foreground">
-              <NumberFlow value={speed} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} />
+              <NumberFlow value={primary.val} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} />
             </span>
-            <span className="text-xs font-mono text-muted-foreground">m/s</span>
+            <span className="text-xs font-mono text-muted-foreground">{primary.unitStr}</span>
             <span className="text-muted-foreground/40">•</span>
             <span className="text-lg font-mono font-semibold text-foreground">
-              <NumberFlow value={kmh} />
+              <NumberFlow value={secondaryUnit === "km/h" ? Math.round(secondary.val) : secondary.val} />
             </span>
-            <span className="text-xs font-mono text-muted-foreground">km/h</span>
+            <span className="text-xs font-mono text-muted-foreground">{secondary.unitStr}</span>
           </div>
 
           <div className="p-2.5 bg-muted/20 border border-border">

@@ -218,28 +218,14 @@ export function getBrowserSpeechLocales(): string[] {
 }
 
 /**
- * Dynamically fetches live Google Cloud TTS and browser-available languages,
+ * Merges the base locales with the browser's speech synthesis locales,
  * synthesizing any newly discovered locales on-the-fly.
  */
-export async function fetchLiveGoogleLanguages(apiKey?: string): Promise<RegionalLanguageOption[]> {
+export async function fetchLiveGoogleLanguages(): Promise<RegionalLanguageOption[]> {
   const discovered = new Set<string>(GOOGLE_BASE_LOCALES);
 
   // 1. Incorporate browser speech synthesis locales
   getBrowserSpeechLocales().forEach((loc) => discovered.add(loc));
-
-  // 2. Query Google Cloud Text-to-Speech proxy
-  try {
-    const url = apiKey ? `/api/tts?apiKey=${encodeURIComponent(apiKey)}` : "/api/tts";
-    const res = await fetch(url);
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data.languageCodes)) {
-        data.languageCodes.forEach((code: string) => discovered.add(code));
-      }
-    }
-  } catch (err) {
-    console.warn("Live Google TTS language discovery fallback:", err);
-  }
 
   const map = new Map<string, RegionalLanguageOption>();
   for (const loc of discovered) {

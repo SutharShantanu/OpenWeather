@@ -6,7 +6,6 @@ import type {
   PrecipitationUnit,
   TimeFormat,
 } from "./weather";
-import type { GoogleTtsModel, GoogleTtsAudioProfile } from "./google-tts";
 
 export interface LocationConfig {
   defaultCity: string;
@@ -24,8 +23,6 @@ export interface ApiEndpointsConfig {
   openMeteoAirQualityBaseUrl: string;
   openMeteoArchiveBaseUrl: string;
   bigDataCloudGeoBaseUrl: string;
-  googleTtsApiBaseUrl: string;
-  googleTranslateTtsBaseUrl: string;
   rainViewerApiBaseUrl: string;
   rainViewerTileBaseUrl: string;
   cartoCdnTileBaseUrl: string;
@@ -34,7 +31,6 @@ export interface ApiEndpointsConfig {
 
 export interface ApiKeysConfig {
   openWeatherApiKey: string;
-  googleTtsApiKey: string;
 }
 
 export interface SettingsDefaultsConfig {
@@ -48,9 +44,6 @@ export interface SettingsDefaultsConfig {
   defaultTimeFormat: TimeFormat;
   defaultDateFormat: "iso" | "intl" | "us";
   defaultCoordinateFormat: "decimal" | "dms";
-  defaultTtsModel: GoogleTtsModel;
-  defaultTtsVoice: string;
-  defaultTtsAudioProfile: GoogleTtsAudioProfile;
   defaultTtsSpeed: number;
   defaultTtsPitch: number;
   defaultTtsVolume: number;
@@ -122,12 +115,6 @@ export const CONFIG: AppConfig = {
     bigDataCloudGeoBaseUrl:
       (typeof process !== "undefined" && process.env.BIGDATACLOUD_GEO_BASE_URL) ||
       "https://api.bigdatacloud.net/data",
-    googleTtsApiBaseUrl:
-      (typeof process !== "undefined" && process.env.GOOGLE_TTS_API_BASE_URL) ||
-      "https://texttospeech.googleapis.com/v1",
-    googleTranslateTtsBaseUrl:
-      (typeof process !== "undefined" && process.env.GOOGLE_TRANSLATE_TTS_BASE_URL) ||
-      "https://translate.google.com/translate_tts",
     rainViewerApiBaseUrl:
       process.env.NEXT_PUBLIC_RAINVIEWER_API_BASE_URL || "https://api.rainviewer.com",
     rainViewerTileBaseUrl:
@@ -141,12 +128,6 @@ export const CONFIG: AppConfig = {
   keys: {
     openWeatherApiKey:
       (typeof process !== "undefined" && process.env.OPENWEATHER_API_KEY) || "",
-    googleTtsApiKey:
-      (typeof process !== "undefined" &&
-        (process.env.GOOGLE_TTS_API_KEY ||
-          process.env.GOOGLE_API_KEY ||
-          process.env.GEMINI_API_KEY)) ||
-      "",
   },
   settings: {
     defaultWeatherSource:
@@ -168,12 +149,6 @@ export const CONFIG: AppConfig = {
       (process.env.NEXT_PUBLIC_DEFAULT_DATE_FORMAT as "iso" | "intl" | "us") || "iso",
     defaultCoordinateFormat:
       (process.env.NEXT_PUBLIC_DEFAULT_COORDINATE_FORMAT as "decimal" | "dms") || "decimal",
-    defaultTtsModel:
-      (process.env.NEXT_PUBLIC_DEFAULT_TTS_MODEL as GoogleTtsModel) || "Journey",
-    defaultTtsVoice: process.env.NEXT_PUBLIC_DEFAULT_TTS_VOICE || "en-US-Journey-F",
-    defaultTtsAudioProfile:
-      (process.env.NEXT_PUBLIC_DEFAULT_TTS_AUDIO_PROFILE as GoogleTtsAudioProfile) ||
-      "headphone-class-device",
     defaultTtsSpeed: process.env.NEXT_PUBLIC_DEFAULT_TTS_SPEED
       ? parseFloat(process.env.NEXT_PUBLIC_DEFAULT_TTS_SPEED)
       : 1.0,

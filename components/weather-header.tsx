@@ -13,30 +13,69 @@ import {
   X,
   Compass,
   Radio,
+  Menu,
+  LocateFixed,
+  ChevronRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
+import { Kbd } from "@/components/ui/kbd"
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
+import { Spinner } from "@/components/ui/spinner"
+import { Separator } from "@/components/ui/separator"
+import { IconTile } from "@/components/ui/icon-tile"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer"
+import { ButtonGroup } from "@/components/ui/button-group"
+import {
   CurrentWeather,
   DailyForecastItem,
   HourlyForecastItem,
   WeatherAlert,
-  GeocodingResult,
 } from "@/lib/weather"
 import { cn } from "@/lib/utils"
 import { WeatherTtsButton } from "@/components/weather-tts-button"
 import { NotificationsPopover } from "@/components/notifications-popover"
-import { ButtonGroup } from "@/components/ui/button-group"
 import type { ExtendedSettings } from "@/components/settings-dialog"
 import { useTranslation } from "@/components/language-provider"
+import { useDisplayPreferences } from "@/components/display-preferences-provider"
 import { CONFIG } from "@/lib/config"
-import { SEARCH_DEBOUNCE_MS, SEARCH_MIN_QUERY_LENGTH } from "@/lib/constants"
+import { useCitySearch, useMediaQuery, useScrollLock } from "@/hooks"
+import { THEME_OPTIONS } from "@/components/settings/constants"
 
 interface WeatherHeaderProps {
   onSearch: (city: string) => void
@@ -74,431 +113,426 @@ export function WeatherHeader({
   isLoading = false,
 }: WeatherHeaderProps) {
   const { t } = useTranslation()
-  const { setTheme, resolvedTheme } = useTheme()
+  const prefs = useDisplayPreferences()
+  const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  const [query, setQuery] = useState("")
-  const [isOpen, setIsOpen] = useState(false)
-  const [results, setResults] = useState<GeocodingResult[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [detectedCoords, setDetectedCoords] = useState<{
-    lat: number
-    lon: number
-  } | null>(null)
-  const [isLocating, setIsLocating] = useState(false)
-  const searchRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const searchFormRef = useRef<HTMLFormElement>(null)
+  // Stateful controls (TTS playback, notifications popover) must mount exactly once
+  const isDesktop = useMediaQuery("(min-width: 1024px)")
+
+  const {
+    query,
+    setQuery,
+    isOpen,
+    setIsOpen,
+    results,
+    clearResults,
+    isSearching,
+    detectedCoords,
+    isLocating,
+    inputRef,
+    handleSearchFocus,
+    handleSelect,
+    handleFormSubmit,
+    clearSearch,
+  } = useCitySearch({
+    language: settings?.language,
+    onSearch,
+    onLocate,
+  })
+
+  // Freeze the page behind the search dropdown while it's open
+  useScrollLock(isOpen)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- theme is only known after hydration
     setMounted(true)
   }, [])
 
-  // Catch user location as soon as search is activated
-  const handleSearchFocus = () => {
-    setIsOpen(true)
-    if (
-      typeof navigator !== "undefined" &&
-      navigator.geolocation &&
-      !detectedCoords &&
-      !isLocating
-    ) {
-      setIsLocating(true)
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setDetectedCoords({
-            lat: pos.coords.latitude,
-            lon: pos.coords.longitude,
-          })
-          setIsLocating(false)
-        },
-        (err) => {
-          console.warn("Geolocation catch on search activation failed:", err)
-          setIsLocating(false)
-        },
-        { timeout: 8000, maximumAge: 60000 }
-      )
+  // The drawer only exists below the lg breakpoint
+  const isMenuVisible = isMenuOpen && !isDesktop
+  const isDark = mounted && resolvedTheme === "dark"
+  const trimmedQuery = query.trim()
+  const showPopular = trimmedQuery.length < 2
+  const hasSelectableItems = isOpen && (showPopular || results.length > 0)
+
+  /** Closes the mobile menu before running an action, so dialogs don't stack under it. */
+  const runFromMenu = (action?: () => void) => () => {
+    setIsMenuOpen(false)
+    action?.()
+  }
+
+  const handleChangeStation = () => {
+    if (onChangeStation) {
+      onChangeStation()
+    } else if (onOpenSettings) {
+      onOpenSettings("source")
     }
   }
 
-  // Keyboard shortcut: "/" or "Cmd+K" to focus search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        (e.key === "k" && (e.metaKey || e.ctrlKey)) ||
-        (e.key === "/" && document.activeElement !== inputRef.current)
-      ) {
-        e.preventDefault()
-        inputRef.current?.focus()
-        handleSearchFocus()
-      }
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [detectedCoords, isLocating])
-
-  // Close search dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  // Keyless Geocoding API search via internal Next.js route
-  useEffect(() => {
-    if (!query.trim() || query.trim().length < SEARCH_MIN_QUERY_LENGTH) {
-      setResults([])
-      setIsSearching(false)
-      return
-    }
-
-    const timer = setTimeout(async () => {
-      setIsSearching(true)
-      try {
-        const res = await fetch(
-          `/api/search?q=${encodeURIComponent(query.trim())}&lang=${settings?.language || "en"}`
-        )
-        if (res.ok) {
-          const data = await res.json()
-          const list: GeocodingResult[] = Array.isArray(data)
-            ? data
-            : Array.isArray(data?.results)
-              ? data.results
-              : []
-          setResults(list)
-        }
-      } catch (err) {
-        console.warn("Geocoding lookup error:", err)
-      } finally {
-        setIsSearching(false)
-      }
-    }, SEARCH_DEBOUNCE_MS)
-
-    return () => clearTimeout(timer)
-  }, [query, settings?.language])
-
-  const handleSelect = (cityName: string) => {
-    onSearch(cityName)
-    setQuery("")
-    setResults([])
-    setIsOpen(false)
+  const handleLocateFromSearch = () => {
+    onLocate()
+    clearSearch()
   }
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (results.length > 0) {
-      handleSelect(results[0].name)
-    } else if (query.trim()) {
-      handleSelect(query.trim())
-    } else {
-      // Empty input with Enter: use current location
-      onLocate()
-      setIsOpen(false)
-    }
-  }
+  const menuItems = [
+    onOpenAiAdvisor && {
+      id: "ai",
+      label: t.header.aiAdvisor,
+      description: t.header.aiAdvisorDesc,
+      icon: Sparkles,
+      onSelect: onOpenAiAdvisor,
+    },
+    {
+      id: "source",
+      label: t.common.source,
+      description: t.header.sourceDesc,
+      icon: Radio,
+      onSelect: handleChangeStation,
+    },
+    {
+      id: "locate",
+      label: t.common.locateMe,
+      description: t.header.locateDesc,
+      icon: LocateFixed,
+      onSelect: onLocate,
+      disabled: isLoading,
+    },
+    onOpenSettings && {
+      id: "settings",
+      label: t.common.settings,
+      description: t.settingsDialog.subtitle,
+      icon: Settings,
+      onSelect: () => onOpenSettings(),
+    },
+  ].filter(Boolean) as {
+    id: string
+    label: string
+    description: string
+    icon: React.ElementType
+    onSelect: () => void
+    disabled?: boolean
+  }[]
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-3 sm:px-6 lg:gap-4 lg:px-8">
         {/* Logo & Brand: Home route */}
-        <Link
-          href="/"
-          onClick={(e) => {
-            setQuery("")
-            setResults([])
-            setIsOpen(false)
-            if (onHome) {
-              e.preventDefault()
-              onHome()
-            }
-          }}
-          className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-85 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:gap-2.5"
-          title="OpenWeather Home"
+        <Button
+          asChild
+          variant="ghost"
+          className="h-9 shrink-0 gap-2 px-1 hover:bg-transparent hover:opacity-85"
         >
-          <div className="flex size-8 items-center justify-center bg-primary text-primary-foreground">
-            <Compass className="size-4" />
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="font-heading text-sm font-medium tracking-tight text-foreground">
+          <Link
+            href="/"
+            onClick={(e) => {
+              clearSearch()
+              if (onHome) {
+                e.preventDefault()
+                onHome()
+              }
+            }}
+            aria-label={t.header.home}
+          >
+            <IconTile variant="solid" size="sm">
+              <Compass />
+            </IconTile>
+            <span className="hidden font-heading text-sm font-medium tracking-tight text-foreground sm:inline">
               OpenWeather
             </span>
-          </div>
-        </Link>
+          </Link>
+        </Button>
 
-        {/* Center: Search with integrated GPS pin */}
-        <div ref={searchRef} className="relative max-w-md flex-1">
-          <form onSubmit={handleFormSubmit} className="relative">
-            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value)
-                setIsOpen(true)
-              }}
-              onFocus={handleSearchFocus}
-              placeholder={t.common.searchPlaceholder}
-              className="pr-16 pl-8 font-mono text-xs"
-            />
-            <div className="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-1">
-              {query && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuery("")
-                    setResults([])
-                  }}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <X className="size-3" />
-                </button>
-              )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={onLocate}
-                    disabled={isLoading}
-                    className="p-1 text-muted-foreground transition-colors hover:text-primary"
-                    title={t.common.locateMe}
-                  >
-                    <MapPin className="size-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>{t.common.locateMe}</TooltipContent>
-              </Tooltip>
-              <kbd className="hidden border border-border px-1 py-0.5 font-mono text-micro text-muted-foreground sm:inline-flex">
-                /
-              </kbd>
-            </div>
-          </form>
-
-          {/* Autocomplete Dropdown */}
-          {isOpen && (
-            <div className="absolute top-full right-0 left-0 z-50 mt-1 border border-border bg-popover text-xs shadow-md ring-1 ring-foreground/10">
-              {/* 0. GPS Current Station (Caught instantly on search activation) */}
-              <button
-                type="button"
-                onClick={() => {
-                  onLocate()
-                  setIsOpen(false)
-                  setQuery("")
-                  setResults([])
-                }}
-                className="group flex w-full items-center justify-between border-b border-border bg-primary/5 px-3 py-2 text-left font-mono text-xs transition-colors hover:bg-muted/80"
+        {/* Center: Search with integrated GPS pin. Command provides arrow-key navigation over the results. */}
+        <Command
+          shouldFilter={false}
+          loop
+          onKeyDown={(e) => {
+            if (e.key === "Escape" && isOpen) {
+              e.preventDefault()
+              setIsOpen(false)
+            } else if (e.key === "Enter" && !hasSelectableItems) {
+              // cmdk swallows Enter (preventDefault), which blocks native form submit.
+              // With nothing to select, run the free-text search / locate ourselves.
+              handleFormSubmit(e)
+            }
+          }}
+          className="size-auto max-w-md min-w-0 flex-1 bg-transparent"
+        >
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverAnchor asChild>
+              <form
+                ref={searchFormRef}
+                onSubmit={handleFormSubmit}
+                role="search"
               >
-                <div className="flex items-center gap-2">
-                  <div className="flex size-6 shrink-0 items-center justify-center border border-primary/30 bg-primary/10 text-primary">
-                    <MapPin
-                      className={cn(
-                        "size-3.5",
-                        isLocating && "animate-pulse text-primary"
-                      )}
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5 font-semibold text-foreground">
-                      <span>Current Station (GPS)</span>
-                      {isLocating ? (
-                        <Badge
-                          variant="outline"
-                          className="h-4 animate-pulse border-primary/30 py-0 font-mono text-nano text-primary"
-                        >
-                          Detecting...
-                        </Badge>
-                      ) : detectedCoords ? (
-                        <Badge
-                          variant="outline"
-                          className="h-4 border-emerald-500/30 py-0 font-mono text-nano text-emerald-600 dark:text-emerald-400"
-                        >
-                          GPS Locked
-                        </Badge>
-                      ) : null}
-                    </div>
-                    <div className="text-mini text-muted-foreground">
-                      {detectedCoords
-                        ? `${detectedCoords.lat.toFixed(3)}°, ${detectedCoords.lon.toFixed(3)}° • Click to load station`
-                        : "Auto-detect meteorological station from device sensors"}
-                    </div>
-                  </div>
-                </div>
-                <span className="text-tiny font-bold text-primary group-hover:underline">
-                  Locate →
-                </span>
-              </button>
+                <InputGroup>
+                  <InputGroupAddon>
+                    <Search />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    ref={inputRef}
+                    type="text"
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value)
+                      setIsOpen(true)
+                    }}
+                    onFocus={handleSearchFocus}
+                    placeholder={t.common.searchPlaceholder}
+                    aria-label={t.common.searchPlaceholder}
+                    aria-expanded={isOpen}
+                    autoComplete="off"
+                    className="font-mono text-xs"
+                  />
+                  <InputGroupAddon align="inline-end" className="gap-0.5">
+                    {query && (
+                      <InputGroupButton
+                        size="icon-xs"
+                        variant="warning"
+                        onClick={() => {
+                          setQuery("")
+                          clearResults()
+                        }}
+                        aria-label={t.common.clear}
+                      >
+                        <X />
+                      </InputGroupButton>
+                    )}
+                    {/* Idle: shortcut hint. Active (dropdown open): locate action replaces it */}
+                    {isOpen ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <InputGroupButton
+                            size="icon-xs"
+                            variant="outline"
+                            className="bg-muted"
+                            onClick={onLocate}
+                            disabled={isLoading}
+                            aria-label={t.common.locateMe}
+                          >
+                            <MapPin className="size-3" />
+                          </InputGroupButton>
+                        </TooltipTrigger>
+                        <TooltipContent>{t.common.locateMe}</TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <Kbd>⌘ + K</Kbd>
+                    )}
+                  </InputGroupAddon>
+                </InputGroup>
+              </form>
+            </PopoverAnchor>
 
-              {isSearching ? (
-                <div className="p-3 text-center font-mono text-xs text-muted-foreground">
-                  Locating stations…
-                </div>
-              ) : results.length > 0 ? (
-                <div className="max-h-64 overflow-y-auto py-1">
-                  <div className="border-b border-border px-3 py-1 font-mono text-tiny text-muted-foreground uppercase">
-                    Geocoding Matches
-                  </div>
-                  {results.map((r, i) => (
-                    <button
-                      key={`${r.name}-${r.lat}-${i}`}
-                      onClick={() => handleSelect(r.name)}
-                      className="flex w-full items-center justify-between border-b border-border/40 px-3 py-2 text-left transition-colors last:border-0 hover:bg-muted"
-                    >
-                      <div className="flex items-center gap-2">
-                        <MapPin className="size-3 shrink-0 text-primary" />
-                        <div>
-                          <span className="font-medium text-foreground">
+            {/* Autocomplete Dropdown: anchored to the search field, positioned by Radix */}
+            <PopoverContent
+              align="start"
+              // Keep typing focus in the input; clicks on the input itself aren't "outside"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+              onCloseAutoFocus={(e) => e.preventDefault()}
+              onInteractOutside={(e) => {
+                if (searchFormRef.current?.contains(e.target as Node))
+                  e.preventDefault()
+              }}
+              className="w-(--radix-popover-trigger-width) gap-0 p-0"
+            >
+              <CommandList data-lenis-prevent className="h-auto max-h-fit">
+                {/* GPS current station: offered while the user hasn't typed a query */}
+                {showPopular && (
+                  <>
+                    <CommandGroup>
+                      <CommandItem
+                        value="__locate__"
+                        onSelect={handleLocateFromSearch}
+                        className="gap-2.5 bg-primary/10 font-mono"
+                      >
+                        <IconTile variant="soft" size="xs">
+                          <MapPin
+                            className={cn(isLocating && "animate-pulse")}
+                          />
+                        </IconTile>
+                        <span className="flex min-w-0 flex-1 flex-col">
+                          <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                            {t.header.currentStationGps}
+                            {isLocating ? (
+                              <Badge
+                                variant="outline"
+                                className="animate-pulse border-primary/30 font-mono text-tiny text-primary"
+                              >
+                                {t.header.detecting}
+                              </Badge>
+                            ) : detectedCoords ? (
+                              <Badge
+                                variant="success-light"
+                                className="font-mono text-tiny"
+                              >
+                                {t.header.gpsLocked}
+                              </Badge>
+                            ) : null}
+                          </span>
+                          <span className="truncate text-mini text-muted-foreground">
+                            {detectedCoords
+                              ? `${prefs.coords(detectedCoords.lat, detectedCoords.lon, 3)} • ${t.header.clickToLoadStation}`
+                              : t.header.autoDetectStation}
+                          </span>
+                        </span>
+                        <span className="text-tiny font-bold text-primary">
+                          {t.header.locateAction}
+                        </span>
+                      </CommandItem>
+                    </CommandGroup>
+                    <CommandSeparator className="mx-0" />
+                    <CommandGroup heading={t.header.popularHubs}>
+                      {CONFIG.location.popularCities.slice(0, 8).map((c) => (
+                        <CommandItem
+                          key={c}
+                          value={`popular:${c}`}
+                          onSelect={() => handleSelect(c)}
+                          className="font-mono"
+                        >
+                          <MapPin className="size-3 text-primary" />
+                          {c}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </>
+                )}
+
+                {!showPopular && results.length > 0 && (
+                  <CommandGroup heading={t.header.geocodingMatches} className="h-auto">
+                    {results.map((r, i) => (
+                      <CommandItem
+                        key={`${r.name}-${r.lat}-${r.lon}-${i}`}
+                        value={`result:${r.name}:${r.lat}:${r.lon}:${i}`}
+                        onSelect={() => handleSelect(r.name)}
+                        className="justify-between"
+                      >
+                        <span className="flex min-w-0 items-center gap-2">
+                          <MapPin className="size-3 text-primary" />
+                          <span className="truncate font-medium text-foreground">
                             {r.name}
                           </span>
-                          <span className="ml-1.5 text-mini text-muted-foreground">
+                          <span className="truncate text-mini text-muted-foreground">
                             {r.state ? `${r.state}, ` : ""}
                             {r.country}
                           </span>
-                        </div>
-                      </div>
-                      <span className="font-mono text-tiny text-muted-foreground">
-                        {r.lat.toFixed(2)}°, {r.lon.toFixed(2)}°
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              ) : query.trim().length >= 2 ? (
-                <div className="p-3 text-center font-mono text-xs text-muted-foreground">
-                  No meteorological station found for &ldquo;{query}&rdquo;
-                </div>
-              ) : (
-                <div className="p-2.5">
-                  <div className="mb-1.5 font-mono text-tiny text-muted-foreground uppercase">
-                    Popular Hubs
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {CONFIG.location.popularCities.slice(0, 8).map((c) => (
-                      <Button
-                        key={c}
-                        variant="secondary"
-                        size="xs"
-                        onClick={() => handleSelect(c)}
-                        className="font-mono text-xs"
-                      >
-                        {c}
-                      </Button>
+                        </span>
+                        <span className="shrink-0 font-mono text-tiny text-muted-foreground">
+                          {prefs.coords(r.lat, r.lon, 2)}
+                        </span>
+                      </CommandItem>
                     ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                  </CommandGroup>
+                )}
 
-        {/* Right Actions: Decluttered, unified controls */}
-        <div className="flex shrink-0 items-center gap-1.5">
-          {/* 1, 2, 3: Synoptic Operations Button Group (Briefing, AI Advisor, Change Station) */}
+                {!showPopular && results.length === 0 && (
+                  <CommandEmpty className="flex items-center justify-center gap-2 py-4 font-mono text-muted-foreground">
+                    {isSearching ? (
+                      <>
+                        <Spinner className="size-3.5" />
+                        {t.header.locatingStations}
+                      </>
+                    ) : (
+                      t.header.noStationFound(trimmedQuery)
+                    )}
+                  </CommandEmpty>
+                )}
+              </CommandList>
+            </PopoverContent>
+          </Popover>
+        </Command>
+
+        {/* Desktop Actions (lg+) */}
+        <div className="hidden shrink-0 items-center gap-1.5 lg:flex">
           <ButtonGroup>
-            {/* Spoken Audio Briefing (Text-to-Speech) */}
-            <WeatherTtsButton
-              current={current}
-              daily={daily}
-              hourly={hourly}
-              unit={unit}
-              settings={settings}
-            />
+            {isDesktop && (
+              <WeatherTtsButton
+                size="default"
+                current={current}
+                daily={daily}
+                hourly={hourly}
+                unit={unit}
+                settings={settings}
+              />
+            )}
 
-            {/* AI Weather Intelligence Advisor */}
             {onOpenAiAdvisor && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
-                    size="sm"
                     onClick={onOpenAiAdvisor}
-                    className="h-8 gap-1.5 px-2.5 font-mono text-xs"
+                    className="font-mono"
                   >
-                    <Sparkles className="size-3.5 text-primary" />
-                    <span className="hidden text-mini sm:inline">AI Advisor</span>
+                    <Sparkles className="text-primary" />
+                    <span className="text-mini">{t.header.aiAdvisor}</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  AI Synoptic Intelligence & Sudden Shift Analysis
-                </TooltipContent>
+                <TooltipContent>{t.header.aiAdvisorDesc}</TooltipContent>
               </Tooltip>
             )}
 
-            {/* Change Station / Data Source */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (onChangeStation) {
-                      onChangeStation()
-                    } else if (onOpenSettings) {
-                      onOpenSettings("source")
-                    }
-                  }}
-                  className="h-8 gap-1.5 px-2.5 font-mono text-xs"
-                  title={t.common.source}
+                  onClick={handleChangeStation}
+                  className="font-mono"
                 >
-                  <Radio className="size-3.5 text-primary" />
-                  <span className="hidden text-mini sm:inline">{t.common.source}</span>
+                  <Radio className="text-primary" />
+                  <span className="text-mini">{t.common.source}</span>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>
-                {t.common.source}
-              </TooltipContent>
+              <TooltipContent>{t.common.source}</TooltipContent>
             </Tooltip>
           </ButtonGroup>
 
-          {/* Real Notifications Center with Web Push */}
-          <NotificationsPopover
-            alerts={alerts}
-            current={current}
-            open={showNotifications}
-            onOpenChange={onNotificationsOpenChange}
-          />
-          {/* 3, 4, 5: Actions Button Group */}
+          {isDesktop && (
+            <NotificationsPopover
+              alerts={alerts}
+              current={current}
+              open={showNotifications}
+              onOpenChange={onNotificationsOpenChange}
+            />
+          )}
+
           <ButtonGroup>
-            {/* Comprehensive Settings Menu */}
             {onOpenSettings && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
-                    size="icon-sm"
+                    size="icon"
                     onClick={() => onOpenSettings()}
-                    className="size-8"
-                    title={t.settingsDialog.title}
+                    aria-label={t.settingsDialog.title}
                   >
-                    <Settings className="size-3.5" />
+                    <Settings />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>
-                  {t.settingsDialog.title}
-                </TooltipContent>
+                <TooltipContent>{t.settingsDialog.title}</TooltipContent>
               </Tooltip>
             )}
 
             {/* Theme Toggle with smooth Sun/Moon transition */}
             <Button
               variant="outline"
-              size="icon-sm"
-              className="relative size-8"
-              onClick={() =>
-                setTheme(resolvedTheme === "dark" ? "light" : "dark")
-              }
+              size="icon"
+              className="relative"
+              onClick={() => setTheme(isDark ? "light" : "dark")}
               aria-label={
                 mounted
-                  ? `Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`
-                  : "Toggle theme"
+                  ? isDark
+                    ? t.header.switchToLight
+                    : t.header.switchToDark
+                  : t.header.toggleTheme
               }
-              title="Toggle Dark / Light Theme"
               disabled={!mounted}
             >
               <Sun
                 className={cn(
                   "size-3.5 transition-all duration-300",
-                  mounted && resolvedTheme === "dark"
+                  isDark
                     ? "scale-0 -rotate-90 opacity-0"
                     : "scale-100 rotate-0 opacity-100"
                 )}
@@ -506,15 +540,136 @@ export function WeatherHeader({
               <Moon
                 className={cn(
                   "absolute size-3.5 transition-all duration-300",
-                  mounted && resolvedTheme === "dark"
+                  isDark
                     ? "scale-100 rotate-0 opacity-100"
                     : "scale-0 rotate-90 opacity-0"
                 )}
               />
-              <span className="sr-only">Toggle theme</span>
             </Button>
           </ButtonGroup>
         </div>
+
+        {/* Compact Actions (< lg): primary controls stay inline, the rest live in the drawer.
+            The briefing stays inline so playback isn't cut off when the drawer closes. */}
+        <ButtonGroup className="shrink-0 lg:hidden">
+          {!isDesktop && (
+            <>
+              <WeatherTtsButton
+                size="icon"
+                current={current}
+                daily={daily}
+                hourly={hourly}
+                unit={unit}
+                settings={settings}
+              />
+              <NotificationsPopover
+                alerts={alerts}
+                current={current}
+                open={showNotifications}
+                onOpenChange={onNotificationsOpenChange}
+              />
+            </>
+          )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsMenuOpen(true)}
+            aria-label={t.header.openMenu}
+            aria-expanded={isMenuVisible}
+            aria-haspopup="dialog"
+          >
+            <Menu />
+          </Button>
+        </ButtonGroup>
+
+        <Drawer open={isMenuVisible} onOpenChange={setIsMenuOpen}>
+          <DrawerContent
+            side="right"
+            aria-describedby={undefined}
+            className="lg:hidden"
+          >
+            <DrawerHeader className="border-b border-border pr-12">
+              <DrawerTitle className="flex items-center gap-2">
+                <IconTile variant="solid" size="xs">
+                  <Compass />
+                </IconTile>
+                OpenWeather
+              </DrawerTitle>
+            </DrawerHeader>
+
+            <ItemGroup
+              aria-label={t.header.mainMenu}
+              className="flex-1 gap-1.5 overflow-y-auto p-3"
+            >
+              {menuItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Item key={item.id} asChild variant="outline" size="sm">
+                    <Button
+                      variant="ghost"
+                      disabled={item.disabled}
+                      onClick={runFromMenu(item.onSelect)}
+                      className="h-auto flex-nowrap justify-start text-left whitespace-normal"
+                    >
+                      <ItemMedia>
+                        <IconTile variant="soft" size="sm">
+                          <Icon />
+                        </IconTile>
+                      </ItemMedia>
+                      <ItemContent className="min-w-0">
+                        <ItemTitle className="font-heading">
+                          {item.label}
+                        </ItemTitle>
+                        <ItemDescription className="truncate">
+                          {item.description}
+                        </ItemDescription>
+                      </ItemContent>
+                      <ItemActions>
+                        <ChevronRight className="size-4 text-muted-foreground" />
+                      </ItemActions>
+                    </Button>
+                  </Item>
+                )
+              })}
+            </ItemGroup>
+
+            <Separator />
+
+            <DrawerFooter className="gap-2 p-3">
+              <ItemTitle className="font-mono text-tiny text-muted-foreground uppercase">
+                {t.settingsDialog.theme.headerTitle}
+              </ItemTitle>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                spacing={1}
+                value={mounted ? theme : undefined}
+                onValueChange={(value) => {
+                  if (value) setTheme(value)
+                }}
+                disabled={!mounted}
+                aria-label={t.settingsDialog.theme.headerTitle}
+                className="grid w-full grid-cols-3"
+              >
+                {THEME_OPTIONS.map((option) => {
+                  const Icon = option.icon
+                  const label = t.settingsDialog.theme[`${option.id}Title`]
+                  return (
+                    <ToggleGroupItem
+                      key={option.id}
+                      value={option.id}
+                      aria-label={label}
+                      className="h-auto flex-col text-tiny"
+                    >
+                      <Icon className="size-4" />
+                      <span className="truncate">{label}</span>
+                    </ToggleGroupItem>
+                  )
+                })}
+              </ToggleGroup>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
       </div>
     </header>
   )

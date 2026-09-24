@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoonInfo } from "@/lib/weather";
 import { useTranslation } from "@/components/language-provider";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 
 interface SolarWidgetProps {
   sunrise: number; // Unix seconds
@@ -17,16 +18,11 @@ interface SolarWidgetProps {
 
 export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetProps) {
   const { t } = useTranslation();
+  const prefs = useDisplayPreferences();
   const [activeTab, setActiveTab] = useState<"sun" | "moon">("sun");
 
-  const sunriseTime = new Date(sunrise * 1000).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const sunsetTime = new Date(sunset * 1000).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const sunriseTime = prefs.time(sunrise);
+  const sunsetTime = prefs.time(sunset);
 
   const totalDaylightSeconds = Math.max(1, sunset - sunrise);
   const elapsedSeconds = Math.max(0, Math.min(totalDaylightSeconds, currentDt - sunrise));

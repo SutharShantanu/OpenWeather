@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { HourlyForecastItem, formatTemperature } from "@/lib/weather";
 import { TrendingUp, CloudRain, Wind, Droplets, SunMedium } from "lucide-react";
 import { useTranslation } from "@/components/language-provider";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 
 interface WeatherChartsCardProps {
   hourly: HourlyForecastItem[];
@@ -35,14 +36,16 @@ interface WeatherChartsCardProps {
 
 export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
   const { t } = useTranslation();
+  const prefs = useDisplayPreferences();
+  const windUnitLabel = prefs.wind(0).unitStr;
   const [metric, setMetric] = useState<"temp" | "precip" | "wind" | "humidity" | "uv">("temp");
 
   const chartData = hourly.slice(0, 24).map((item) => ({
-    time: item.time,
+    time: prefs.clock(item.time),
     temp: formatTemperature(item.temp, unit),
     feelsLike: formatTemperature(item.feelsLike, unit),
     precip: Math.round(item.pop * 100),
-    wind: parseFloat(item.windSpeed.toFixed(1)),
+    wind: prefs.wind(item.windSpeed).val,
     humidity: item.humidity,
     uv: item.uvIndex ?? 0,
   }));
@@ -174,7 +177,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
               <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" strokeOpacity={0.08} />
                 <XAxis dataKey="time" stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} />
-                <YAxis stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} tickFormatter={(val) => `${val}m/s`} />
+                <YAxis stroke="currentColor" className="text-tiny font-mono text-muted-foreground" tickLine={false} axisLine={false} tickFormatter={(val) => `${val}${windUnitLabel}`} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
@@ -182,7 +185,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                       return (
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
-                          <div className="text-teal-500 font-bold">Wind Speed: {data.wind} m/s</div>
+                          <div className="text-teal-500 font-bold">Wind Speed: {data.wind} {windUnitLabel}</div>
                         </div>
                       );
                     }

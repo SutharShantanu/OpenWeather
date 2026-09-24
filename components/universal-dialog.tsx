@@ -93,6 +93,53 @@ export function UniversalDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
         showCloseButton={showCloseButton}
+        onEscapeKeyDown={(event) => {
+          // Let an expanded combobox/listbox consume Escape first without closing the dialog
+          const target = event.target as HTMLElement | null
+          const isComboboxTarget = Boolean(
+            target?.closest?.(
+              '[role="combobox"][aria-expanded="true"], [data-slot^="combobox-"], [role="listbox"], [data-base-ui-combobox-positioner], [data-base-ui-combobox-popup]'
+            )
+          )
+          const isAnyComboboxOpen = Boolean(
+            document.querySelector(
+              '[data-slot="combobox-content"][data-open], [data-base-ui-combobox-popup][data-open], [role="combobox"][aria-expanded="true"]'
+            )
+          )
+          if (isComboboxTarget || isAnyComboboxOpen) {
+            event.preventDefault()
+          }
+        }}
+        onPointerDownOutside={(event) => {
+          const originalTarget = (event.detail?.originalEvent?.target || event.target) as HTMLElement | null
+          if (
+            originalTarget?.closest?.(
+              '[data-slot^="combobox-"], [role="listbox"], [data-base-ui-combobox-positioner], [data-base-ui-combobox-popup]'
+            )
+          ) {
+            event.preventDefault()
+          }
+        }}
+        onInteractOutside={(event) => {
+          const originalTarget = (event.detail?.originalEvent?.target || event.target) as HTMLElement | null
+          if (
+            originalTarget?.closest?.(
+              '[data-slot^="combobox-"], [role="listbox"], [data-base-ui-combobox-positioner], [data-base-ui-combobox-popup]'
+            )
+          ) {
+            event.preventDefault()
+          }
+        }}
+        onFocusOutside={(event) => {
+          const target = event.target as HTMLElement | null
+          if (
+            target?.closest?.(
+              '[data-slot^="combobox-"], [role="listbox"], [data-base-ui-combobox-positioner], [data-base-ui-combobox-popup]'
+            )
+          ) {
+            event.preventDefault()
+          }
+        }}
         className={cn(
           "flex h-auto max-h-[90vh] sm:h-auto sm:max-h-[86vh] w-full flex-col gap-0 overflow-hidden p-0 text-xs",
           sizeClasses[size],

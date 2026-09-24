@@ -16,6 +16,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent }
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/components/language-provider";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 
 interface HourlyForecastProps {
   hourly: HourlyForecastItem[];
@@ -24,17 +25,18 @@ interface HourlyForecastProps {
 
 export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
   const { t, translateCondition } = useTranslation();
+  const prefs = useDisplayPreferences();
   const [showChart, setShowChart] = useState(false);
   const [hoursLimit, setHoursLimit] = useState<24 | 48>(24);
 
   const displayedHourly = hourly.slice(0, hoursLimit);
 
   const chartData = displayedHourly.map((item) => ({
-    time: item.time,
+    time: prefs.clock(item.time),
     temp: formatTemperature(item.temp, unit),
     feelsLike: formatTemperature(item.feelsLike, unit),
     pop: Math.round(item.pop * 100),
-    wind: item.windSpeed,
+    wind: prefs.wind(item.windSpeed).val,
     uv: item.uvIndex ?? 0,
   }));
 
@@ -117,7 +119,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                           <div className="font-semibold text-foreground">{data.time}</div>
                           <div className="text-primary font-bold">{data.temp}°{unit}</div>
                           <div className="text-tiny text-muted-foreground">{t.common.precip}: {data.pop}%</div>
-                          <div className="text-tiny text-muted-foreground">{t.hero.wind}: {data.wind} m/s</div>
+                          <div className="text-tiny text-muted-foreground">{t.hero.wind}: {data.wind} {prefs.wind(0).unitStr}</div>
                           {data.uv > 0 && (
                             <div className="text-tiny text-amber-500">{t.hero.uvIndex}: {data.uv}</div>
                           )}
@@ -150,7 +152,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                   className="flex flex-col items-center justify-between gap-2 min-w-[5.25rem] p-2.5 bg-muted/20 border border-border hover:bg-muted/40 transition-colors text-center shrink-0"
                 >
                   <span className="text-tiny font-mono text-muted-foreground font-medium">
-                    {item.time}
+                    {prefs.clock(item.time)}
                   </span>
 
                   <div className="size-7 bg-background border border-border flex items-center justify-center">
@@ -174,7 +176,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
 
                   <div className="flex items-center gap-1 text-micro font-mono text-muted-foreground pt-1 border-t border-border/40 w-full justify-center">
                     <Wind className="size-2.5 text-muted-foreground" />
-                    <span>{item.windSpeed.toFixed(0)}m/s</span>
+                    <span>{Math.round(prefs.wind(item.windSpeed).val)}{prefs.wind(0).unitStr}</span>
                   </div>
                 </div>
               );

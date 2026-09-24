@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CONFIG } from "@/lib/config";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const lat = searchParams.get("lat");
@@ -21,7 +23,7 @@ export async function GET(request: NextRequest) {
     // 10-year historical climate sample (2014 to 2024)
     const url = `${CONFIG.api.openMeteoArchiveBaseUrl}/archive?latitude=${latitude}&longitude=${longitude}&start_date=2014-01-01&end_date=2024-12-31&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=auto`;
 
-    const res = await fetch(url, { next: { revalidate: 86400 } });
+    const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
     if (!res.ok) {
       throw new Error(`Archive API returned status ${res.status}`);
     }

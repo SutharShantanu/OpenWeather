@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { CONFIG } from "@/lib/config";
+import { useDisplayPreferences } from "@/components/display-preferences-provider";
 
 interface RadarMapInnerProps {
   lat: number;
@@ -24,6 +25,8 @@ export function RadarMapInner({
   mapStyle = "dark",
   opacity = 0.75,
 }: RadarMapInnerProps) {
+  const prefs = useDisplayPreferences();
+  const popupHtml = `<b>${cityName} Station</b><br/>${prefs.coords(lat, lon, 3)}`;
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -68,7 +71,7 @@ export function RadarMapInner({
       }),
     }).addTo(map);
 
-    marker.bindPopup(`<b>${cityName} Station</b><br/>${lat.toFixed(3)}°, ${lon.toFixed(3)}°`);
+    marker.bindPopup(popupHtml);
 
     mapRef.current = map;
     markerRef.current = marker;
@@ -101,9 +104,9 @@ export function RadarMapInner({
     mapRef.current.setView([lat, lon], 8);
     if (markerRef.current) {
       markerRef.current.setLatLng([lat, lon]);
-      markerRef.current.setPopupContent(`<b>${cityName} Station</b><br/>${lat.toFixed(3)}°, ${lon.toFixed(3)}°`);
+      markerRef.current.setPopupContent(popupHtml);
     }
-  }, [lat, lon, cityName]);
+  }, [lat, lon, popupHtml]);
 
   // Update Doppler radar or satellite overlay
   useEffect(() => {

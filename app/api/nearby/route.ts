@@ -3,6 +3,8 @@ import { CONFIG } from "@/lib/config";
 import { NearbyCity } from "@/lib/weather";
 import { haversineDistanceKm } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const lat = parseFloat(searchParams.get("lat") || "");
@@ -17,7 +19,7 @@ export async function GET(request: NextRequest) {
   let currentCountry = "";
   try {
     const bdcUrl = `${CONFIG.api.bigDataCloudGeoBaseUrl}/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
-    const res = await fetch(bdcUrl, { next: { revalidate: 86400 } });
+    const res = await fetch(bdcUrl, { signal: AbortSignal.timeout(3000) });
     if (res.ok) {
       const data = await res.json();
       currentCity =
@@ -52,7 +54,7 @@ export async function GET(request: NextRequest) {
   const reversePromises = offsets.map(async ({ dlat, dlon }) => {
     try {
       const bdcUrl = `${CONFIG.api.bigDataCloudGeoBaseUrl}/reverse-geocode-client?latitude=${lat + dlat}&longitude=${lon + dlon}&localityLanguage=en`;
-      const res = await fetch(bdcUrl, { next: { revalidate: 86400 } });
+      const res = await fetch(bdcUrl, { signal: AbortSignal.timeout(3000) });
       if (res.ok) {
         const data = await res.json();
         const city =
@@ -72,7 +74,7 @@ export async function GET(request: NextRequest) {
   const geoPromises = searchTerms.slice(0, 6).map(async (term) => {
     try {
       const url = `${CONFIG.api.openMeteoGeoBaseUrl}/search?name=${encodeURIComponent(term)}&count=10&language=en&format=json`;
-      const res = await fetch(url, { next: { revalidate: 3600 } });
+      const res = await fetch(url, { signal: AbortSignal.timeout(3000) });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.results)) {
