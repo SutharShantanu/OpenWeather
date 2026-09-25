@@ -75,9 +75,15 @@ export function WeatherHero({
             <Badge variant="secondary" className="font-mono text-tiny">
               {current.country || t.common.stationTelemetry}
             </Badge>
-            {uvClass && (
+            {uvClass && current.uvIndex !== undefined && (
               <Badge variant="outline" className={`font-mono text-tiny ${uvClass.color}`}>
-                UV {current.uvIndex} • {uvClass.label}
+                UV {current.uvIndex} • {
+                  current.uvIndex < 3 ? t.widgets.uv.low :
+                  current.uvIndex < 6 ? t.widgets.uv.moderate :
+                  current.uvIndex < 8 ? t.widgets.uv.high :
+                  current.uvIndex < 11 ? t.widgets.uv.veryHigh :
+                  t.widgets.uv.extreme
+                }
               </Badge>
             )}
             <span className="text-tiny font-mono text-muted-foreground hidden sm:inline">

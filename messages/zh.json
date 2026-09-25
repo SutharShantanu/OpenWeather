@@ -98,7 +98,11 @@
     "Violent Rain Showers": "强阵雨",
     "Snow Showers": "阵雪",
     "Severe Thunderstorm": "强雷暴",
-    "Fog & Depositing Rime": "浓雾与雾凇"
+    "Fog & Depositing Rime": "浓雾与雾凇",
+    "Thunderstorm": "Thunderstorm",
+    "Clear Night": "Clear Night",
+    "Freezing Rain": "Freezing Rain",
+    "Variable": "Variable"
   },
   "widgets": {
     "wind": {
@@ -138,7 +142,12 @@
       "unhealthy": "不健康",
       "veryUnhealthy": "非常不健康",
       "hazardous": "严重污染",
-      "scale": "Scale"
+      "scale": "Scale",
+      "level1Desc": "Air quality is satisfactory with minimal risk.",
+      "level2Desc": "Acceptable quality; minor irritation possible for sensitive groups.",
+      "level3Desc": "General public may experience slight discomfort.",
+      "level4Desc": "Health alert: sensitive individuals may experience adverse symptoms.",
+      "level5Desc": "Emergency conditions: entire population likely affected."
     },
     "solar": {
       "title": "日照天文历",
@@ -173,7 +182,17 @@
       "currentIntensity": "Current Intensity",
       "dailyPeak": "Daily Peak Index",
       "burnTime": "Skin Burn Time",
-      "recommendedSpf": "Recommended SPF"
+      "recommendedSpf": "Recommended SPF",
+      "lowAdvice": "No special protection required. Safe for outdoor activities.",
+      "moderateAdvice": "Wear sunglasses, hat, and SPF 30+ sunscreen during midday hours.",
+      "highAdvice": "Seek shade during midday peaks. Wear sun-protective clothing and SPF 30+.",
+      "veryHighAdvice": "Avoid midday sun. Shirt, hat, sunglasses, and high-factor sunscreen essential.",
+      "extremeAdvice": "Take all precautions. Unprotected skin and eyes will burn in minutes.",
+      "burnTimeOver60": "> 60 mins",
+      "burnTime40": "~ 40 mins",
+      "burnTime25": "~ 25 mins",
+      "burnTime15": "~ 15 mins",
+      "burnTimeUnder10": "< 10 mins"
     }
   },
   "settingsDialog": {

@@ -23,11 +23,11 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
 
   // Approximate burn time in minutes based on UV
   const getBurnTime = (uv: number) => {
-    if (uv < 3) return "> 60 mins";
-    if (uv < 6) return "~ 40 mins";
-    if (uv < 8) return "~ 25 mins";
-    if (uv < 11) return "~ 15 mins";
-    return "< 10 mins";
+    if (uv < 3) return t.widgets.uv.burnTimeOver60;
+    if (uv < 6) return t.widgets.uv.burnTime40;
+    if (uv < 8) return t.widgets.uv.burnTime25;
+    if (uv < 11) return t.widgets.uv.burnTime15;
+    return t.widgets.uv.burnTimeUnder10;
   };
 
   const getRiskLabel = (risk: string) => {
@@ -140,7 +140,17 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
         {/* WHO Advice Box */}
         <div className="p-2.5 bg-muted/30 border border-border text-mini leading-relaxed text-muted-foreground flex items-start gap-2">
           <Sparkles className="size-3.5 text-primary shrink-0 mt-0.5" />
-          <span>{classification.advice}</span>
+          <span>
+            {currentVal < 3
+              ? t.widgets.uv.lowAdvice
+              : currentVal < 6
+              ? t.widgets.uv.moderateAdvice
+              : currentVal < 8
+              ? t.widgets.uv.highAdvice
+              : currentVal < 11
+              ? t.widgets.uv.veryHighAdvice
+              : t.widgets.uv.extremeAdvice}
+          </span>
         </div>
       </CardContent>
     </Card>

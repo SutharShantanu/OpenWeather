@@ -70,7 +70,15 @@ export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
               <span className="text-xs font-mono text-muted-foreground">/ 5 {t.widgets.airQuality.scale}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {classification.description}
+              {aqi === 1
+                ? t.widgets.airQuality.level1Desc
+                : aqi === 2
+                ? t.widgets.airQuality.level2Desc
+                : aqi === 3
+                ? t.widgets.airQuality.level3Desc
+                : aqi === 4
+                ? t.widgets.airQuality.level4Desc
+                : t.widgets.airQuality.level5Desc}
             </p>
           </div>
 
