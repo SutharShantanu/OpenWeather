@@ -510,7 +510,7 @@
     "gpsLocked": "GPS Fixado",
     "clickToLoadStation": "Clique para carregar a estação",
     "autoDetectStation": "Detectar automaticamente a estação meteorológica pelos sensores",
-    "locateAction": "Localizar →",
+    "locateAction": "Localizar",
     "locatingStations": "Localizando estações…",
     "geocodingMatches": "Correspondências de Geocodificação",
     "noStationFound": "Nenhuma estação meteorológica encontrada para «{query}»",

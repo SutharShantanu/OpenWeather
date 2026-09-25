@@ -298,7 +298,7 @@ export function buildWeatherProvider(
         provider: "Dynamic Multi-Engine Failover",
         status: "active",
         requiresApiKey: false,
-        description: `Automated multi-engine consensus: Cascades ${activeEngines.join(" → ")}.`,
+        description: `Automated multi-engine consensus: Cascades ${activeEngines.join(", ")}.`,
         badge: "Smart Failover",
       };
     }

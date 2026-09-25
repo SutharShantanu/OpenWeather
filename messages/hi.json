@@ -510,7 +510,7 @@
     "gpsLocked": "GPS लॉक",
     "clickToLoadStation": "स्टेशन लोड करने के लिए क्लिक करें",
     "autoDetectStation": "डिवाइस सेंसर से मौसम स्टेशन का स्वतः पता लगाएँ",
-    "locateAction": "स्थान खोजें →",
+    "locateAction": "स्थान खोजें",
     "locatingStations": "स्टेशन खोजे जा रहे हैं…",
     "geocodingMatches": "जियोकोडिंग परिणाम",
     "noStationFound": "“{query}” के लिए कोई मौसम स्टेशन नहीं मिला",

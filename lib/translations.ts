@@ -1221,7 +1221,7 @@ export const TRANSLATIONS: Partial<Record<SupportedLanguage, Translations>> = {
       gpsLocked: "GPS Locked",
       clickToLoadStation: "Click to load station",
       autoDetectStation: "Auto-detect meteorological station from device sensors",
-      locateAction: "Locate →",
+      locateAction: "Locate",
       locatingStations: "Locating stations…",
       geocodingMatches: "Geocoding Matches",
       noStationFound: (query) => `No meteorological station found for “${query}”`,

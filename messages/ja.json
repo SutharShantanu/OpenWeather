@@ -510,7 +510,7 @@
     "gpsLocked": "GPS 測位済み",
     "clickToLoadStation": "クリックして観測所を読み込む",
     "autoDetectStation": "端末のセンサーから気象観測所を自動検出",
-    "locateAction": "現在地へ →",
+    "locateAction": "現在地へ",
     "locatingStations": "観測所を検索中…",
     "geocodingMatches": "ジオコーディング結果",
     "noStationFound": "「{query}」に該当する気象観測所はありません",

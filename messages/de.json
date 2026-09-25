@@ -510,7 +510,7 @@
     "gpsLocked": "GPS erfasst",
     "clickToLoadStation": "Klicken, um die Station zu laden",
     "autoDetectStation": "Wetterstation automatisch über die Gerätesensoren ermitteln",
-    "locateAction": "Orten →",
+    "locateAction": "Orten",
     "locatingStations": "Stationen werden gesucht…",
     "geocodingMatches": "Geokodierungstreffer",
     "noStationFound": "Keine Wetterstation für „{query}“ gefunden",

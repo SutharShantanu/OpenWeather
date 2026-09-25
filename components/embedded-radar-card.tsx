@@ -161,6 +161,14 @@ export function EmbeddedRadarCard({
             >
               {t.radar.light}
             </Button>
+            <Button
+              variant={mapStyle === "osm" ? "default" : "ghost"}
+              size="xs"
+              onClick={() => setMapStyle("osm")}
+              className="h-6 px-2 text-tiny font-mono"
+            >
+              OSM
+            </Button>
           </div>
 
           {/* Layer Mode */}

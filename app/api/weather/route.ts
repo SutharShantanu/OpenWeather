@@ -314,7 +314,7 @@ export async function GET(request: NextRequest) {
           provider: "Dynamic Multi-Engine Failover",
           status: "active",
           requiresApiKey: false,
-          description: `Automated multi-engine consensus: Cascades ${activeChain.join(" → ")}.`,
+          description: `Automated multi-engine consensus: Cascades ${activeChain.join(", ")}.`,
           badge: "Smart Failover",
         },
       ];

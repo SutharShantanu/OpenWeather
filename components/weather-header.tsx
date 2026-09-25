@@ -16,6 +16,7 @@ import {
   Menu,
   LocateFixed,
   ChevronRight,
+  ArrowRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -302,23 +303,18 @@ export function WeatherHeader({
                     )}
                     {/* Idle: shortcut hint. Active (dropdown open): locate action replaces it */}
                     {isOpen ? (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <InputGroupButton
-                            size="icon-xs"
-                            variant="outline"
-                            className="bg-muted"
-                            onClick={onLocate}
-                            disabled={isLoading}
-                            aria-label={t.common.locateMe}
-                          >
-                            <MapPin className="size-3" />
-                          </InputGroupButton>
-                        </TooltipTrigger>
-                        <TooltipContent>{t.common.locateMe}</TooltipContent>
-                      </Tooltip>
+                      <InputGroupButton
+                        size="icon-xs"
+                        variant="outline"
+                        className="bg-muted"
+                        onClick={onLocate}
+                        disabled={isLoading}
+                        aria-label={t.common.locateMe}
+                      >
+                        <MapPin className="size-3" />
+                      </InputGroupButton>
                     ) : (
-                      <Kbd>⌘ + K</Kbd>
+                      <Kbd>/</Kbd>
                     )}
                   </InputGroupAddon>
                 </InputGroup>
@@ -345,7 +341,7 @@ export function WeatherHeader({
                       <CommandItem
                         value="__locate__"
                         onSelect={handleLocateFromSearch}
-                        className="gap-2.5 bg-primary/10 font-mono"
+                        className="gap-2.5 bg-accent font-mono"
                       >
                         <IconTile variant="soft" size="xs">
                           <MapPin
@@ -377,9 +373,29 @@ export function WeatherHeader({
                               : t.header.autoDetectStation}
                           </span>
                         </span>
-                        <span className="text-tiny font-bold text-primary">
-                          {t.header.locateAction}
-                        </span>
+                        <Button
+                          size="xs"
+                          variant="default"
+                          disabled={isLocating || isLoading}
+                          className="shrink-0 gap-1 font-mono text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleLocateFromSearch()
+                          }}
+                        >
+                          {isLocating ? (
+                            <>
+                              <Spinner className="size-3" />
+                              <span>{t.common.locating}</span>
+                            </>
+                          ) : (
+                            <>
+                              <MapPin className="size-3" />
+                              <span>{t.header.locateAction}</span>
+                              <ArrowRight className="size-3" />
+                            </>
+                          )}
+                        </Button>
                       </CommandItem>
                     </CommandGroup>
                     <CommandSeparator className="mx-0" />
@@ -400,7 +416,10 @@ export function WeatherHeader({
                 )}
 
                 {!showPopular && results.length > 0 && (
-                  <CommandGroup heading={t.header.geocodingMatches} className="h-auto">
+                  <CommandGroup
+                    heading={t.header.geocodingMatches}
+                    className="h-auto"
+                  >
                     {results.map((r, i) => (
                       <CommandItem
                         key={`${r.name}-${r.lat}-${r.lon}-${i}`}

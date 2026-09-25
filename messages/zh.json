@@ -510,7 +510,7 @@
     "gpsLocked": "GPS 已锁定",
     "clickToLoadStation": "点击调取此台站数据",
     "autoDetectStation": "通过设备传感器自动探测最近气象站",
-    "locateAction": "立即定位 →",
+    "locateAction": "立即定位",
     "locatingStations": "正在定位台站…",
     "geocodingMatches": "地理编码匹配项",
     "noStationFound": "未找到与“{query}”相符的气象站",

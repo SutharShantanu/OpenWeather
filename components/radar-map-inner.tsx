@@ -36,14 +36,20 @@ export function RadarMapInner({
   const overlayRef = useRef<L.TileLayer | null>(null);
 
   const getBaseTileUrl = (style: string) => {
+    const withCartoKey = (url: string) => {
+      if (!CONFIG.keys.cartoApiKey || url.includes("key=")) return url;
+      const separator = url.includes("?") ? "&" : "?";
+      return `${url}${separator}key=${CONFIG.keys.cartoApiKey}`;
+    };
+
     switch (style) {
       case "voyager":
-        return `${CONFIG.api.cartoCdnTileBaseUrl}/rastertiles/voyager/{z}/{x}/{y}{r}.png`;
+        return withCartoKey(`${CONFIG.api.cartoCdnTileBaseUrl}/rastertiles/voyager/{z}/{x}/{y}{r}.png`);
       case "osm":
         return `${CONFIG.api.openStreetMapTileBaseUrl}/{z}/{x}/{y}.png`;
       case "dark":
       default:
-        return `${CONFIG.api.cartoCdnTileBaseUrl}/dark_all/{z}/{x}/{y}{r}.png`;
+        return withCartoKey(`${CONFIG.api.cartoCdnTileBaseUrl}/dark_all/{z}/{x}/{y}{r}.png`);
     }
   };
 

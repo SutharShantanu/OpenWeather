@@ -510,7 +510,7 @@
     "gpsLocked": "GPS зафиксирован",
     "clickToLoadStation": "Нажмите для загрузки станции",
     "autoDetectStation": "Автоматическое определение метеостанции по датчикам",
-    "locateAction": "Определить →",
+    "locateAction": "Определить",
     "locatingStations": "Поиск станций…",
     "geocodingMatches": "Совпадения геокодирования",
     "noStationFound": "По запросу «{query}» метеостанций не найдено",

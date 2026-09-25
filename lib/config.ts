@@ -31,6 +31,7 @@ export interface ApiEndpointsConfig {
 
 export interface ApiKeysConfig {
   openWeatherApiKey: string;
+  cartoApiKey: string;
 }
 
 export interface SettingsDefaultsConfig {
@@ -128,6 +129,8 @@ export const CONFIG: AppConfig = {
   keys: {
     openWeatherApiKey:
       (typeof process !== "undefined" && process.env.OPENWEATHER_API_KEY) || "",
+    cartoApiKey:
+      process.env.NEXT_PUBLIC_CARTO_API_KEY || "",
   },
   settings: {
     defaultWeatherSource:
