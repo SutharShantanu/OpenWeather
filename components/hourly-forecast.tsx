@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import NumberFlow from "@number-flow/react";
-import { Clock, TrendingUp, CloudRain, SunMedium, Wind } from "lucide-react";
+import { Clock, TrendingUp, CloudRain, Wind } from "lucide-react";
 import {
   AreaChart,
   Area,
@@ -24,7 +24,7 @@ interface HourlyForecastProps {
 }
 
 export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
-  const { t, translateCondition } = useTranslation();
+  const { t } = useTranslation();
   const prefs = useDisplayPreferences();
   const [showChart, setShowChart] = useState(false);
   const [hoursLimit, setHoursLimit] = useState<24 | 48>(24);
@@ -50,7 +50,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
               {t.forecast.hourlyTitle}
             </CardTitle>
             <Badge variant="outline" className="text-tiny font-mono">
-              1-Hour Precision
+              {t.forecast.oneHourPrecision}
             </Badge>
           </div>
           <CardDescription className="text-xs">
@@ -87,7 +87,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
             className="font-mono text-xs gap-1.5 h-7"
           >
             <TrendingUp className="size-3" />
-            <span>{showChart ? "Cards" : "Curve"}</span>
+            <span>{showChart ? t.forecast.cards : t.forecast.curve}</span>
           </Button>
         </CardAction>
       </CardHeader>

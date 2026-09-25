@@ -83,7 +83,7 @@ export function HumidityWidget({ humidity, tempC, unit }: HumidityWidgetProps) {
         <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-2">
             <ThermometerSun className="size-3.5 text-amber-500" />
-            <span className="text-muted-foreground">NOAA Heat Index:</span>
+            <span className="text-muted-foreground">{t.widgets.humidity.heatIndex}</span>
           </div>
           <span className="font-bold text-foreground">
             <NumberFlow value={displayHeatIndex} />°{unit}

@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CONFIG } from "@/lib/config";
 import { EmptyState } from "@/components/empty-state";
 import { WeatherAlert, CurrentWeather } from "@/lib/weather";
+import { useTranslation } from "@/components/language-provider";
 
 interface NotificationsPopoverProps {
   alerts?: WeatherAlert[];
@@ -32,6 +32,7 @@ export function NotificationsPopover({
   open,
   onOpenChange,
 }: NotificationsPopoverProps) {
+  const { t } = useTranslation();
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
   const activeAlerts = alerts.filter((a) => !dismissedIds.includes(a.id));
@@ -52,7 +53,7 @@ export function NotificationsPopover({
           variant="outline"
           size="icon-sm"
           className="size-8 relative"
-          title="Notification Center"
+          title={t.notifications.title}
         >
           {unreadCount > 0 ? (
             <BellRing className="size-3.5 text-primary" />
@@ -75,10 +76,10 @@ export function NotificationsPopover({
         <div className="flex items-center justify-between border-b border-border pb-2.5">
           <div className="flex items-center gap-1.5 font-heading font-semibold text-foreground">
             <Bell className="size-3.5 text-primary" />
-            <span>Notification Center</span>
+            <span>{t.notifications.title}</span>
             {unreadCount > 0 && (
               <Badge variant="outline" className="text-micro font-mono ml-1">
-                {unreadCount} Active
+                {t.notifications.activeCount(unreadCount)}
               </Badge>
             )}
           </div>
@@ -91,7 +92,7 @@ export function NotificationsPopover({
               className="h-5 px-1.5 text-tiny text-muted-foreground hover:text-foreground"
             >
               <Trash2 className="size-2.5 mr-1" />
-              Clear
+              {t.common.clear}
             </Button>
           )}
         </div>
@@ -99,7 +100,7 @@ export function NotificationsPopover({
         {/* Active Weather Bulletins */}
         <div className="space-y-2">
           <div className="text-tiny uppercase font-bold text-muted-foreground">
-            Current Station Bulletins
+            {t.notifications.currentBulletins}
           </div>
 
           {activeAlerts.length > 0 ? (
@@ -131,7 +132,7 @@ export function NotificationsPopover({
                       onClick={() => handleDismissAlert(alert.id)}
                       className="hover:text-foreground underline cursor-pointer"
                     >
-                      Dismiss
+                      {t.notifications.dismiss}
                     </button>
                   </div>
                 </div>
@@ -143,8 +144,8 @@ export function NotificationsPopover({
               size="sm"
               icon={<ShieldCheck className="text-emerald-500 size-4" />}
               iconStackClassName="text-emerald-500"
-              title="All Systems Clear"
-              description={`No active weather bulletins or severe advisories for ${current?.cityName || "your location"}.`}
+              title={t.notifications.allClearTitle}
+              description={t.notifications.allClearDesc(current?.cityName || t.common.stationTelemetry)}
             />
           )}
         </div>

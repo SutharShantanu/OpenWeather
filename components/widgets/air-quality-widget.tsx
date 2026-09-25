@@ -24,6 +24,23 @@ export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
     { label: "NO₂", val: airQuality?.no2 ?? 12, max: 200, unit: "µg/m³" },
   ];
 
+  const getTranslatedAqiLabel = (level: number) => {
+    switch (level) {
+      case 1:
+        return t.widgets.airQuality.good;
+      case 2:
+        return t.widgets.airQuality.moderate;
+      case 3:
+        return t.widgets.airQuality.sensitive;
+      case 4:
+        return t.widgets.airQuality.unhealthy;
+      case 5:
+        return t.widgets.airQuality.hazardous;
+      default:
+        return classification.label;
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="border-b border-border pb-3 flex flex-row items-center justify-between">
@@ -39,7 +56,7 @@ export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
           </CardDescription>
         </div>
         <Badge variant="outline" className={`font-mono text-tiny ${classification.color}`}>
-          AQI {aqi} — {classification.label}
+          AQI {aqi} — {getTranslatedAqiLabel(aqi)}
         </Badge>
       </CardHeader>
 
@@ -50,7 +67,7 @@ export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
               <span className="text-3xl font-mono font-bold text-foreground">
                 <NumberFlow value={aqi} />
               </span>
-              <span className="text-xs font-mono text-muted-foreground">/ 5 Scale</span>
+              <span className="text-xs font-mono text-muted-foreground">/ 5 {t.widgets.airQuality.scale}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {classification.description}

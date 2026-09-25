@@ -53,13 +53,13 @@ export function roundTo(val: number, decimals: number = 0): number {
  * Creates a debounced function that delays invoking fn until after wait milliseconds
  * have elapsed since the last time the debounced function was invoked.
  */
-export function debounce<T extends (...args: any[]) => any>(
-  fn: T,
+export function debounce<Args extends unknown[], R>(
+  fn: (...args: Args) => R,
   wait: number
-): ((...args: Parameters<T>) => void) & { cancel: () => void } {
+): ((...args: Args) => void) & { cancel: () => void } {
   let timeoutId: ReturnType<typeof setTimeout> | null = null
 
-  const debounced = (...args: Parameters<T>) => {
+  const debounced = (...args: Args) => {
     if (timeoutId !== null) {
       clearTimeout(timeoutId)
     }

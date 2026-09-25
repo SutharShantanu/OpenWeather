@@ -21,12 +21,8 @@ import {
   Pause,
   CloudRain,
   Cloud,
-  Layers,
   Maximize2,
   Minimize2,
-  Gauge,
-  Sliders,
-  Map,
 } from "lucide-react";
 
 interface RadarFrame {
@@ -68,7 +64,7 @@ export function EmbeddedRadarCard({
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeLayer, setActiveLayer] = useState<"radar" | "satellite" | "none">("radar");
   const [mapStyle, setMapStyle] = useState<"dark" | "voyager" | "osm">("dark");
-  const [opacity, setOpacity] = useState<number>(0.8);
+  const opacity = 0.8;
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(750);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const cardContainerRef = useRef<HTMLDivElement>(null);
@@ -142,7 +138,7 @@ export function EmbeddedRadarCard({
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            Live precipitation Doppler scan & multi-source base maps
+            {t.radar.desc}
           </CardDescription>
         </div>
 
@@ -155,7 +151,7 @@ export function EmbeddedRadarCard({
               onClick={() => setMapStyle("dark")}
               className="h-6 px-2 text-tiny font-mono"
             >
-              Dark
+              {t.radar.dark}
             </Button>
             <Button
               variant={mapStyle === "voyager" ? "default" : "ghost"}
@@ -163,7 +159,7 @@ export function EmbeddedRadarCard({
               onClick={() => setMapStyle("voyager")}
               className="h-6 px-2 text-tiny font-mono"
             >
-              Light
+              {t.radar.light}
             </Button>
           </div>
 
@@ -176,7 +172,7 @@ export function EmbeddedRadarCard({
               className="gap-1 font-mono text-tiny h-6 px-2"
             >
               <CloudRain className="size-3" />
-              <span>Radar</span>
+              <span>{t.radar.radarLayer}</span>
             </Button>
             <Button
               variant={activeLayer === "satellite" ? "default" : "ghost"}
@@ -185,7 +181,7 @@ export function EmbeddedRadarCard({
               className="gap-1 font-mono text-tiny h-6 px-2"
             >
               <Cloud className="size-3" />
-              <span>Clouds</span>
+              <span>{t.radar.cloudsLayer}</span>
             </Button>
             <Button
               variant={activeLayer === "none" ? "default" : "ghost"}
@@ -193,7 +189,7 @@ export function EmbeddedRadarCard({
               onClick={() => setActiveLayer("none")}
               className="font-mono text-tiny h-6 px-2"
             >
-              Clear
+              {t.radar.clearLayer}
             </Button>
           </div>
 
@@ -203,7 +199,7 @@ export function EmbeddedRadarCard({
             size="xs"
             onClick={() => setPlaybackSpeed((prev) => (prev === 750 ? 400 : 750))}
             className="h-6 px-2 font-mono text-tiny"
-            title="Playback Speed"
+            title={t.radar.playbackSpeed}
           >
             {playbackSpeed === 750 ? "1x" : "2x"}
           </Button>
@@ -214,10 +210,22 @@ export function EmbeddedRadarCard({
             size="icon-xs"
             onClick={toggleFullscreen}
             className="h-6 w-6"
-            title="Toggle Fullscreen"
+            title={t.radar.toggleFullscreen}
           >
             {isFullscreen ? <Minimize2 className="size-3" /> : <Maximize2 className="size-3" />}
           </Button>
+
+          {onExpand && (
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={onExpand}
+              className="h-6 px-2 font-mono text-tiny"
+              title={t.radar.openFullRadar}
+            >
+              {t.radar.fullRadar}
+            </Button>
+          )}
         </CardAction>
       </CardHeader>
 
@@ -238,7 +246,7 @@ export function EmbeddedRadarCard({
 
         {/* Live Legend Overlay on Map */}
         <div className="absolute top-3 right-3 z-10 bg-background/90 border border-border p-2 text-tiny font-mono shadow-md backdrop-blur-sm hidden sm:block">
-          <div className="font-bold text-foreground mb-1">Precipitation dBZ</div>
+          <div className="font-bold text-foreground mb-1">{t.radar.precipDbz}</div>
           <div className="flex items-center gap-1">
             <div className="w-4 h-2 bg-[#00ffff]" title="Light Drizzle" />
             <div className="w-4 h-2 bg-[#0000ff]" title="Rain" />
@@ -247,8 +255,8 @@ export function EmbeddedRadarCard({
             <div className="w-4 h-2 bg-[#ff0000]" title="Violent / Hail" />
           </div>
           <div className="flex justify-between text-nano text-muted-foreground pt-0.5">
-            <span>Drizzle</span>
-            <span>Heavy</span>
+            <span>{t.radar.drizzle}</span>
+            <span>{t.radar.heavy}</span>
           </div>
         </div>
       </CardContent>
@@ -263,11 +271,11 @@ export function EmbeddedRadarCard({
             className="gap-1.5 font-mono text-xs h-7 px-2.5"
           >
             {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
-            <span>{isPlaying ? "PAUSE" : "PLAY LOOP"}</span>
+            <span>{isPlaying ? t.radar.pause : t.radar.playLoop}</span>
           </Button>
 
           <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="text-muted-foreground text-tiny uppercase">Frame</span>
+            <span className="text-muted-foreground text-tiny uppercase">{t.radar.frame}</span>
             <span className="font-semibold text-foreground">{frameTimeStr}</span>
             <Badge variant="outline" className="text-tiny font-mono px-1.5 py-0 h-4">
               {currentFrameIndex + 1}/{radarFrames.length}
@@ -290,7 +298,7 @@ export function EmbeddedRadarCard({
             disabled={radarFrames.length === 0}
             className="w-full accent-primary h-1 bg-muted cursor-pointer"
           />
-          <span className="text-tiny font-mono text-muted-foreground shrink-0">Now</span>
+          <span className="text-tiny font-mono text-muted-foreground shrink-0">{t.common.now}</span>
         </div>
       </CardFooter>
     </Card>

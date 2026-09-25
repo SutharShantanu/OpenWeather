@@ -62,7 +62,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            {activeTab === "sun" ? t.widgets.solar.subtitle : "Lunar phase & illumination"}
+            {activeTab === "sun" ? t.widgets.solar.subtitle : t.widgets.solar.lunarSubtitle}
           </CardDescription>
         </div>
 
@@ -73,7 +73,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
             onClick={() => setActiveTab("sun")}
             className="h-6 px-2 font-mono text-tiny"
           >
-            Sun
+            {t.widgets.solar.sunTab}
           </Button>
           <Button
             variant={activeTab === "moon" ? "default" : "ghost"}
@@ -81,7 +81,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
             onClick={() => setActiveTab("moon")}
             className="h-6 px-2 font-mono text-tiny"
           >
-            Moon
+            {t.widgets.solar.moonTab}
           </Button>
         </div>
       </CardHeader>
@@ -130,7 +130,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
             <div className="flex justify-between items-center text-tiny font-mono text-muted-foreground pt-1">
               <span>{t.widgets.solar.dayLength}: {daylightHours}h {daylightMinutes}m</span>
               <Badge variant="outline" className="font-mono text-micro">
-                {isDaylight ? "Sun Above Horizon" : "Night Cycle"}
+                {isDaylight ? t.widgets.solar.sunAboveHorizon : t.widgets.solar.nightCycle}
               </Badge>
             </div>
           </>
@@ -138,12 +138,12 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
           <div className="space-y-3 py-1">
             <div className="flex items-center justify-between p-3 bg-muted/20 border border-border">
               <div className="space-y-1">
-                <span className="text-tiny font-mono text-muted-foreground uppercase">Lunar Phase</span>
+                <span className="text-tiny font-mono text-muted-foreground uppercase">{t.widgets.solar.lunarPhase}</span>
                 <div className="text-base font-heading font-bold text-foreground">
                   {moonData.name}
                 </div>
                 <div className="text-xs font-mono text-primary font-semibold">
-                  {moonData.illumination}% Illumination
+                  {t.widgets.solar.illumination(moonData.illumination)}
                 </div>
               </div>
 
@@ -160,12 +160,12 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
 
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
               <div className="p-2 bg-muted/20 border border-border">
-                <span className="text-micro text-muted-foreground uppercase block">Cycle Phase</span>
+                <span className="text-micro text-muted-foreground uppercase block">{t.widgets.solar.cyclePhase}</span>
                 <span className="font-bold text-foreground">{(moonData.phase * 29.53).toFixed(1)} / 29.5d</span>
               </div>
               <div className="p-2 bg-muted/20 border border-border">
-                <span className="text-micro text-muted-foreground uppercase block">Sky Visibility</span>
-                <span className="font-bold text-foreground">{moonData.illumination > 40 ? "Bright Sky" : "Dark Sky"}</span>
+                <span className="text-micro text-muted-foreground uppercase block">{t.widgets.solar.skyVisibility}</span>
+                <span className="font-bold text-foreground">{moonData.illumination > 40 ? t.widgets.solar.brightSky : t.widgets.solar.darkSky}</span>
               </div>
             </div>
           </div>

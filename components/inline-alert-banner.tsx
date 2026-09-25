@@ -25,7 +25,6 @@ import {
 import {
   AlertTriangle,
   ShieldCheck,
-  ShieldAlert,
   Volume2,
   CheckCircle2,
   Circle,
@@ -115,7 +114,9 @@ export function InlineAlertBanner({
   // Web Audio Synthesizer Chime
   const playChime = () => {
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
       if (!AudioCtx) return
       const ctx = new AudioCtx()
       setIsPlaying(true)
@@ -170,7 +171,7 @@ export function InlineAlertBanner({
             variant="outline"
             className="border-emerald-500/30 bg-emerald-500/10 font-mono text-[10px] text-emerald-600 dark:text-emerald-400"
           >
-            NOMINAL
+            {t.alerts.nominal}
           </Badge>
         </AlertAction>
       </Alert>
@@ -192,19 +193,17 @@ export function InlineAlertBanner({
           <div>
             <div className="flex items-center gap-2">
               <CardTitle className="font-heading text-sm font-semibold tracking-tight">
-                Meteorological Advisory Bulletin
+                {t.alerts.bulletinTitle}
               </CardTitle>
               <Badge
                 variant={hasCritical ? "destructive" : "outline"}
                 className="font-mono text-tiny"
               >
-                {activeAlerts.length} Active{" "}
-                {activeAlerts.length === 1 ? "Alert" : "Alerts"}
+                {t.alerts.activeAlerts(activeAlerts.length)}
               </Badge>
             </div>
             <CardDescription className="text-xs">
-              Official severe weather warning & public safety directives for{" "}
-              {current.cityName}
+              {t.alerts.bulletinDesc(current.cityName)}
             </CardDescription>
           </div>
         </div>
@@ -218,7 +217,7 @@ export function InlineAlertBanner({
             className="h-6 gap-1 px-2 font-mono text-tiny"
           >
             <Volume2 className="size-3 text-primary" />
-            <span>Sound Chime</span>
+            <span>{t.alerts.soundChime}</span>
           </Button>
 
           <Button
@@ -227,7 +226,7 @@ export function InlineAlertBanner({
             onClick={() => setIsExpanded(!isExpanded)}
             className="h-6 gap-1 px-2 font-mono text-tiny text-muted-foreground hover:text-foreground"
           >
-            <span>{isExpanded ? "Collapse" : "Expand Directives"}</span>
+            <span>{isExpanded ? t.alerts.collapse : t.alerts.expand}</span>
             {isExpanded ? (
               <ChevronUp className="size-3" />
             ) : (
@@ -276,7 +275,7 @@ export function InlineAlertBanner({
                           <>
                             <span>•</span>
                             <Clock className="size-2.5" />
-                            <span>Expires: {alert.expires}</span>
+                            <span>{t.alerts.expires} {alert.expires}</span>
                           </>
                         )}
                       </div>
@@ -302,8 +301,8 @@ export function InlineAlertBanner({
                       )}
                       <div className="flex-1">
                         <span className="mb-0.5 block text-mini font-semibold">
-                          Safety Protocol:{" "}
-                          {isChecked ? "Acknowledged" : "Action Required"}
+                          {t.alerts.safetyProtocol}{" "}
+                          {isChecked ? t.alerts.acknowledged : t.alerts.actionRequired}
                         </span>
                         <span className="text-mini leading-relaxed text-muted-foreground">
                           {alert.instruction}

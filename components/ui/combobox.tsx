@@ -114,6 +114,72 @@ function ComboboxContent({
   > & {
     positionerClassName?: string
   }) {
+  const popupRef = React.useRef<HTMLDivElement | null>(null)
+
+  React.useEffect(() => {
+    const el = popupRef.current
+    if (!el) return
+
+    const handleWheel = (e: WheelEvent) => {
+      // Prevent parent scroll locks (e.g. Radix Dialog's RemoveScroll on document)
+      // from intercepting and canceling trackpad/mousepad wheel scrolling.
+      e.stopPropagation()
+
+      const scrollable =
+        el.querySelector<HTMLElement>('[data-slot="scroll-area-viewport"]') ||
+        el.querySelector<HTMLElement>('[data-slot="combobox-list"]') ||
+        el.querySelector<HTMLElement>('.overflow-y-auto')
+
+      if (!scrollable) return
+
+      // If wheel event originates outside the scrollable viewport (e.g. over search input or padding),
+      // or if browser default action was blocked, apply wheel delta directly to the scroll viewport.
+      if (!scrollable.contains(e.target as Node) || e.defaultPrevented) {
+        const deltaY =
+          e.deltaMode === 1
+            ? e.deltaY * 20
+            : e.deltaMode === 2
+            ? e.deltaY * 100
+            : e.deltaY
+        scrollable.scrollTop += deltaY
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.stopPropagation()
+    }
+
+    // Scroll active/highlighted items into view during keyboard navigation
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "data-highlighted"
+        ) {
+          const target = mutation.target as HTMLElement
+          if (target?.hasAttribute("data-highlighted")) {
+            target.scrollIntoView({ block: "nearest" })
+          }
+        }
+      }
+    })
+
+    observer.observe(el, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ["data-highlighted"],
+    })
+
+    el.addEventListener("wheel", handleWheel, { passive: false })
+    el.addEventListener("touchmove", handleTouchMove, { passive: false })
+
+    return () => {
+      observer.disconnect()
+      el.removeEventListener("wheel", handleWheel)
+      el.removeEventListener("touchmove", handleTouchMove)
+    }
+  }, [])
+
   return (
     <ComboboxPrimitive.Portal>
       <DismissableLayerBranch asChild>
@@ -143,7 +209,9 @@ function ComboboxContent({
             }}
           >
             <ComboboxPrimitive.Popup
+              ref={popupRef}
               data-slot="combobox-content"
+              data-lenis-prevent="true"
               data-chips={!!anchor}
               className={cn(
                 "group/combobox-content max-h-(--available-height) w-(--anchor-width) max-w-(--available-width) min-w-(--anchor-width) origin-(--transform-origin) overflow-hidden rounded-none text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 data-[chips=true]:min-w-(--anchor-width) data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 *:data-[slot=input-group]:m-1 *:data-[slot=input-group]:mb-0 *:data-[slot=input-group]:h-8 *:data-[slot=input-group]:border-input/30 *:data-[slot=input-group]:bg-input/30 *:data-[slot=input-group]:shadow-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 animate-none! relative bg-popover/95 backdrop-blur-md before:pointer-events-none before:absolute before:inset-0 before:-z-1 before:rounded-[inherit] before:backdrop-blur-2xl before:backdrop-saturate-150 **:data-[slot$=-item]:focus:bg-foreground/10 **:data-[slot$=-item]:data-highlighted:bg-foreground/10 **:data-[slot$=-separator]:bg-foreground/5 **:data-[slot$=-trigger]:focus:bg-foreground/10 **:data-[slot$=-trigger]:aria-expanded:bg-foreground/10! **:data-[variant=destructive]:focus:bg-foreground/10! **:data-[variant=destructive]:text-accent-foreground! **:data-[variant=destructive]:**:text-accent-foreground!",
@@ -162,6 +230,7 @@ function ComboboxList({ className, ...props }: ComboboxPrimitive.List.Props) {
   return (
     <ComboboxPrimitive.List
       data-slot="combobox-list"
+      data-lenis-prevent="true"
       className={cn(
         "no-scrollbar max-h-[min(calc(--spacing(72)---spacing(9)),calc(var(--available-height)---spacing(9)))] scroll-py-1 overflow-y-auto overscroll-contain data-empty:p-0",
         className

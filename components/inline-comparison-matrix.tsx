@@ -48,11 +48,16 @@ export function InlineComparisonMatrix({
     "Tokyo";
   const [targetCity, setTargetCity] = useState(initialTarget);
   const [targetWeather, setTargetWeather] = useState<CurrentWeather | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [prevTarget, setPrevTarget] = useState({ city: initialTarget, lang: language });
+
+  if (prevTarget.city !== targetCity || prevTarget.lang !== language) {
+    setPrevTarget({ city: targetCity, lang: language });
+    setLoading(true);
+  }
 
   useEffect(() => {
     let isMounted = true;
-    setLoading(true);
 
     fetch(`/api/weather?city=${encodeURIComponent(targetCity)}&lang=${encodeURIComponent(language || "en")}`)
       .then((res) => res.json())
@@ -118,7 +123,7 @@ export function InlineComparisonMatrix({
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            Direct variance analysis between primary station and global metropolises
+            {t.compare.desc}
           </CardDescription>
         </div>
 
@@ -147,9 +152,9 @@ export function InlineComparisonMatrix({
             <div>
               <div className="flex items-center justify-between mb-1">
                 <Badge variant="outline" className="text-tiny font-mono">
-                  PRIMARY STATION
+                  {t.compare.primaryStation}
                 </Badge>
-                <span className="text-tiny font-mono text-muted-foreground">Active</span>
+                <span className="text-tiny font-mono text-muted-foreground">{t.compare.active}</span>
               </div>
               <h3 className="text-base font-heading font-semibold text-foreground">{baseCurrent.cityName}</h3>
               <p className="text-xs text-muted-foreground capitalize">
@@ -170,7 +175,7 @@ export function InlineComparisonMatrix({
             <div>
               <div className="flex items-center justify-between mb-1">
                 <Badge variant="secondary" className="text-tiny font-mono">
-                  TARGET STATION
+                  {t.compare.targetStation}
                 </Badge>
                 {renderDelta(tempDiff, `°${unit}`)}
               </div>
@@ -178,7 +183,7 @@ export function InlineComparisonMatrix({
                 {targetWeather?.cityName || targetCity}
               </h3>
               <p className="text-xs text-muted-foreground capitalize">
-                {loading ? "Syncing telemetry…" : targetWeather?.condition.description ? translateCondition(targetWeather.condition.description) : "Connected"}
+                {loading ? t.compare.syncingTelemetry : targetWeather?.condition.description ? translateCondition(targetWeather.condition.description) : t.compare.connected}
               </p>
             </div>
 
@@ -201,7 +206,7 @@ export function InlineComparisonMatrix({
                   className="gap-1 text-primary font-mono text-xs"
                 >
                   <Navigation className="size-2.5" />
-                  <span>Switch Dashboard</span>
+                  <span>{t.compare.switchDashboard}</span>
                 </Button>
               )}
             </div>
@@ -212,17 +217,17 @@ export function InlineComparisonMatrix({
         {targetWeather && (
           <div className="border border-border text-xs">
             <div className="bg-muted/40 px-3 py-1.5 border-b border-border flex justify-between font-mono text-tiny text-muted-foreground font-semibold">
-              <span className="w-1/3">ATMOSPHERIC METRIC</span>
+              <span className="w-1/3">{t.compare.atmosphericMetric}</span>
               <span className="w-1/4 text-center">{baseCurrent.cityName.toUpperCase()}</span>
               <span className="w-1/4 text-center">{targetWeather.cityName.toUpperCase()}</span>
-              <span className="w-1/6 text-right">SPREAD DELTA</span>
+              <span className="w-1/6 text-right">{t.compare.spreadDelta}</span>
             </div>
 
             <div className="divide-y divide-border">
               <div className="px-3 py-2 flex justify-between items-center font-mono">
                 <div className="w-1/3 flex items-center gap-1.5">
                   <CloudSun className="size-3 text-amber-500" />
-                  <span>Temperature</span>
+                  <span>{t.compare.temperature}</span>
                 </div>
                 <span className="w-1/4 text-center">{baseTemp}°{unit}</span>
                 <span className="w-1/4 text-center">{targetTemp}°{unit}</span>
@@ -232,7 +237,7 @@ export function InlineComparisonMatrix({
               <div className="px-3 py-2 flex justify-between items-center font-mono">
                 <div className="w-1/3 flex items-center gap-1.5">
                   <Droplets className="size-3 text-sky-500" />
-                  <span>Relative Humidity</span>
+                  <span>{t.compare.humidity}</span>
                 </div>
                 <span className="w-1/4 text-center">{baseCurrent.humidity}%</span>
                 <span className="w-1/4 text-center">{targetWeather.humidity}%</span>
@@ -242,7 +247,7 @@ export function InlineComparisonMatrix({
               <div className="px-3 py-2 flex justify-between items-center font-mono">
                 <div className="w-1/3 flex items-center gap-1.5">
                   <Wind className="size-3 text-teal-500" />
-                  <span>Wind Velocity</span>
+                  <span>{t.compare.windVelocity}</span>
                 </div>
                 <span className="w-1/4 text-center">{baseWind.val.toFixed(1)} {baseWind.unitStr}</span>
                 <span className="w-1/4 text-center">{targetWind.val.toFixed(1)} {targetWind.unitStr}</span>
@@ -252,7 +257,7 @@ export function InlineComparisonMatrix({
               <div className="px-3 py-2 flex justify-between items-center font-mono">
                 <div className="w-1/3 flex items-center gap-1.5">
                   <Gauge className="size-3 text-amber-500" />
-                  <span>Barometric Pressure</span>
+                  <span>{t.compare.pressure}</span>
                 </div>
                 <span className="w-1/4 text-center">{basePressure.val} {basePressure.unitStr}</span>
                 <span className="w-1/4 text-center">{targetPressure.val} {targetPressure.unitStr}</span>
@@ -264,7 +269,7 @@ export function InlineComparisonMatrix({
               <div className="px-3 py-2 flex justify-between items-center font-mono">
                 <div className="w-1/3 flex items-center gap-1.5">
                   <Sparkles className="size-3 text-emerald-500" />
-                  <span>Air Quality Index</span>
+                  <span>{t.compare.airQuality}</span>
                 </div>
                 <span className="w-1/4 text-center">AQI {baseCurrent.airQuality?.aqi ?? 1}</span>
                 <span className="w-1/4 text-center">AQI {targetWeather.airQuality?.aqi ?? 1}</span>

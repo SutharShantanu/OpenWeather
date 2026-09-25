@@ -23,7 +23,7 @@ export function PinnedLocations({
   onSelectCity,
   onUnpinCity,
 }: PinnedLocationsProps) {
-  const { language, translateCondition } = useTranslation();
+  const { t, language, translateCondition } = useTranslation();
   const [cityData, setCityData] = useState<Record<string, CurrentWeather>>({});
 
   useEffect(() => {
@@ -71,15 +71,15 @@ export function PinnedLocations({
           <div className="flex items-center gap-2">
             <Bookmark className="size-3.5 text-primary" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
-              Pinned Weather Stations
+              {t.pinned.title}
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            Persistent quick-access telemetry locations
+            {t.pinned.desc}
           </CardDescription>
         </div>
         <Badge variant="outline" className="text-tiny font-mono">
-          {pinnedCities.length} {pinnedCities.length === 1 ? "Station" : "Stations"}
+          {t.pinned.stationCount(pinnedCities.length)}
         </Badge>
       </CardHeader>
 
@@ -103,7 +103,7 @@ export function PinnedLocations({
                       <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </h4>
                     <p className="text-mini text-muted-foreground capitalize">
-                      {weather?.condition.description ? translateCondition(weather.condition.description) : "Loading telemetry…"}
+                      {weather?.condition.description ? translateCondition(weather.condition.description) : t.pinned.loadingTelemetry}
                     </p>
                   </div>
 
@@ -115,7 +115,7 @@ export function PinnedLocations({
                       onUnpinCity(city);
                     }}
                     className="hover:text-destructive text-muted-foreground"
-                    title="Unpin station"
+                    title={t.pinned.unpinStation}
                   >
                     <X className="size-3" />
                   </Button>

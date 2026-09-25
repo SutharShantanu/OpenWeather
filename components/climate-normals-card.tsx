@@ -1,17 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import NumberFlow from "@number-flow/react";
 import {
   History,
   TrendingUp,
   TrendingDown,
   ArrowUp,
   ArrowDown,
-  CloudRain,
-  Calendar,
-  Sparkles,
-  BarChart3,
 } from "lucide-react";
 import {
   AreaChart,
@@ -72,11 +67,16 @@ export function ClimateNormalsCard({
   const prefs = useDisplayPreferences();
   const [data, setData] = useState<ClimateData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [prevCoords, setPrevCoords] = useState({ lat, lon });
   const [viewMode, setViewMode] = useState<"daily" | "annual">("daily");
+
+  if (prevCoords.lat !== lat || prevCoords.lon !== lon) {
+    setPrevCoords({ lat, lon });
+    setLoading(true);
+  }
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
 
     fetch(`/api/climate?lat=${lat}&lon=${lon}`)
       .then((res) => res.json())
@@ -138,11 +138,11 @@ export function ClimateNormalsCard({
               {t.tabs.climate}
             </CardTitle>
             <Badge variant="outline" className="font-mono text-tiny">
-              {data.sampleYears}-Year Baseline
+              {t.climate.yearBaseline(data.sampleYears)}
             </Badge>
           </div>
           <CardDescription className="text-xs">
-            Climatological benchmark against historical observations for {data.date}
+            {t.climate.benchmarkDesc(data.date)}
           </CardDescription>
         </div>
 
@@ -154,7 +154,7 @@ export function ClimateNormalsCard({
               onClick={() => setViewMode("daily")}
               className="h-6 px-2 font-mono text-tiny"
             >
-              Today's Delta
+              {t.climate.todaysDelta}
             </Button>
             <Button
               variant={viewMode === "annual" ? "default" : "ghost"}
@@ -162,7 +162,7 @@ export function ClimateNormalsCard({
               onClick={() => setViewMode("annual")}
               className="h-6 px-2 font-mono text-tiny"
             >
-              12-Month Cycle
+              {t.climate.twelveMonthCycle}
             </Button>
           </div>
         </CardAction>
@@ -190,7 +190,7 @@ export function ClimateNormalsCard({
 
                 <div>
                   <div className="text-xs font-mono text-muted-foreground uppercase">
-                    Thermal Departure from Normal
+                    {t.climate.thermalDeparture}
                   </div>
                   <div className="text-base font-heading font-bold text-foreground flex items-center gap-1.5">
                     <span>
@@ -203,7 +203,7 @@ export function ClimateNormalsCard({
                         isAboveNormal ? "text-amber-500" : "text-sky-500"
                       }`}
                     >
-                      {isAboveNormal ? "Above Climate Normal" : "Below Climate Normal"}
+                      {isAboveNormal ? t.climate.aboveClimateNormal : t.climate.belowClimateNormal}
                     </Badge>
                   </div>
                 </div>
@@ -211,10 +211,10 @@ export function ClimateNormalsCard({
 
               <div className="text-right sm:border-l sm:border-border sm:pl-4">
                 <div className="text-tiny font-mono text-muted-foreground uppercase">
-                  Current vs Expected
+                  {t.climate.currentVsExpected}
                 </div>
                 <div className="text-xs font-mono font-semibold text-foreground">
-                  Observed <span className="text-primary font-bold">{dispCurrent}°{unit}</span> | Avg High{" "}
+                  {t.climate.observed} <span className="text-primary font-bold">{dispCurrent}°{unit}</span> | {t.climate.avgHigh}{" "}
                   <span className="text-foreground">{dispAvgHigh}°{unit}</span>
                 </div>
               </div>
@@ -224,49 +224,49 @@ export function ClimateNormalsCard({
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs font-mono">
               <div className="p-2.5 bg-muted/20 border border-border">
                 <span className="text-micro text-muted-foreground uppercase block mb-1">
-                  Historical Average High
+                  {t.climate.histAvgHigh}
                 </span>
                 <div className="flex items-center gap-1 text-base font-bold text-foreground">
                   <ArrowUp className="size-3 text-amber-500" />
                   <span>{dispAvgHigh}°{unit}</span>
                 </div>
-                <span className="text-micro text-muted-foreground">30-day baseline</span>
+                <span className="text-micro text-muted-foreground">{t.climate.thirtyDayBaseline}</span>
               </div>
 
               <div className="p-2.5 bg-muted/20 border border-border">
                 <span className="text-micro text-muted-foreground uppercase block mb-1">
-                  Historical Average Low
+                  {t.climate.histAvgLow}
                 </span>
                 <div className="flex items-center gap-1 text-base font-bold text-foreground">
                   <ArrowDown className="size-3 text-sky-500" />
                   <span>{dispAvgLow}°{unit}</span>
                 </div>
-                <span className="text-micro text-muted-foreground">diurnal minimum</span>
+                <span className="text-micro text-muted-foreground">{t.climate.diurnalMinimum}</span>
               </div>
 
               <div className="p-2.5 bg-muted/20 border border-border">
                 <span className="text-micro text-muted-foreground uppercase block mb-1">
-                  All-Time Record High
+                  {t.climate.recordHigh}
                 </span>
                 <div className="flex items-center gap-1 text-base font-bold text-rose-500">
                   <ArrowUp className="size-3 text-rose-500" />
                   <span>{dispRecHigh}°{unit}</span>
                 </div>
                 <span className="text-micro text-muted-foreground">
-                  Recorded in {data.recordHigh.year}
+                  {t.climate.recordedIn(Number(data.recordHigh.year))}
                 </span>
               </div>
 
               <div className="p-2.5 bg-muted/20 border border-border">
                 <span className="text-micro text-muted-foreground uppercase block mb-1">
-                  All-Time Record Low
+                  {t.climate.recordLow}
                 </span>
                 <div className="flex items-center gap-1 text-base font-bold text-indigo-400">
                   <ArrowDown className="size-3 text-indigo-400" />
                   <span>{dispRecLow}°{unit}</span>
                 </div>
                 <span className="text-micro text-muted-foreground">
-                  Recorded in {data.recordLow.year}
+                  {t.climate.recordedIn(Number(data.recordLow.year))}
                 </span>
               </div>
             </div>
@@ -274,8 +274,8 @@ export function ClimateNormalsCard({
         ) : (
           <div className="space-y-3">
             <div className="flex justify-between items-center text-xs font-mono text-muted-foreground px-1">
-              <span>Annual Thermal & Precipitation Normal Curve</span>
-              <span className="text-tiny">Highs vs Lows (°{unit})</span>
+              <span>{t.climate.annualCurve}</span>
+              <span className="text-tiny">{t.climate.highsVsLows(unit)}</span>
             </div>
 
             <div className="h-48 w-full">
@@ -297,9 +297,9 @@ export function ClimateNormalsCard({
                         return (
                           <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                             <div className="font-semibold text-foreground">{d.month}</div>
-                            <div className="text-amber-500">Normal High: {d.high}°{unit}</div>
-                            <div className="text-sky-500">Normal Low: {d.low}°{unit}</div>
-                            <div className="text-muted-foreground text-tiny">Monthly Rainfall: ~{prefs.precipText(d.rainfall)}</div>
+                            <div className="text-amber-500">{t.climate.normalHigh} {d.high}°{unit}</div>
+                            <div className="text-sky-500">{t.climate.normalLow} {d.low}°{unit}</div>
+                            <div className="text-muted-foreground text-tiny">{t.climate.monthlyRainfall} ~{prefs.precipText(d.rainfall)}</div>
                           </div>
                         );
                       }

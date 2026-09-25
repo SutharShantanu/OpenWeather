@@ -270,7 +270,7 @@ export default function WeatherDashboardPage() {
                 type="button"
                 onClick={() => handleOpenSettings("source")}
                 className="group inline-flex cursor-pointer items-center gap-1.5 text-left uppercase transition-colors hover:text-foreground"
-                title="Click to choose weather data source & forecast station"
+                title={t.common.sourceTooltip}
               >
                 <span className="text-muted-foreground group-hover:text-foreground">
                   {t.common.source}:{" "}
@@ -278,7 +278,7 @@ export default function WeatherDashboardPage() {
                     {weather?.providerName ||
                       (weather?.dataSource === "LIVE_API"
                         ? "Open-Meteo"
-                        : "Simulated Sensor")}
+                        : t.common.simulatedSensor)}
                   </strong>
                   {weather?.stationName && (
                     <span className="ml-1 font-semibold text-primary">
@@ -634,7 +634,7 @@ export default function WeatherDashboardPage() {
 
         {/* Footer */}
         <footer className="space-y-1 border-t border-border px-4 py-6 text-center font-mono text-xs text-muted-foreground">
-          <p>OpenWeather Precision Meteorological Console</p>
+          <p>{t.common.consoleFooter}</p>
         </footer>
       </div>
       </DisplayPreferencesProvider>

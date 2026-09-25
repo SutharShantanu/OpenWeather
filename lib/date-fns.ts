@@ -27,8 +27,7 @@ export function isValid(date: unknown): boolean {
 
 export function format(
   date: Date | number,
-  formatStr: string,
-  _options?: Record<string, unknown>
+  formatStr: string
 ): string {
   const d = toDate(date)
   if (isNaN(d.getTime())) {

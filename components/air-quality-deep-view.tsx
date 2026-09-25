@@ -10,7 +10,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, ShieldCheck, HeartPulse, Activity, AlertCircle } from "lucide-react";
+import { Sparkles, HeartPulse, Activity, AlertCircle } from "lucide-react";
 import { AirQualityData, getAQIClassification } from "@/lib/weather";
 import { useTranslation } from "@/components/language-provider";
 
@@ -20,16 +20,17 @@ interface AirQualityDeepViewProps {
 
 export function AirQualityDeepView({ airQuality }: AirQualityDeepViewProps) {
   const { t } = useTranslation();
+  const aq = t.airQualityDeep;
   const aqi = airQuality?.aqi ?? 1;
   const classification = getAQIClassification(aqi);
 
   const pollutants = [
-    { name: "Fine Particulate (PM2.5)", symbol: "PM2.5", val: airQuality?.pm2_5 ?? 8.4, max: 50, unit: "µg/m³", desc: "Combustion particles, organic compounds, metals" },
-    { name: "Coarse Particulate (PM10)", symbol: "PM10", val: airQuality?.pm10 ?? 16.2, max: 100, unit: "µg/m³", desc: "Dust, pollen, mold spores, fly ash" },
-    { name: "Tropospheric Ozone (O₃)", symbol: "O₃", val: airQuality?.o3 ?? 48.2, max: 180, unit: "µg/m³", desc: "Photochemical smog, vehicle exhaust reactions" },
-    { name: "Nitrogen Dioxide (NO₂)", symbol: "NO₂", val: airQuality?.no2 ?? 12.4, max: 200, unit: "µg/m³", desc: "Thermal combustion and engine emissions" },
-    { name: "Sulphur Dioxide (SO₂)", symbol: "SO₂", val: airQuality?.so2 ?? 3.1, max: 350, unit: "µg/m³", desc: "Industrial fuels, power generation byproduct" },
-    { name: "Carbon Monoxide (CO)", symbol: "CO", val: airQuality?.co ?? 240.3, max: 10000, unit: "µg/m³", desc: "Incomplete fuel combustion, vehicle exhaust" },
+    { name: aq.pm25, symbol: "PM2.5", val: airQuality?.pm2_5 ?? 8.4, max: 50, unit: "µg/m³", desc: "Combustion particles, organic compounds, metals" },
+    { name: aq.pm10, symbol: "PM10", val: airQuality?.pm10 ?? 16.2, max: 100, unit: "µg/m³", desc: "Dust, pollen, mold spores, fly ash" },
+    { name: aq.o3, symbol: "O₃", val: airQuality?.o3 ?? 48.2, max: 180, unit: "µg/m³", desc: "Photochemical smog, vehicle exhaust reactions" },
+    { name: aq.no2, symbol: "NO₂", val: airQuality?.no2 ?? 12.4, max: 200, unit: "µg/m³", desc: "Thermal combustion and engine emissions" },
+    { name: aq.so2, symbol: "SO₂", val: airQuality?.so2 ?? 3.1, max: 350, unit: "µg/m³", desc: "Industrial fuels, power generation byproduct" },
+    { name: aq.co, symbol: "CO", val: airQuality?.co ?? 240.3, max: 10000, unit: "µg/m³", desc: "Incomplete fuel combustion, vehicle exhaust" },
   ];
 
   return (
@@ -43,7 +44,7 @@ export function AirQualityDeepView({ airQuality }: AirQualityDeepViewProps) {
             </CardTitle>
           </div>
           <CardDescription className="text-xs">
-            WHO European & Global particulate concentration telemetry
+            {aq.whoSubtitle}
           </CardDescription>
         </div>
         <Badge variant="outline" className={`font-mono text-tiny ${classification.color}`}>
@@ -55,12 +56,12 @@ export function AirQualityDeepView({ airQuality }: AirQualityDeepViewProps) {
         {/* Top Summary Box */}
         <div className="p-4 bg-muted/20 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <span className="text-tiny font-mono text-muted-foreground uppercase">Air Quality Index</span>
+            <span className="text-tiny font-mono text-muted-foreground uppercase">{aq.aqiTitle}</span>
             <div className="flex items-baseline gap-2 mt-0.5">
               <span className="text-4xl font-mono font-bold text-foreground">
                 <NumberFlow value={aqi} />
               </span>
-              <span className="text-xs font-mono text-muted-foreground">/ 5 (Clean to Hazardous)</span>
+              <span className="text-xs font-mono text-muted-foreground">{aq.scaleDesc}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {classification.description}
@@ -70,15 +71,15 @@ export function AirQualityDeepView({ airQuality }: AirQualityDeepViewProps) {
           <div className="flex flex-col gap-1.5 text-xs font-mono border-t sm:border-t-0 sm:border-l border-border sm:pl-4 pt-2 sm:pt-0">
             <div className="flex items-center gap-2">
               <HeartPulse className="size-3.5 text-emerald-500" />
-              <span>General Public: Minimal risk</span>
+              <span>{aq.generalPublic}</span>
             </div>
             <div className="flex items-center gap-2">
               <Activity className="size-3.5 text-sky-500" />
-              <span>Outdoor Activity: Ideal conditions</span>
+              <span>{aq.outdoorActivity}</span>
             </div>
             <div className="flex items-center gap-2">
               <AlertCircle className="size-3.5 text-muted-foreground" />
-              <span>Sensitive Groups: Normal caution</span>
+              <span>{aq.sensitiveGroups}</span>
             </div>
           </div>
         </div>
@@ -105,7 +106,7 @@ export function AirQualityDeepView({ airQuality }: AirQualityDeepViewProps) {
                 </div>
                 <div className="flex justify-between text-micro font-mono text-muted-foreground">
                   <span>{p.name}</span>
-                  <span>{pct}% of limit</span>
+                  <span>{aq.percentOfLimit(pct)}</span>
                 </div>
               </div>
             );

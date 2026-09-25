@@ -1,4 +1,5 @@
 import { CurrentWeather, DailyForecastItem, HourlyForecastItem, formatTemperature } from "./weather";
+import { Translations, getTranslation, translateCondition } from "./translations";
 
 export interface SuddenChangeAlert {
   id: string;
@@ -11,7 +12,7 @@ export interface SuddenChangeAlert {
 }
 
 export interface PlannedWeatherShift {
-  period: "TOMORROW" | "WEEKEND" | "WEEKLY_TREND";
+  period: string;
   headline: string;
   summary: string;
   temperatureShift: string;
@@ -36,8 +37,11 @@ export function analyzeWeatherWithAi(
   current: CurrentWeather,
   hourly: HourlyForecastItem[],
   daily: DailyForecastItem[],
-  unit: "C" | "F"
+  unit: "C" | "F",
+  t?: Translations
 ): AiWeatherAnalysis {
+  const trans = t || getTranslation("en");
+  const ai = trans.aiAdvisor;
   const suddenAlerts: SuddenChangeAlert[] = [];
   const plannedShifts: PlannedWeatherShift[] = [];
   const recommendations: LifestyleRecommendation[] = [];
@@ -53,10 +57,10 @@ export function analyzeWeatherWithAi(
         id: "ai-sudden-rain",
         type: "RAIN_INBOUND",
         urgency: "HIGH",
-        title: "Sudden Rain Approaching",
-        detail: `Precipitation probability surges from ${Math.round(currentPop)}% to ${futurePop}% at approximately ${next12Hours[i].time}.`,
-        action: "Take an umbrella and plan for wet transit conditions.",
-        timing: `Around ${next12Hours[i].time}`,
+        title: ai.suddenRainTitle,
+        detail: ai.suddenRainDetail(Math.round(currentPop), futurePop, next12Hours[i].time),
+        action: ai.suddenRainAction,
+        timing: ai.timingAround(next12Hours[i].time),
       });
       break;
     }
@@ -72,10 +76,10 @@ export function analyzeWeatherWithAi(
           id: "ai-rapid-cooling",
           type: "RAPID_COOLING",
           urgency: "MEDIUM",
-          title: "Rapid Thermal Drop Anticipated",
-          detail: `Temperatures will drop by ${formatTemperature(drop, unit)}°${unit} within ${i} hours.`,
-          action: "Carry a sweater or jacket if staying out past twilight.",
-          timing: `By ${next12Hours[i].time}`,
+          title: ai.rapidCoolingTitle,
+          detail: ai.rapidCoolingDetail(formatTemperature(drop, unit), unit, i),
+          action: ai.rapidCoolingAction,
+          timing: ai.timingBy(next12Hours[i].time),
         });
         break;
       }
@@ -90,10 +94,10 @@ export function analyzeWeatherWithAi(
         id: "ai-wind-surge",
         type: "WIND_SURGE",
         urgency: "MEDIUM",
-        title: "Sudden Wind Velocity Surge",
-        detail: `Strong wind gusts up to ${(item.windGusts || item.windSpeed * 1.5).toFixed(1)} m/s detected around ${item.time}.`,
-        action: "Secure outdoor furniture and watch for crosswinds during highway transit.",
-        timing: `Around ${item.time}`,
+        title: ai.windSurgeTitle,
+        detail: ai.windSurgeDetail((item.windGusts || item.windSpeed * 1.5).toFixed(1), item.time),
+        action: ai.windSurgeAction,
+        timing: ai.timingAround(item.time),
       });
       break;
     }
@@ -107,16 +111,17 @@ export function analyzeWeatherWithAi(
     const tomMax = formatTemperature(tomorrow.tempMax, unit);
     const diff = tomMax - todayMax;
 
-    let shiftText = "Consistent temperature";
-    if (diff >= 2) shiftText = `${diff}°${unit} warmer`;
-    else if (diff <= -2) shiftText = `${Math.abs(diff)}°${unit} cooler`;
+    let shiftText = ai.tomorrowConsistent;
+    if (diff >= 2) shiftText = ai.tomorrowWarmer(diff, unit);
+    else if (diff <= -2) shiftText = ai.tomorrowCooler(Math.abs(diff), unit);
 
+    const tomDesc = translateCondition(tomorrow.description);
     plannedShifts.push({
-      period: "TOMORROW",
-      headline: `Tomorrow in ${current.cityName}: ${tomorrow.description}`,
-      summary: `Expected high of ${tomMax}°${unit} and low of ${formatTemperature(tomorrow.tempMin, unit)}°${unit}.`,
+      period: ai.tomorrowPeriod,
+      headline: `${ai.tomorrowPeriod} ${current.cityName}: ${tomDesc}`,
+      summary: `${trans.climate.normalHigh} ${tomMax}°${unit}, ${trans.climate.normalLow} ${formatTemperature(tomorrow.tempMin, unit)}°${unit}.`,
       temperatureShift: shiftText,
-      precipitationRisk: Math.round(tomorrow.pop * 100) > 25 ? `${Math.round(tomorrow.pop * 100)}% chance of rain` : "Mainly dry",
+      precipitationRisk: Math.round(tomorrow.pop * 100) > 25 ? ai.tomorrowRainChance(Math.round(tomorrow.pop * 100)) : ai.tomorrowMainlyDry,
     });
   }
 
@@ -129,11 +134,11 @@ export function analyzeWeatherWithAi(
     const weekendRain = Math.max(sat.pop, sun.pop) > 0.3;
 
     plannedShifts.push({
-      period: "WEEKEND",
-      headline: "Weekend Climatological Outlook",
-      summary: `Expect ${weekendRain ? "sporadic precipitation" : "favorable synoptic stability"} with temperatures hovering around ${formatTemperature(avgWeekendTemp, unit)}°${unit}.`,
-      temperatureShift: `Highs near ${formatTemperature(avgWeekendTemp, unit)}°${unit}`,
-      precipitationRisk: weekendRain ? "Precipitation probable" : "Minimal precipitation risk",
+      period: ai.weekendPeriod,
+      headline: ai.weekendHeadline,
+      summary: weekendRain ? ai.weekendSummaryRain(formatTemperature(avgWeekendTemp, unit), unit) : ai.weekendSummaryDry(formatTemperature(avgWeekendTemp, unit), unit),
+      temperatureShift: ai.weekendHighsNear(formatTemperature(avgWeekendTemp, unit), unit),
+      precipitationRisk: weekendRain ? ai.weekendPrecipProbable : ai.weekendPrecipMinimal,
     });
   }
 
@@ -143,10 +148,10 @@ export function analyzeWeatherWithAi(
   const willRain = next12Hours.some((h) => (h.pop ?? 0) > 0.4);
 
   // Clothing
-  let clothing = "Light layers with comfortable breathable clothing.";
-  if (isCold) clothing = "Thermal insulated jacket, scarf, and layered garments advised.";
-  else if (isHot) clothing = "Ultra-light breathable fabrics, wide-brim hat, and sunglasses recommended.";
-  if (willRain) clothing += " Waterproof outer shell or compact umbrella essential.";
+  let clothing = ai.clothingMild;
+  if (isCold) clothing = ai.clothingCold;
+  else if (isHot) clothing = ai.clothingHot;
+  if (willRain) clothing += ai.clothingRain;
   recommendations.push({ category: "CLOTHING", advice: clothing });
 
   // Outdoor sports index
@@ -161,24 +166,23 @@ export function analyzeWeatherWithAi(
     score: sportScore,
     advice:
       sportScore >= 8
-        ? "Superb conditions for outdoor running, cycling, or recreation."
+        ? ai.sportSuperb
         : sportScore >= 5
-        ? "Acceptable outdoor conditions; schedule activities before precipitation onset."
-        : "Adverse meteorological conditions; indoor training recommended.",
+        ? ai.sportAcceptable
+        : ai.sportAdverse,
   });
 
   // Commute
   recommendations.push({
     category: "COMMUTE",
-    advice: willRain
-      ? "Expect vehicular congestion and slick pavement during peak transit intervals."
-      : "Dry conditions with nominal transit predictability across the city grid.",
+    advice: willRain ? ai.commuteRain : ai.commuteDry,
   });
 
-  const overallSummary = `Synoptic analysis for ${current.cityName}: ${current.condition.description} with ambient temperature at ${formatTemperature(current.temp, unit)}°${unit}. ${
+  const condDesc = translateCondition(current.condition.description);
+  const overallSummary = `${current.cityName}: ${condDesc}, ${formatTemperature(current.temp, unit)}°${unit}. ${
     suddenAlerts.length > 0
-      ? `Attention: ${suddenAlerts[0].title}. `
-      : "Atmospheric equilibrium is currently steady across the short-range trajectory. "
+      ? `${suddenAlerts[0].title}. `
+      : `${ai.summarySteady} `
   }`;
 
   return {

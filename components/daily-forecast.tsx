@@ -2,7 +2,7 @@
 
 import React from "react";
 import NumberFlow from "@number-flow/react";
-import { Calendar, CloudRain, SunMedium, Wind } from "lucide-react";
+import { Calendar, CloudRain, SunMedium } from "lucide-react";
 import { DailyForecastItem, formatTemperature } from "@/lib/weather";
 import { WeatherIcon } from "@/components/weather-icon";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";

@@ -15,6 +15,7 @@ import { Alert } from "@/components/ui/alert"
 import { Dot } from "@/components/ui/dot"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   Select,
   SelectContent,
@@ -98,7 +99,7 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* 1. Language & Regional Dialect */}
-        <Card>
+        <Card className="h-fit">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-heading text-xs font-semibold text-foreground">
               <Languages className="size-4 text-primary" />
@@ -139,7 +140,7 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                 render={
                   <Button
                     variant="outline"
-                    className="w-full justify-between font-mono text-xs"
+                    className="w-full justify-between font-mono text-xs h-auto min-h-9 py-2"
                   />
                 }
               >
@@ -163,7 +164,7 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                   }
                 </ComboboxValue>
               </ComboboxTrigger>
-              <ComboboxContent className="min-w-(--anchor-width) max-w-[var(--available-width)]">
+              <ComboboxContent className="min-w-(--anchor-width) max-w-[var(--available-width)] h-auto max-h-[var(--available-height)]">
                 <ComboboxInput
                   showTrigger={false}
                   showSearchIcon
@@ -171,26 +172,30 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                   placeholder={regional.searchLanguagePlaceholder}
                 />
                 <ComboboxEmpty>{regional.noLanguageFound}</ComboboxEmpty>
-                <ComboboxList className="mt-1">
-                  {(lang: RegionalLanguageOption) => (
-                    <ComboboxItem key={lang.code} value={lang}>
-                      <span className="flex items-center gap-2 font-mono">
-                        <span>{lang.flag}</span>
-                        <span className="font-semibold text-foreground">
-                          {lang.label}
-                        </span>
-                        <span className="text-tiny text-muted-foreground">
-                          ({lang.englishName} • {lang.region})
-                        </span>
-                        {resolveUiLanguage(lang.code) === null && (
-                          <span className="ml-auto text-nano text-muted-foreground uppercase">
-                            {regional.voiceOnly}
+                <ScrollArea className="h-72 max-h-[min(calc(var(--available-height)-4rem),32rem)]">
+                  <ComboboxList className="mt-1 max-h-none overflow-visible pr-2">
+                    {(lang: RegionalLanguageOption) => (
+                      <ComboboxItem key={lang.code} value={lang} className="py-1">
+                        <span className="flex min-w-0 flex-1 items-center gap-2 font-mono">
+                          <span className="shrink-0">{lang.flag}</span>
+                          <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                            <span className="font-semibold text-foreground">
+                              {lang.label}
+                            </span>
+                            <span className="text-tiny text-muted-foreground">
+                              ({lang.englishName} • {lang.region})
+                            </span>
                           </span>
-                        )}
-                      </span>
-                    </ComboboxItem>
-                  )}
-                </ComboboxList>
+                          {resolveUiLanguage(lang.code) === null && (
+                            <span className="ml-auto shrink-0 text-nano text-muted-foreground uppercase">
+                              {regional.voiceOnly}
+                            </span>
+                          )}
+                        </span>
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ScrollArea>
               </ComboboxContent>
             </Combobox>
             <div className="flex items-center justify-between gap-2">

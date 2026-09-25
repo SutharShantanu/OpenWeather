@@ -5,6 +5,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { CONFIG } from "@/lib/config";
 import { useDisplayPreferences } from "@/components/display-preferences-provider";
+import { useTranslation } from "@/components/language-provider";
 
 interface RadarMapInnerProps {
   lat: number;
@@ -25,8 +26,9 @@ export function RadarMapInner({
   mapStyle = "dark",
   opacity = 0.75,
 }: RadarMapInnerProps) {
+  const { t } = useTranslation();
   const prefs = useDisplayPreferences();
-  const popupHtml = `<b>${cityName} Station</b><br/>${prefs.coords(lat, lon, 3)}`;
+  const popupHtml = `<b>${t.radar.stationPopup(cityName)}</b><br/>${prefs.coords(lat, lon, 3)}`;
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -80,6 +82,8 @@ export function RadarMapInner({
       map.remove();
       mapRef.current = null;
     };
+    // Map instance is created once on mount; dynamic prop updates are handled by subsequent effects
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update base map style if switched

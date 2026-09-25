@@ -60,11 +60,11 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
               {t.tabs.charts}
             </CardTitle>
             <Badge variant="outline" className="text-tiny font-mono">
-              24-Hour Graph
+              {t.charts.twentyFourHour}
             </Badge>
           </div>
           <CardDescription className="text-xs">
-            Interactive multi-sensor trend lines & probability matrices
+            {t.charts.interactiveDesc}
           </CardDescription>
         </div>
 
@@ -78,7 +78,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
               className="gap-1 font-mono text-xs h-6 px-2"
             >
               <TrendingUp className="size-3" />
-              <span>Temp</span>
+              <span>{t.charts.tempTab}</span>
             </Button>
             <Button
               variant={metric === "precip" ? "default" : "ghost"}
@@ -141,8 +141,8 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                       return (
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
-                          <div className="text-primary font-bold">Ambient: {data.temp}°{unit}</div>
-                          <div className="text-muted-foreground">Apparent: {data.feelsLike}°{unit}</div>
+                          <div className="text-primary font-bold">{t.charts.ambient} {data.temp}°{unit}</div>
+                          <div className="text-muted-foreground">{t.charts.apparent} {data.feelsLike}°{unit}</div>
                         </div>
                       );
                     }
@@ -164,7 +164,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                       return (
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
-                          <div className="text-sky-500 font-bold">Precip Probability: {data.precip}%</div>
+                          <div className="text-sky-500 font-bold">{t.charts.precipProbability} {data.precip}%</div>
                         </div>
                       );
                     }
@@ -185,7 +185,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                       return (
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
-                          <div className="text-teal-500 font-bold">Wind Speed: {data.wind} {windUnitLabel}</div>
+                          <div className="text-teal-500 font-bold">{t.charts.windSpeed} {data.wind} {windUnitLabel}</div>
                         </div>
                       );
                     }
@@ -212,7 +212,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                       return (
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
-                          <div className="text-sky-500 font-bold">Relative Humidity: {data.humidity}%</div>
+                          <div className="text-sky-500 font-bold">{t.charts.relativeHumidity} {data.humidity}%</div>
                         </div>
                       );
                     }
@@ -233,7 +233,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                       return (
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
-                          <div className="text-amber-500 font-bold">UV Radiation: {data.uv}</div>
+                          <div className="text-amber-500 font-bold">{t.charts.uvRadiation} {data.uv}</div>
                         </div>
                       );
                     }

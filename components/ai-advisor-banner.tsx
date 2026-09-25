@@ -1,15 +1,12 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 import {
   Sparkles,
   AlertCircle,
-  CloudRain,
   Thermometer,
-  Wind,
   Shirt,
   Bike,
-  Car,
   ChevronRight,
   Info,
 } from "lucide-react"
@@ -38,6 +35,7 @@ import {
   analyzeWeatherWithAi,
   AiWeatherAnalysis,
 } from "@/lib/ai-weather-advisor"
+import { useTranslation } from "@/components/language-provider"
 
 interface AiAdvisorBannerProps {
   current: CurrentWeather
@@ -54,11 +52,13 @@ export function AiAdvisorBanner({
   unit,
   onOpenDetailedAi,
 }: AiAdvisorBannerProps) {
+  const { t } = useTranslation()
   const analysis: AiWeatherAnalysis = analyzeWeatherWithAi(
     current,
     hourly,
     daily,
-    unit
+    unit,
+    t
   )
   const hasSudden = analysis.suddenAlerts.length > 0
 
@@ -79,18 +79,17 @@ export function AiAdvisorBanner({
           <div>
             <div className="flex items-center gap-2">
               <CardTitle className="font-heading text-sm font-semibold tracking-tight">
-                AI Synoptic Intelligence & Advisory
+                {t.aiAdvisor.bannerTitle}
               </CardTitle>
               <Badge
                 variant="outline"
                 className="border-primary/30 font-mono text-tiny text-primary"
               >
-                Live Insights
+                {t.aiAdvisor.liveInsights}
               </Badge>
             </div>
             <CardDescription className="text-xs">
-              Automated pattern analysis for sudden atmospheric variations &
-              planned shifts
+              {t.aiAdvisor.bannerDesc}
             </CardDescription>
           </div>
         </div>
@@ -101,9 +100,9 @@ export function AiAdvisorBanner({
               variant="outline"
               size="xs"
               onClick={onOpenDetailedAi}
-              className="h-7 gap-1.5 font-mono text-xs"
+              className="gap-1.5 font-mono text-xs"
             >
-              <span>Full Synoptic Brief</span>
+              <span>{t.aiAdvisor.fullBrief}</span>
               <ChevronRight className="size-3" />
             </Button>
           </CardAction>
@@ -123,7 +122,7 @@ export function AiAdvisorBanner({
                   </AlertTitle>
                   <Badge
                     variant="destructive"
-                    className="h-4 px-1.5 py-0 font-mono text-[10px] uppercase"
+                    className="font-mono text-tiny uppercase"
                   >
                     {alert.timing}
                   </Badge>
@@ -132,7 +131,7 @@ export function AiAdvisorBanner({
                   <p className="leading-relaxed">{alert.detail}</p>
                   <p className="text-[11px] text-muted-foreground">
                     <span className="font-semibold text-foreground">
-                      Action Directive:
+                      {t.aiAdvisor.actionDirective}
                     </span>{" "}
                     {alert.action}
                   </p>
@@ -144,18 +143,17 @@ export function AiAdvisorBanner({
           <Alert variant="default" className="border-border bg-muted/20 py-2.5">
             <Info className="size-3.5 shrink-0 text-primary" />
             <AlertTitle className="text-xs font-semibold text-foreground">
-              Micro-Climate Stability
+              {t.aiAdvisor.microClimateStability}
             </AlertTitle>
             <AlertDescription className="text-xs text-muted-foreground">
-              No sudden micro-climate disturbances detected in the 6-hour
-              forecast window.
+              {t.aiAdvisor.microClimateDesc}
             </AlertDescription>
             <AlertAction>
               <Badge
                 variant="outline"
                 className="border-emerald-500/30 bg-emerald-500/10 font-mono text-[10px] text-emerald-600 dark:text-emerald-400"
               >
-                STABLE
+                {t.aiAdvisor.stable}
               </Badge>
             </AlertAction>
           </Alert>
@@ -167,7 +165,7 @@ export function AiAdvisorBanner({
             <div className="space-y-1 border border-border bg-muted/20 p-2.5">
               <div className="flex items-center gap-1.5 text-tiny text-muted-foreground uppercase">
                 <Shirt className="size-3 text-primary" />
-                <span>Attire Guidance</span>
+                <span>{t.aiAdvisor.attireGuidance}</span>
               </div>
               <p className="text-mini leading-snug text-foreground">
                 {clothingAdvice}
@@ -180,7 +178,7 @@ export function AiAdvisorBanner({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-tiny text-muted-foreground uppercase">
                   <Bike className="size-3 text-teal-500" />
-                  <span>Outdoor Activity</span>
+                  <span>{t.aiAdvisor.outdoorActivity}</span>
                 </div>
                 <Badge
                   variant="outline"
@@ -199,7 +197,7 @@ export function AiAdvisorBanner({
             <div className="space-y-1 border border-border bg-muted/20 p-2.5 sm:col-span-2 lg:col-span-1">
               <div className="flex items-center gap-1.5 text-tiny text-muted-foreground uppercase">
                 <Thermometer className="size-3 text-amber-500" />
-                <span>Tomorrow Shift</span>
+                <span>{t.aiAdvisor.tomorrowShift}</span>
               </div>
               <p className="text-mini leading-snug text-foreground">
                 <span className="font-semibold text-primary">

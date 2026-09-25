@@ -75,11 +75,23 @@ export function WindWidget({ speed, deg }: WindWidgetProps) {
 
           <div className="p-2.5 bg-muted/20 border border-border">
             <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-muted-foreground">Beaufort Scale:</span>
-              <span className="font-bold text-foreground">Force {beaufort.scale}</span>
+              <span className="text-muted-foreground">{t.widgets.wind.beaufortScale}</span>
+              <span className="font-bold text-foreground">{t.widgets.wind.forceScale(beaufort.scale)}</span>
             </div>
             <p className="text-mini font-mono text-teal-500 font-medium mt-0.5">
-              {beaufort.label}
+              {beaufort.scale === 0
+                ? t.widgets.wind.calm
+                : beaufort.scale <= 2
+                ? t.widgets.wind.lightBreeze
+                : beaufort.scale <= 4
+                ? t.widgets.wind.moderateBreeze
+                : beaufort.scale === 5
+                ? t.widgets.wind.freshBreeze
+                : beaufort.scale <= 7
+                ? t.widgets.wind.strongBreeze
+                : beaufort.scale <= 9
+                ? t.widgets.wind.gale
+                : t.widgets.wind.storm}
             </p>
           </div>
         </div>

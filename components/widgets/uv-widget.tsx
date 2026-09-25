@@ -30,6 +30,23 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
     return "< 10 mins";
   };
 
+  const getRiskLabel = (risk: string) => {
+    switch (risk) {
+      case "Low":
+        return t.widgets.uv.low;
+      case "Moderate":
+        return t.widgets.uv.moderate;
+      case "High":
+        return t.widgets.uv.high;
+      case "Very High":
+        return t.widgets.uv.veryHigh;
+      case "Extreme":
+        return t.widgets.uv.extreme;
+      default:
+        return risk;
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="border-b border-border pb-3 flex flex-row items-center justify-between">
@@ -45,7 +62,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
           </CardDescription>
         </div>
         <Badge variant="outline" className={`font-mono text-tiny ${classification.color}`}>
-          {classification.risk}
+          {getRiskLabel(classification.risk)}
         </Badge>
       </CardHeader>
 
@@ -57,7 +74,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
               {currentVal.toFixed(1)}
             </div>
             <div className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-              Current Intensity
+              {t.widgets.uv.currentIntensity}
             </div>
           </div>
           <div className="text-right">
@@ -65,7 +82,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
               {maxVal.toFixed(1)}
             </div>
             <div className="text-tiny font-mono text-muted-foreground uppercase">
-              Daily Peak Index
+              {t.widgets.uv.dailyPeak}
             </div>
           </div>
         </div>
@@ -73,11 +90,11 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
         {/* Segmented UV Spectrum Bar */}
         <div className="space-y-1.5">
           <div className="h-2 w-full bg-muted border border-border relative overflow-hidden flex">
-            <div className="h-full w-1/4 bg-emerald-500/80 border-r border-background/20" title="0-3 Low" />
-            <div className="h-full w-1/4 bg-amber-500/80 border-r border-background/20" title="3-6 Moderate" />
-            <div className="h-full w-1/6 bg-orange-500/80 border-r border-background/20" title="6-8 High" />
-            <div className="h-full w-1/4 bg-rose-500/80 border-r border-background/20" title="8-11 Very High" />
-            <div className="h-full flex-1 bg-purple-500/80" title="11+ Extreme" />
+            <div className="h-full w-1/4 bg-emerald-500/80 border-r border-background/20" title={`0-3 ${t.widgets.uv.low}`} />
+            <div className="h-full w-1/4 bg-amber-500/80 border-r border-background/20" title={`3-6 ${t.widgets.uv.moderate}`} />
+            <div className="h-full w-1/6 bg-orange-500/80 border-r border-background/20" title={`6-8 ${t.widgets.uv.high}`} />
+            <div className="h-full w-1/4 bg-rose-500/80 border-r border-background/20" title={`8-11 ${t.widgets.uv.veryHigh}`} />
+            <div className="h-full flex-1 bg-purple-500/80" title={`11+ ${t.widgets.uv.extreme}`} />
           </div>
 
           {/* Marker pointer */}
@@ -89,11 +106,11 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
           </div>
 
           <div className="flex justify-between text-micro font-mono text-muted-foreground pt-0.5">
-            <span>0 Low</span>
-            <span>3 Mod</span>
-            <span>6 High</span>
-            <span>8 V.High</span>
-            <span>11+ Ext</span>
+            <span>0 {t.widgets.uv.low}</span>
+            <span>3 {t.widgets.uv.moderate}</span>
+            <span>6 {t.widgets.uv.high}</span>
+            <span>8 {t.widgets.uv.veryHigh}</span>
+            <span>11+ {t.widgets.uv.extreme}</span>
           </div>
         </div>
 
@@ -102,7 +119,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
           <div className="p-2 bg-muted/20 border border-border">
             <div className="flex items-center gap-1.5 text-muted-foreground text-tiny mb-1">
               <Clock className="size-3 text-primary" />
-              <span>Skin Burn Time</span>
+              <span>{t.widgets.uv.burnTime}</span>
             </div>
             <div className="font-bold text-foreground">
               {getBurnTime(currentVal)}
@@ -112,7 +129,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
           <div className="p-2 bg-muted/20 border border-border">
             <div className="flex items-center gap-1.5 text-muted-foreground text-tiny mb-1">
               <ShieldAlert className="size-3 text-amber-500" />
-              <span>Recommended SPF</span>
+              <span>{t.widgets.uv.recommendedSpf}</span>
             </div>
             <div className="font-bold text-foreground">
               {currentVal < 3 ? "SPF 15+" : currentVal < 8 ? "SPF 30+" : "SPF 50+"}

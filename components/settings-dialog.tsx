@@ -16,8 +16,9 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { Tabs, TabsList } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
+import { Dot } from "@/components/ui/dot"
 import { Button } from "@/components/ui/button"
+import { useTheme } from "next-themes"
 import {
   Popover,
   PopoverContent,
@@ -32,14 +33,11 @@ import {
 } from "@/components/ui/select"
 import { UniversalDialog } from "@/components/universal-dialog"
 import { useTranslation } from "@/components/language-provider"
-import { MAX_PINNED_CITIES } from "@/lib/constants"
 
 // Public types consumed across the app (weather hooks, header, TTS button)
 export type * from "./settings/types"
 
 import type { ExtendedSettings } from "./settings/types"
-import { TTS_VOICES, resolveTtsVoice } from "@/lib/edge-tts"
-import { getActiveUnitPreset } from "./settings/utils"
 import {
   SettingsTabTrigger,
   SettingsTabPanel,
@@ -125,11 +123,83 @@ export function SettingsDialog({
   coords,
 }: SettingsDialogProps) {
   const { t } = useTranslation()
+  const { theme } = useTheme()
   const [isResetConfirmOpen, setIsResetConfirmOpen] = React.useState(false)
-  const apiKeyCount = [settings.customApiKey?.trim()].filter(Boolean).length
-  const unitPreset = getActiveUnitPreset(settings)
 
   const currentTab = TAB_ALIASES[activeTab] ?? activeTab
+
+  // Track initial snapshot when dialog opens to detect tab changes/updates
+  const [lastOpen, setLastOpen] = React.useState(open)
+  const [initialSnapshot, setInitialSnapshot] = React.useState<{
+    settings: ExtendedSettings
+    pinnedCities: string[]
+    theme?: string
+  } | null>(open ? { settings: { ...settings }, pinnedCities: [...pinnedCities], theme } : null)
+
+  if (open !== lastOpen) {
+    setLastOpen(open)
+    if (open) {
+      setInitialSnapshot({
+        settings: { ...settings },
+        pinnedCities: [...pinnedCities],
+        theme,
+      })
+    } else {
+      setInitialSnapshot(null)
+    }
+  }
+
+  const initial = initialSnapshot
+
+  const isLocationsChanged = Boolean(
+    initial &&
+      (pinnedCities.length !== initial.pinnedCities.length ||
+        pinnedCities.some((c, i) => c !== initial.pinnedCities[i]))
+  )
+
+  const isSourceChanged = Boolean(
+    initial &&
+      (settings.weatherSource !== initial.settings.weatherSource ||
+        settings.forecastStation !== initial.settings.forecastStation)
+  )
+
+  const isApiChanged = Boolean(
+    initial &&
+      (settings.customApiKey ?? "") !== (initial.settings.customApiKey ?? "")
+  )
+
+  const isUnitsChanged = Boolean(
+    initial &&
+      (settings.tempUnit !== initial.settings.tempUnit ||
+        settings.windUnit !== initial.settings.windUnit ||
+        settings.pressureUnit !== initial.settings.pressureUnit ||
+        settings.precipUnit !== initial.settings.precipUnit)
+  )
+
+  const isRegionalChanged = Boolean(
+    initial &&
+      (settings.language !== initial.settings.language ||
+        settings.timeFormat !== initial.settings.timeFormat ||
+        settings.dateFormat !== initial.settings.dateFormat ||
+        settings.coordinateFormat !== initial.settings.coordinateFormat)
+  )
+
+  const isSpeechChanged = Boolean(
+    initial &&
+      (settings.ttsVoice !== initial.settings.ttsVoice ||
+        settings.speechRate !== initial.settings.speechRate ||
+        settings.autoSpeakOnLoad !== initial.settings.autoSpeakOnLoad ||
+        settings.googleTtsPitch !== initial.settings.googleTtsPitch ||
+        settings.googleTtsVolumeGain !== initial.settings.googleTtsVolumeGain ||
+        settings.speechDeliveryStyle !== initial.settings.speechDeliveryStyle)
+  )
+
+  const isAppearanceChanged = Boolean(
+    initial?.theme && theme && theme !== initial.theme
+  )
+
+  const renderTabDot = (changed: boolean) =>
+    changed ? <Dot variant="primary" size="sm" pulse /> : null
 
   const tabsListRef = React.useRef<HTMLDivElement>(null)
   const tabsOverflow = useHorizontalOverflow(tabsListRef)
@@ -174,14 +244,7 @@ export function SettingsDialog({
       label: t.settingsDialog.tabLocations,
       icon: MapPin,
       description: t.settingsDialog.tabDescriptions.locations,
-      badge: (
-        <Badge
-          variant={pinnedCities.length >= MAX_PINNED_CITIES ? "warning-outline" : "primary-outline"}
-          className="font-mono text-tiny"
-        >
-          {pinnedCities.length}/{MAX_PINNED_CITIES}
-        </Badge>
-      ),
+      badge: renderTabDot(isLocationsChanged),
       content: (
         <LocationsTabContent
           pinnedCities={pinnedCities}
@@ -199,13 +262,7 @@ export function SettingsDialog({
       label: t.settingsDialog.tabSource,
       icon: Server,
       description: t.settingsDialog.tabDescriptions.source,
-      badge: (
-        <Badge variant="primary-outline" className="font-mono text-tiny uppercase">
-          {settings.weatherSource === "auto"
-            ? t.settingsDialog.autoSourceBadge
-            : settings.weatherSource}
-        </Badge>
-      ),
+      badge: renderTabDot(isSourceChanged),
       content: (
         <SourceTabContent
           settings={settings}
@@ -219,14 +276,7 @@ export function SettingsDialog({
       label: t.settingsDialog.tabApi,
       icon: KeyRound,
       description: t.settingsDialog.tabDescriptions.api,
-      badge: (
-        <Badge
-          variant={apiKeyCount === 0 ? "warning-outline" : "primary-outline"}
-          className="font-mono text-tiny"
-        >
-          {apiKeyCount}/2
-        </Badge>
-      ),
+      badge: renderTabDot(isApiChanged),
       content: (
         <ApiKeysTabContent
           settings={settings}
@@ -240,11 +290,7 @@ export function SettingsDialog({
       label: t.settingsDialog.tabUnits,
       icon: Compass,
       description: t.settingsDialog.tabDescriptions.units,
-      badge: (
-        <Badge variant="primary-outline" className="font-mono text-tiny uppercase">
-          {t.settingsDialog.units.presets[unitPreset]}
-        </Badge>
-      ),
+      badge: renderTabDot(isUnitsChanged),
       content: (
         <UnitsTabContent
           settings={settings}
@@ -258,11 +304,7 @@ export function SettingsDialog({
       label: t.settingsDialog.tabRegional,
       icon: Globe,
       description: t.settingsDialog.tabDescriptions.localization,
-      badge: (
-        <Badge variant="primary-outline" className="font-mono text-tiny uppercase">
-          {settings.language?.toUpperCase() || "EN"}
-        </Badge>
-      ),
+      badge: renderTabDot(isRegionalChanged),
       content: (
         <RegionalTabContent
           settings={settings}
@@ -276,11 +318,7 @@ export function SettingsDialog({
       label: t.settingsDialog.tabSpeech,
       icon: Volume2,
       description: t.settingsDialog.tabDescriptions.speech,
-      badge: (
-        <Badge variant="primary-outline" className="font-mono text-tiny uppercase">
-          {TTS_VOICES.find((v) => v.id === resolveTtsVoice(settings.ttsVoice))?.name}
-        </Badge>
-      ),
+      badge: renderTabDot(isSpeechChanged),
       content: (
         <SpeechTabContent
           settings={settings}
@@ -293,6 +331,7 @@ export function SettingsDialog({
       label: t.settingsDialog.tabTheme,
       icon: Palette,
       description: t.settingsDialog.tabDescriptions.appearance,
+      badge: renderTabDot(isAppearanceChanged),
       content: <AppearanceTabContent />,
     },
   ]
