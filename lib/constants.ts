@@ -41,6 +41,7 @@ export const STORAGE_KEYS = {
   LAST_CITY: "openweather_last_city",
   USER_SEARCHED: "openweather_user_searched",
   RECENT_VOICES: "openweather_recent_voices",
+  API_KEYS_HISTORY: "openweather_api_keys_history_v1",
 } as const;
 
 // Default Pinned Locations

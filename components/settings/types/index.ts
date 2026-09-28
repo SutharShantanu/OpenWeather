@@ -57,6 +57,7 @@ export interface ExtendedSettings {
   weatherSource: WeatherDataSource
   forecastStation: ForecastStationModel
   customApiKey?: string
+  customCartoApiKey?: string
   // Speech & Audio configurations
   googleTtsPitch: number
   googleTtsVolumeGain: number

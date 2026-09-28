@@ -165,7 +165,8 @@ export function SettingsDialog({
 
   const isApiChanged = Boolean(
     initial &&
-      (settings.customApiKey ?? "") !== (initial.settings.customApiKey ?? "")
+      ((settings.customApiKey ?? "") !== (initial.settings.customApiKey ?? "") ||
+        (settings.customCartoApiKey ?? "") !== (initial.settings.customCartoApiKey ?? ""))
   )
 
   const isUnitsChanged = Boolean(

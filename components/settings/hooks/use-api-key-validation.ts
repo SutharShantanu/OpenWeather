@@ -12,6 +12,7 @@ const KEY_TEST_TIMEOUT_MS = 10000
 
 interface UseApiKeyValidationOptions {
   customApiKey?: string
+  customCartoApiKey?: string
   city?: string
 }
 
@@ -90,16 +91,22 @@ function useKeyTest(currentKey: string, text: ApiKeysText) {
  */
 export function useApiKeyValidation({
   customApiKey,
+  customCartoApiKey,
   city,
 }: UseApiKeyValidationOptions) {
   const { t } = useTranslation()
   const text = t.settingsDialog.apiKeys
   const [showOwmKey, setShowOwmKey] = useState(false)
+  const [showCartoKey, setShowCartoKey] = useState(false)
 
   const owmKey = customApiKey?.trim() || ""
+  const cartoKey = customCartoApiKey?.trim() || ""
 
   const owmTest = useKeyTest(owmKey, text)
   const runOwmTest = owmTest.run
+
+  const cartoTest = useKeyTest(cartoKey, text)
+  const runCartoTest = cartoTest.run
 
   const handleTestOpenWeatherKey = useCallback(() => {
     if (!owmKey) return
@@ -132,6 +139,32 @@ export function useApiKeyValidation({
     }, text.contactingOwm)
   }, [owmKey, city, runOwmTest, text])
 
+  const handleTestCartoKey = useCallback(() => {
+    if (!cartoKey) return
+    return runCartoTest(async (signal) => {
+      const testUrl = `https://a.basemaps.cartocdn.com/rastertiles/dark_all/7/91/53.png?key=${encodeURIComponent(cartoKey)}`
+      const res = await fetch(testUrl, { signal })
+      if (!res.ok) {
+        return {
+          status: "error",
+          message: text.testFailedHttp(res.status),
+        }
+      }
+      const blob = await res.blob()
+      const etag = res.headers.get("etag") || ""
+      if (etag.includes("wm-") || blob.size <= 2600) {
+        return {
+          status: "error",
+          message: text.cartoWatermarked,
+        }
+      }
+      return {
+        status: "success",
+        message: text.cartoAccepted,
+      }
+    }, text.testingCartoKey)
+  }, [cartoKey, runCartoTest, text])
+
   return {
     showOwmKey,
     setShowOwmKey,
@@ -139,5 +172,11 @@ export function useApiKeyValidation({
     owmTestMsg: owmTest.message,
     hasCustomOwm: Boolean(owmKey),
     handleTestOpenWeatherKey,
+    showCartoKey,
+    setShowCartoKey,
+    cartoTestStatus: cartoTest.status,
+    cartoTestMsg: cartoTest.message,
+    hasCustomCarto: Boolean(cartoKey),
+    handleTestCartoKey,
   }
 }

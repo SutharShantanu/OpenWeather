@@ -125,6 +125,7 @@ export const DEFAULT_EXTENDED_SETTINGS: ExtendedSettings = {
   weatherSource: CONFIG.settings.defaultWeatherSource || WEATHER_DATA_PROVIDERS[0].id,
   forecastStation: CONFIG.settings.defaultForecastStation || FORECAST_STATION_MODELS[0].id,
   customApiKey: "",
+  customCartoApiKey: CONFIG.keys.cartoApiKey || "",
   // Speech & Audio defaults
   googleTtsPitch: CONFIG.settings.defaultTtsPitch,
   googleTtsVolumeGain: CONFIG.settings.defaultTtsVolume,

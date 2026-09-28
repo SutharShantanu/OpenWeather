@@ -337,6 +337,15 @@ export interface Translations {
       hideOwmKey: string;
       testConnection: string;
       owmHelp: string;
+      cartoTitle: string;
+      cartoDesc: string;
+      cartoPlaceholder: string;
+      showCartoKey: string;
+      hideCartoKey: string;
+      cartoHelp: string;
+      cartoAccepted: string;
+      cartoWatermarked: string;
+      testingCartoKey: string;
       testKey: string;
       keyVerified: string;
       keyTestFailed: string;
@@ -349,6 +358,16 @@ export interface Translations {
       testFailedHttp: (status: number) => string;
       testTimedOut: (seconds: number) => string;
       networkError: string;
+      historyTitle: string;
+      historyDesc: string;
+      noHistory: string;
+      useKey: string;
+      activeKey: string;
+      previousKey: string;
+      deleteKeyAria: string;
+      clearHistory: string;
+      revertToServerShared: string;
+      recentKeys: string;
     };
     locations: {
       activeStation: string;
@@ -1050,6 +1069,18 @@ export const TRANSLATIONS: Partial<Record<SupportedLanguage, Translations>> = {
         testConnection: "Test Connection",
         owmHelp:
           "Leave blank to utilize the shared server environment key. Obtain a dedicated API key at",
+        cartoTitle: "CARTO Basemaps API Key",
+        cartoDesc:
+          "Supplies clean, high-resolution Dark Matter and Voyager radar base map tiles without watermarks.",
+        cartoPlaceholder: "e.g. cb1_41ez_...",
+        showCartoKey: "Show CARTO key",
+        hideCartoKey: "Hide CARTO key",
+        cartoHelp:
+          "Leave blank to utilize the shared server environment key. Obtain a free dedicated API key at",
+        cartoAccepted: "CARTO accepted the key. Clean high-resolution basemap tiles verified.",
+        cartoWatermarked:
+          "CARTO returned watermarked tiles. Check if your key is active and unrestricted.",
+        testingCartoKey: "Verifying CARTO key with CDN...",
         testKey: "Test Key",
         keyVerified: "Key Verified",
         keyTestFailed: "Key Test Failed",
@@ -1062,6 +1093,18 @@ export const TRANSLATIONS: Partial<Record<SupportedLanguage, Translations>> = {
         testFailedHttp: (status) => `Key test failed (HTTP ${status}).`,
         testTimedOut: (seconds) => `The test timed out after ${seconds} seconds.`,
         networkError: "Network error while testing the key.",
+        historyTitle: "Key Vault & History",
+        historyDesc:
+          "Manage previously added keys and quickly switch between your personal credentials and server defaults.",
+        noHistory:
+          "No previous keys stored yet. Added keys will be recorded here so you can easily switch back.",
+        useKey: "Use Key",
+        activeKey: "Active",
+        previousKey: "Previous",
+        deleteKeyAria: "Remove key from history",
+        clearHistory: "Clear History",
+        revertToServerShared: "Revert to Server Default",
+        recentKeys: "Recent:",
       },
       locations: {
         activeStation: "Active Weather Station",

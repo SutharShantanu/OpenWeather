@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { CurrentWeather, formatTemperature, getUvClassification } from "@/lib/weather";
 import { WeatherIcon } from "@/components/weather-icon";
+import { WeatherAtmosphere } from "@/components/weather-atmosphere";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,8 +63,14 @@ export function WeatherHero({
   const localTime = prefs.time(current.dt);
 
   return (
-    <Card className="w-full">
-      <CardHeader className="border-b border-border pb-4">
+    <Card className="w-full relative overflow-hidden">
+      {/* Real-time Weather Atmosphere Animation Layer (Only for this card) */}
+      <WeatherAtmosphere
+        condition={current.condition.type}
+        isNight={current.condition.icon?.includes("n")}
+        windSpeed={current.windSpeed}
+      />
+      <CardHeader className="border-b border-border pb-4 relative z-10 backdrop-blur-[0.5px]">
         <div className="flex flex-col gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="font-mono text-tiny gap-1">
@@ -139,7 +146,7 @@ export function WeatherHero({
         </CardAction>
       </CardHeader>
 
-      <CardContent className="space-y-6 pt-4">
+      <CardContent className="space-y-6 pt-4 relative z-10">
         {/* Main Temperature & Icon Presentation */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-baseline gap-2">

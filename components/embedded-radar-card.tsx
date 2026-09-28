@@ -36,6 +36,7 @@ interface EmbeddedRadarCardProps {
   cityName: string;
   heightClass?: string;
   onExpand?: () => void;
+  customCartoApiKey?: string;
 }
 
 const MapInner = dynamic(
@@ -56,6 +57,7 @@ export function EmbeddedRadarCard({
   cityName,
   heightClass = "h-[360px]",
   onExpand,
+  customCartoApiKey,
 }: EmbeddedRadarCardProps) {
   const { t } = useTranslation();
   const prefs = useDisplayPreferences();
@@ -250,6 +252,7 @@ export function EmbeddedRadarCard({
           currentFrame={currentFrame}
           mapStyle={mapStyle}
           opacity={opacity}
+          customCartoApiKey={customCartoApiKey}
         />
 
         {/* Live Legend Overlay on Map */}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { CONFIG } from "@/lib/config";
@@ -15,6 +15,7 @@ interface RadarMapInnerProps {
   currentFrame: { time: number; path: string } | null;
   mapStyle?: "dark" | "voyager" | "osm";
   opacity?: number;
+  customCartoApiKey?: string;
 }
 
 export function RadarMapInner({
@@ -25,6 +26,7 @@ export function RadarMapInner({
   currentFrame,
   mapStyle = "dark",
   opacity = 0.75,
+  customCartoApiKey,
 }: RadarMapInnerProps) {
   const { t } = useTranslation();
   const prefs = useDisplayPreferences();
@@ -35,11 +37,15 @@ export function RadarMapInner({
   const baseTileRef = useRef<L.TileLayer | null>(null);
   const overlayRef = useRef<L.TileLayer | null>(null);
 
-  const getBaseTileUrl = (style: string) => {
+  const getBaseTileUrl = useCallback((style: string) => {
     const withCartoKey = (url: string) => {
-      if (!CONFIG.keys.cartoApiKey || url.includes("key=")) return url;
+      const apiKey =
+        customCartoApiKey ||
+        process.env.NEXT_PUBLIC_CARTO_API_KEY ||
+        CONFIG.keys.cartoApiKey;
+      if (!apiKey || url.includes("key=")) return url;
       const separator = url.includes("?") ? "&" : "?";
-      return `${url}${separator}key=${CONFIG.keys.cartoApiKey}`;
+      return `${url}${separator}key=${apiKey}`;
     };
 
     switch (style) {
@@ -49,9 +55,9 @@ export function RadarMapInner({
         return `${CONFIG.api.openStreetMapTileBaseUrl}/{z}/{x}/{y}.png`;
       case "dark":
       default:
-        return withCartoKey(`${CONFIG.api.cartoCdnTileBaseUrl}/dark_all/{z}/{x}/{y}{r}.png`);
+        return withCartoKey(`${CONFIG.api.cartoCdnTileBaseUrl}/rastertiles/dark_all/{z}/{x}/{y}{r}.png`);
     }
-  };
+  }, [customCartoApiKey]);
 
   // Initialize Leaflet map
   useEffect(() => {
@@ -59,7 +65,7 @@ export function RadarMapInner({
 
     const map = L.map(containerRef.current, {
       center: [lat, lon],
-      zoom: 8,
+      zoom: 7,
       zoomControl: true,
       attributionControl: false,
     });
@@ -92,7 +98,7 @@ export function RadarMapInner({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Update base map style if switched
+  // Update base map style or API key if switched
   useEffect(() => {
     if (!mapRef.current) return;
     if (baseTileRef.current) {
@@ -106,12 +112,12 @@ export function RadarMapInner({
     if (overlayRef.current) {
       overlayRef.current.bringToFront();
     }
-  }, [mapStyle]);
+  }, [mapStyle, getBaseTileUrl]);
 
   // Update center when coordinates change
   useEffect(() => {
     if (!mapRef.current) return;
-    mapRef.current.setView([lat, lon], 8);
+    mapRef.current.setView([lat, lon], mapRef.current.getZoom() || 7);
     if (markerRef.current) {
       markerRef.current.setLatLng([lat, lon]);
       markerRef.current.setPopupContent(popupHtml);
@@ -141,6 +147,8 @@ export function RadarMapInner({
     const overlay = L.tileLayer(tileUrl, {
       opacity: opacity,
       zIndex: 10,
+      maxNativeZoom: 7,
+      maxZoom: 19,
     });
 
     overlay.addTo(mapRef.current);
