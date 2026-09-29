@@ -621,7 +621,11 @@
     "commuteDry": "Torra förhållanden med normal framkomlighet i hela staden.",
     "summarySteady": "Atmosfären är för närvarande stabil på kort sikt.",
     "timingAround": "Runt {time}",
-    "timingBy": "Senast {time}"
+    "timingBy": "Senast {time}",
+    "liveBadge": "Live-AI",
+    "basicBadge": "Grundläggande analys",
+    "analyzing": "Analyserar aktuella förhållanden…",
+    "fallbackNotice": "AI-rådgivaren är inte tillgänglig just nu, så detta är en grundläggande analys av prognosen."
   },
   "notifications": {
     "title": "Notiscenter",

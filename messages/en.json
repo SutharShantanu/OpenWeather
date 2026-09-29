@@ -621,7 +621,11 @@
     "commuteDry": "Dry conditions with nominal transit predictability across the city grid.",
     "summarySteady": "Atmospheric equilibrium is currently steady across the short-range trajectory.",
     "timingAround": "Around {time}",
-    "timingBy": "By {time}"
+    "timingBy": "By {time}",
+    "liveBadge": "Live AI",
+    "basicBadge": "Basic analysis",
+    "analyzing": "Analyzing live conditions…",
+    "fallbackNotice": "The AI advisor is unavailable right now, so this is a basic analysis of the forecast."
   },
   "notifications": {
     "title": "Notification Center",

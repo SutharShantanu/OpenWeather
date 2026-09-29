@@ -621,7 +621,11 @@
     "commuteDry": "Tørre forhold med normal fremkommelighed i hele byen.",
     "summarySteady": "Atmosfæren er i øjeblikket stabil på kort sigt.",
     "timingAround": "Omkring {time}",
-    "timingBy": "Inden {time}"
+    "timingBy": "Inden {time}",
+    "liveBadge": "Live AI",
+    "basicBadge": "Grundlæggende analyse",
+    "analyzing": "Analyserer aktuelle forhold…",
+    "fallbackNotice": "AI-rådgiveren er ikke tilgængelig lige nu, så dette er en grundlæggende analyse af prognosen."
   },
   "notifications": {
     "title": "Notifikationscenter",

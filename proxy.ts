@@ -8,6 +8,7 @@ import type { NextRequest } from "next/server"
 const WINDOW_MS = 60_000
 const LIMITS: Record<string, number> = {
   tts: 20,
+  advisor: 15, // each call can hit the Gemini API
   default: 60,
 }
 const MAX_TRACKED = 10_000

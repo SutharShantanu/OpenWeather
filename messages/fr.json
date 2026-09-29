@@ -621,7 +621,11 @@
     "commuteDry": "Temps sec avec une circulation globalement prévisible dans toute la ville.",
     "summarySteady": "L'équilibre atmosphérique reste stable à court terme.",
     "timingAround": "Vers {time}",
-    "timingBy": "D'ici {time}"
+    "timingBy": "D'ici {time}",
+    "liveBadge": "IA en direct",
+    "basicBadge": "Analyse de base",
+    "analyzing": "Analyse des conditions actuelles…",
+    "fallbackNotice": "Le conseiller IA est indisponible pour le moment ; voici une analyse de base des prévisions."
   },
   "notifications": {
     "title": "Centre de notifications",

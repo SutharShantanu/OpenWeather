@@ -621,7 +621,11 @@
     "commuteDry": "天气干燥，全市交通状况总体可预期。",
     "summarySteady": "短期内大气平衡目前保持稳定。",
     "timingAround": "{time}前后",
-    "timingBy": "{time}前"
+    "timingBy": "{time}前",
+    "liveBadge": "实时 AI",
+    "basicBadge": "基础分析",
+    "analyzing": "正在分析当前天气…",
+    "fallbackNotice": "AI 顾问暂时不可用，因此显示的是预报的基础分析。"
   },
   "notifications": {
     "title": "通知中心",

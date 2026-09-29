@@ -621,7 +621,11 @@
     "commuteDry": "Suché podmínky s běžnou předvídatelností dopravy v celém městě.",
     "summarySteady": "Atmosférická rovnováha je v krátkodobém výhledu aktuálně stabilní.",
     "timingAround": "Kolem {time}",
-    "timingBy": "Do {time}"
+    "timingBy": "Do {time}",
+    "liveBadge": "Živá AI",
+    "basicBadge": "Základní analýza",
+    "analyzing": "Analyzuji aktuální podmínky…",
+    "fallbackNotice": "AI poradce teď není k dispozici, proto zobrazujeme základní analýzu předpovědi."
   },
   "notifications": {
     "title": "Centrum oznámení",

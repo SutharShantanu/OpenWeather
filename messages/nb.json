@@ -621,7 +621,11 @@
     "commuteDry": "Tørre forhold med normal fremkommelighet i hele byen.",
     "summarySteady": "Atmosfæren er for øyeblikket stabil på kort sikt.",
     "timingAround": "Rundt {time}",
-    "timingBy": "Innen {time}"
+    "timingBy": "Innen {time}",
+    "liveBadge": "Live-KI",
+    "basicBadge": "Grunnleggende analyse",
+    "analyzing": "Analyserer gjeldende forhold…",
+    "fallbackNotice": "KI-rådgiveren er ikke tilgjengelig akkurat nå, så dette er en grunnleggende analyse av varselet."
   },
   "notifications": {
     "title": "Varslingssenter",

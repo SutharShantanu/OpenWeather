@@ -621,7 +621,11 @@
     "commuteDry": "Keadaan kering dengan kelancaran trafik biasa di seluruh bandar.",
     "summarySteady": "Keseimbangan atmosfera kini stabil sepanjang trajektori jarak dekat.",
     "timingAround": "Sekitar {time}",
-    "timingBy": "Menjelang {time}"
+    "timingBy": "Menjelang {time}",
+    "liveBadge": "AI langsung",
+    "basicBadge": "Analisis asas",
+    "analyzing": "Menganalisis keadaan semasa…",
+    "fallbackNotice": "Penasihat AI tidak tersedia sekarang, jadi ini ialah analisis asas ramalan."
   },
   "notifications": {
     "title": "Pusat Pemberitahuan",

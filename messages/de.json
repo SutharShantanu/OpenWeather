@@ -621,7 +621,11 @@
     "commuteDry": "Trockene Bedingungen mit weitgehend verlässlichem Verkehrsfluss im gesamten Stadtgebiet.",
     "summarySteady": "Das atmosphärische Gleichgewicht bleibt kurzfristig derzeit stabil.",
     "timingAround": "Gegen {time}",
-    "timingBy": "Bis {time}"
+    "timingBy": "Bis {time}",
+    "liveBadge": "Live-KI",
+    "basicBadge": "Einfache Analyse",
+    "analyzing": "Aktuelle Bedingungen werden analysiert…",
+    "fallbackNotice": "Der KI-Berater ist gerade nicht verfügbar, daher siehst du eine einfache Analyse der Vorhersage."
   },
   "notifications": {
     "title": "Benachrichtigungscenter",

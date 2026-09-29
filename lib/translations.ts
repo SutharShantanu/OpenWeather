@@ -534,6 +534,10 @@ export interface Translations {
     toggleTheme: string;
   };
   aiAdvisor: {
+    liveBadge: string;
+    basicBadge: string;
+    analyzing: string;
+    fallbackNotice: string;
     bannerTitle: string;
     liveInsights: string;
     bannerDesc: string;

@@ -621,7 +621,11 @@
     "commuteDry": "Kuivat olosuhteet ja normaali sujuvuus koko kaupungissa.",
     "summarySteady": "Ilmakehä on tällä hetkellä vakaa lähitulevaisuudessa.",
     "timingAround": "Noin klo {time}",
-    "timingBy": "Klo {time} mennessä"
+    "timingBy": "Klo {time} mennessä",
+    "liveBadge": "Live-tekoäly",
+    "basicBadge": "Perusanalyysi",
+    "analyzing": "Analysoidaan nykyisiä olosuhteita…",
+    "fallbackNotice": "Tekoälyneuvoja ei ole juuri nyt käytettävissä, joten tämä on ennusteen perusanalyysi."
   },
   "notifications": {
     "title": "Ilmoituskeskus",

@@ -621,7 +621,11 @@
     "commuteDry": "Tuyong kondisyon at karaniwang maayos ang daloy ng trapiko sa buong lungsod.",
     "summarySteady": "Kasalukuyang matatag ang balanse ng atmospera sa maikling saklaw.",
     "timingAround": "Bandang {time}",
-    "timingBy": "Pagsapit ng {time}"
+    "timingBy": "Pagsapit ng {time}",
+    "liveBadge": "Live AI",
+    "basicBadge": "Pangunahing pagsusuri",
+    "analyzing": "Sinusuri ang kasalukuyang lagay…",
+    "fallbackNotice": "Hindi available ang AI advisor ngayon, kaya ito ay pangunahing pagsusuri ng forecast."
   },
   "notifications": {
     "title": "Sentro ng Abiso",

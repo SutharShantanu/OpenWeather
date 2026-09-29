@@ -621,7 +621,11 @@
     "commuteDry": "Száraz idő, a közlekedés a városban jól kiszámítható.",
     "summarySteady": "A légköri egyensúly jelenleg egyenletes a rövid távú előrejelzési pályán.",
     "timingAround": "{time} körül",
-    "timingBy": "{time} előtt"
+    "timingBy": "{time} előtt",
+    "liveBadge": "Élő MI",
+    "basicBadge": "Alapelemzés",
+    "analyzing": "Az aktuális viszonyok elemzése…",
+    "fallbackNotice": "Az MI-tanácsadó most nem érhető el, ezért ez az előrejelzés alapelemzése."
   },
   "notifications": {
     "title": "Értesítési központ",

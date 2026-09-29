@@ -10,6 +10,7 @@ It shows current conditions, hourly and daily forecasts, charts, a precipitation
 - **Location:** GPS, then IP-based detection, then a configurable default city. City search, pinned cities and nearby stations.
 - **Radar:** RainViewer tiles on a Leaflet map (CARTO or OpenStreetMap basemaps).
 - **Speech:** weather briefings through Microsoft Edge neural voices (no key needed).
+- **AI advisor:** Gemini reads the live forecast for your location and writes a briefing (next-12-hour changes, tomorrow, weekend) and answers questions, streamed as they are generated, in your language and units.
 - **Settings:** units, regional formats, theme, data source, API keys, speech and favorites. Stored in `localStorage` and synced across tabs; dialogs and tabs are reflected in the URL.
 - **Languages:** 31 UI languages are listed. Only Hindi is complete; several others are partial and fall back to English.
 
@@ -32,6 +33,7 @@ All variables are documented in [`.env.example`](.env.example). None are require
 | Variable | Purpose |
 | --- | --- |
 | `OPENWEATHER_API_KEY` | Server-side OpenWeatherMap key. Users can also enter their own key in Settings. |
+| `GEMINI_API_KEY` | Enables the live AI weather advisor (Gemini). Server-side only; without it the advisor uses basic rules. |
 | `NEXT_PUBLIC_CARTO_API_KEY` | CARTO basemap key; removes the watermark on the Dark/Voyager map styles. |
 | `NEXT_PUBLIC_DEFAULT_WEATHER_SOURCE` | `open-meteo`, `openweathermap`, `simulation` or `auto`. |
 | `NEXT_PUBLIC_DEFAULT_CITY` / `_LAT` / `_LON` | Fallback location when detection fails. |
@@ -63,11 +65,12 @@ All routes live in `app/api/` and are public.
 | `GET /api/location` | Approximate location from request headers / IP |
 | `GET /api/nearby` | Nearby cities for a coordinate |
 | `GET /api/climate` | Normals and records for today from the last 10 years |
+| `POST /api/advisor` | AI advisor: `mode: "briefing"` returns a JSON briefing, `mode: "ask"` streams an answer. Uses the live weather snapshot for the current location; cached 15 min. |
 | `POST /api/tts` | Text to speech (Edge neural voices), max 5000 characters |
 
 Invalid input returns `400`. When an upstream provider fails, the routes return an error (`404`/`502`/`503`) instead of made-up data. Simulated data is only served when `source=simulation` is requested.
 
-`proxy.ts` rate-limits `/api/*` per IP (60 requests/minute, 20 for TTS).
+`proxy.ts` rate-limits `/api/*` per IP (60 requests/minute, 20 for TTS, 15 for the AI advisor).
 
 ## Deployment notes
 

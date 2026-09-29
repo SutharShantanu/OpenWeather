@@ -621,7 +621,11 @@
     "commuteDry": "Tempo seco, com trânsito em geral previsível em toda a cidade.",
     "summarySteady": "O equilíbrio atmosférico segue estável no curto prazo.",
     "timingAround": "Por volta de {time}",
-    "timingBy": "Até {time}"
+    "timingBy": "Até {time}",
+    "liveBadge": "IA ao vivo",
+    "basicBadge": "Análise básica",
+    "analyzing": "Analisando as condições atuais…",
+    "fallbackNotice": "O assistente de IA está indisponível no momento, então esta é uma análise básica da previsão."
   },
   "notifications": {
     "title": "Central de notificações",

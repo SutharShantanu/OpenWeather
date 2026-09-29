@@ -621,7 +621,11 @@
     "commuteDry": "Condizioni asciutte con viabilità generalmente regolare in tutta la città.",
     "summarySteady": "L'equilibrio atmosferico resta stabile nel breve termine.",
     "timingAround": "Intorno alle {time}",
-    "timingBy": "Entro le {time}"
+    "timingBy": "Entro le {time}",
+    "liveBadge": "IA in tempo reale",
+    "basicBadge": "Analisi di base",
+    "analyzing": "Analisi delle condizioni attuali…",
+    "fallbackNotice": "Il consulente IA non è disponibile al momento, quindi questa è un'analisi di base delle previsioni."
   },
   "notifications": {
     "title": "Centro notifiche",

@@ -621,7 +621,11 @@
     "commuteDry": "Kuru hava; şehir genelinde ulaşım öngörülebilirliği normal.",
     "summarySteady": "Atmosferik denge kısa vadeli seyirde şu anda sabit.",
     "timingAround": "{time} civarı",
-    "timingBy": "{time} itibarıyla"
+    "timingBy": "{time} itibarıyla",
+    "liveBadge": "Canlı YZ",
+    "basicBadge": "Temel analiz",
+    "analyzing": "Güncel koşullar analiz ediliyor…",
+    "fallbackNotice": "YZ danışmanı şu anda kullanılamıyor, bu yüzden tahminin temel analizi gösteriliyor."
   },
   "notifications": {
     "title": "Bildirim Merkezi",

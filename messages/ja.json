@@ -621,7 +621,11 @@
     "commuteDry": "乾燥した天候で、市内の交通はおおむね順調に見込まれます。",
     "summarySteady": "短期的に大気の均衡は現在安定しています。",
     "timingAround": "{time}頃",
-    "timingBy": "{time}まで"
+    "timingBy": "{time}まで",
+    "liveBadge": "ライブAI",
+    "basicBadge": "基本分析",
+    "analyzing": "現在の状況を分析中…",
+    "fallbackNotice": "AIアドバイザーは現在利用できないため、予報の基本分析を表示しています。"
   },
   "notifications": {
     "title": "通知センター",

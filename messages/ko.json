@@ -621,7 +621,11 @@
     "commuteDry": "건조한 날씨로 도시 전역의 교통 흐름이 원활할 것으로 예상됩니다.",
     "summarySteady": "단기 예보 구간 동안 대기가 안정적입니다.",
     "timingAround": "{time}경",
-    "timingBy": "{time}까지"
+    "timingBy": "{time}까지",
+    "liveBadge": "실시간 AI",
+    "basicBadge": "기본 분석",
+    "analyzing": "현재 상황을 분석하는 중…",
+    "fallbackNotice": "AI 어드바이저를 지금 사용할 수 없어 예보의 기본 분석을 표시합니다."
   },
   "notifications": {
     "title": "알림 센터",

@@ -621,7 +621,11 @@
     "commuteDry": "Thời tiết khô ráo, việc di chuyển trong thành phố ở mức bình thường.",
     "summarySteady": "Cân bằng khí quyển hiện ổn định trong xu hướng ngắn hạn.",
     "timingAround": "Khoảng {time}",
-    "timingBy": "Trước {time}"
+    "timingBy": "Trước {time}",
+    "liveBadge": "AI trực tiếp",
+    "basicBadge": "Phân tích cơ bản",
+    "analyzing": "Đang phân tích điều kiện hiện tại…",
+    "fallbackNotice": "Trợ lý AI hiện không khả dụng, nên đây là phân tích cơ bản của dự báo."
   },
   "notifications": {
     "title": "Trung tâm thông báo",

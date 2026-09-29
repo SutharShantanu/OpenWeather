@@ -373,6 +373,7 @@ export default function WeatherDashboardPage() {
               current={weather.current}
               hourly={weather.hourly}
               daily={weather.daily}
+              alerts={weather.alerts}
               unit={unit}
             />
           )}

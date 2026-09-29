@@ -621,7 +621,11 @@
     "commuteDry": "Droog weer met normale voorspelbaarheid van het verkeer in de hele stad.",
     "summarySteady": "Het atmosferische evenwicht is momenteel stabiel op korte termijn.",
     "timingAround": "Rond {time}",
-    "timingBy": "Tegen {time}"
+    "timingBy": "Tegen {time}",
+    "liveBadge": "Live AI",
+    "basicBadge": "Basisanalyse",
+    "analyzing": "Actuele omstandigheden worden geanalyseerd…",
+    "fallbackNotice": "De AI-adviseur is nu niet beschikbaar, dus dit is een basisanalyse van de verwachting."
   },
   "notifications": {
     "title": "Meldingencentrum",

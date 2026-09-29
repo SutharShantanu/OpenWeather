@@ -621,7 +621,11 @@
     "commuteDry": "Condiții uscate, cu predictibilitate normală a traficului în tot orașul.",
     "summarySteady": "Echilibrul atmosferic este stabil în prezent pe traiectoria pe termen scurt.",
     "timingAround": "În jurul orei {time}",
-    "timingBy": "Până la {time}"
+    "timingBy": "Până la {time}",
+    "liveBadge": "AI în timp real",
+    "basicBadge": "Analiză de bază",
+    "analyzing": "Se analizează condițiile actuale…",
+    "fallbackNotice": "Consilierul AI nu este disponibil acum, așa că aceasta este o analiză de bază a prognozei."
   },
   "notifications": {
     "title": "Centru de notificări",

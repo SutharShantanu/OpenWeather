@@ -621,7 +621,11 @@
     "commuteDry": "Warunki suche, przewidywalny ruch w całej sieci miejskiej.",
     "summarySteady": "Równowaga atmosferyczna jest obecnie stabilna w krótkim horyzoncie prognozy.",
     "timingAround": "Około {time}",
-    "timingBy": "Do {time}"
+    "timingBy": "Do {time}",
+    "liveBadge": "AI na żywo",
+    "basicBadge": "Podstawowa analiza",
+    "analyzing": "Analizowanie bieżących warunków…",
+    "fallbackNotice": "Doradca AI jest teraz niedostępny, więc to podstawowa analiza prognozy."
   },
   "notifications": {
     "title": "Centrum powiadomień",
