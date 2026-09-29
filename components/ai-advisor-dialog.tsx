@@ -12,6 +12,11 @@ import {
   X,
 } from "lucide-react"
 import { CopyButton } from "@/components/ui/copy-button"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { Spinner } from "@/components/ui/spinner"
 import { useAiAdvisor, type AdvisorAnswer } from "@/hooks/use-ai-advisor"
 import { UniversalDialog } from "@/components/universal-dialog"
@@ -380,14 +385,17 @@ export function AiAdvisorDialog({
                               <BubbleContent>{item.question}</BubbleContent>
                             </Bubble>
                             <MessageFooter className={HOVER_ACTIONS}>
-                              <CopyButton
-                                value={item.question}
-                                variant="ghost"
-                                size="icon-xs"
-                                aria-label={ai.copy}
-                                copyLabel={ai.copy}
-                                copiedLabel={ai.copied}
-                              />
+                              <WithTooltip label={ai.copy}>
+                                <CopyButton
+                                  value={item.question}
+                                  variant="ghost"
+                                  size="icon-xs"
+                                  title=""
+                                  aria-label={ai.copy}
+                                  copyLabel={ai.copy}
+                                  copiedLabel={ai.copied}
+                                />
+                              </WithTooltip>
                             </MessageFooter>
                           </MessageContent>
                         </Message>
@@ -415,7 +423,7 @@ export function AiAdvisorDialog({
                                   )}
                                 </BubbleContent>
                                 {item.reaction && (
-                                  <BubbleReactions align="start">
+                                  <BubbleReactions align="start" className="rounded-full">
                                     <span
                                       role="img"
                                       aria-label={
@@ -423,7 +431,7 @@ export function AiAdvisorDialog({
                                           ? ai.helpful
                                           : ai.notHelpful
                                       }
-                                      className="px-1 text-xs"
+                                      className="text-xs"
                                     >
                                       {item.reaction === "up" ? "👍" : "👎"}
                                     </span>
@@ -435,11 +443,8 @@ export function AiAdvisorDialog({
                               <MessageFooter
                                 className={`gap-0.5 ${HOVER_ACTIONS}`}
                               >
-                                <Button
-                                  variant="ghost"
-                                  size="icon-xs"
-                                  aria-label={ai.helpful}
-                                  title={ai.helpful}
+                                <ActionButton
+                                  label={ai.helpful}
                                   aria-pressed={item.reaction === "up"}
                                   onClick={() => react(item.id, "up")}
                                   className={
@@ -447,12 +452,9 @@ export function AiAdvisorDialog({
                                   }
                                 >
                                   <ThumbsUp />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon-xs"
-                                  aria-label={ai.notHelpful}
-                                  title={ai.notHelpful}
+                                </ActionButton>
+                                <ActionButton
+                                  label={ai.notHelpful}
                                   aria-pressed={item.reaction === "down"}
                                   onClick={() => react(item.id, "down")}
                                   className={
@@ -462,25 +464,25 @@ export function AiAdvisorDialog({
                                   }
                                 >
                                   <ThumbsDown />
-                                </Button>
-                                <CopyButton
-                                  value={item.answer}
-                                  variant="ghost"
-                                  size="icon-xs"
-                                  aria-label={ai.copy}
-                                  copyLabel={ai.copy}
-                                  copiedLabel={ai.copied}
-                                />
-                                {item.status === "done" && (
-                                  <Button
+                                </ActionButton>
+                                <WithTooltip label={ai.copy}>
+                                  <CopyButton
+                                    value={item.answer}
                                     variant="ghost"
                                     size="icon-xs"
-                                    aria-label={ai.reply}
-                                    title={ai.reply}
+                                    title=""
+                                    aria-label={ai.copy}
+                                    copyLabel={ai.copy}
+                                    copiedLabel={ai.copied}
+                                  />
+                                </WithTooltip>
+                                {item.status === "done" && (
+                                  <ActionButton
+                                    label={ai.reply}
                                     onClick={() => startReply(item)}
                                   >
                                     <Reply />
-                                  </Button>
+                                  </ActionButton>
                                 )}
                                 {item.status === "fallback" && (
                                   <Badge
@@ -515,14 +517,9 @@ export function AiAdvisorDialog({
             </span>{" "}
             {snippet(replyTo.answer)}
           </span>
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            aria-label={ai.cancelReply}
-            onClick={() => setReplyTo(null)}
-          >
+          <ActionButton label={ai.cancelReply} onClick={() => setReplyTo(null)}>
             <X />
-          </Button>
+          </ActionButton>
         </div>
       )}
 
@@ -560,6 +557,37 @@ export function AiAdvisorDialog({
 /** Hover/focus reveal for message actions; always visible without a hover-capable pointer. */
 const HOVER_ACTIONS =
   "opacity-0 transition-opacity group-hover/message:opacity-100 group-focus-within/message:opacity-100 [@media(hover:none)]:opacity-100"
+
+/** Wraps a control with a tooltip showing `label`. */
+function WithTooltip({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactElement
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+/** Ghost icon button for message actions; `label` is its tooltip and accessible name. */
+function ActionButton({
+  label,
+  children,
+  ...props
+}: React.ComponentProps<typeof Button> & { label: string }) {
+  return (
+    <WithTooltip label={label}>
+      <Button variant="ghost" size="icon-xs" aria-label={label} {...props}>
+        {children}
+      </Button>
+    </WithTooltip>
+  )
+}
 
 /** Three pulsing dots shown until the first words of an answer arrive. */
 function TypingIndicator({ label }: { label: string }) {
