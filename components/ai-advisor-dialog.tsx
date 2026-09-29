@@ -6,8 +6,29 @@ import { Spinner } from "@/components/ui/spinner"
 import { useAiAdvisor } from "@/hooks/use-ai-advisor"
 import { UniversalDialog } from "@/components/universal-dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
+import { IconTile } from "@/components/ui/icon-tile"
+import { Bubble, BubbleContent } from "@/components/ui/bubble"
+import {
+  Message,
+  MessageAvatar,
+  MessageContent,
+  MessageFooter,
+} from "@/components/ui/message"
+import {
+  MessageScroller,
+  MessageScrollerButton,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+} from "@/components/ui/message-scroller"
 import {
   CurrentWeather,
   DailyForecastItem,
@@ -302,69 +323,103 @@ export function AiAdvisorDialog({
         </div>
       </div>
 
-      {/* Interactive Chat Input */}
-      <form onSubmit={handleSubmit} className="flex gap-2 pt-1">
-        <Input
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder={ai.chatPlaceholder}
-          className="h-8 rounded-none font-mono text-xs"
-        />
-        <Button
-          type="submit"
-          size="sm"
-          className="h-8 gap-1 px-3 font-mono text-xs"
-        >
-          <Send className="size-3" />
-          <span>{ai.askButton}</span>
-        </Button>
-      </form>
-
-      {/* Conversation history */}
+      {/* Conversation: questions on the end side, AI answers with an avatar */}
       {answers.length > 0 && (
-        <div
-          aria-live="polite"
-          className="max-h-64 space-y-2.5 overflow-y-auto border-t border-border pt-2"
-        >
-          {answers.map((item) => (
-            <div
-              key={item.id}
-              className="space-y-1 border border-border bg-muted/20 p-2.5"
-            >
-              <div className="flex items-center gap-1.5 font-semibold text-primary">
-                <Bot className="size-3 shrink-0" />
-                <span>
-                  {ai.consultationPrefix}
-                  {item.question}
-                </span>
-                {item.status === "fallback" && (
-                  <Badge
-                    variant="outline"
-                    className="ms-auto shrink-0 font-mono text-nano uppercase"
-                  >
-                    {ai.basicBadge}
-                  </Badge>
-                )}
-              </div>
-              <p className="border-s border-primary/30 ps-4 leading-relaxed whitespace-pre-line text-foreground">
-                {item.answer}
-                {item.status === "streaming" &&
-                  (item.answer ? (
-                    <span
-                      aria-hidden
-                      className="ms-0.5 inline-block h-3 w-1.5 animate-pulse bg-primary align-middle"
-                    />
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-                      <Spinner className="size-3" />
-                      {ai.analyzing}
-                    </span>
-                  ))}
-              </p>
-            </div>
-          ))}
-        </div>
+        <MessageScrollerProvider autoScroll defaultScrollPosition="end">
+          <MessageScroller className="h-72 border border-border bg-muted/10">
+            <MessageScrollerViewport>
+              <MessageScrollerContent
+                aria-busy={answers.some((a) => a.status === "streaming")}
+                className="gap-3 p-3"
+              >
+                {[...answers].reverse().map((item) => (
+                  <React.Fragment key={item.id}>
+                    <MessageScrollerItem
+                      messageId={`${item.id}-q`}
+                      scrollAnchor
+                    >
+                      <Message align="end">
+                        <MessageContent>
+                          <Bubble>
+                            <BubbleContent>{item.question}</BubbleContent>
+                          </Bubble>
+                        </MessageContent>
+                      </Message>
+                    </MessageScrollerItem>
+                    <MessageScrollerItem messageId={`${item.id}-a`}>
+                      <Message>
+                        <MessageAvatar>
+                          <IconTile variant="soft" size="xs">
+                            <Bot />
+                          </IconTile>
+                        </MessageAvatar>
+                        <MessageContent>
+                          <Bubble variant="muted">
+                            <BubbleContent className="leading-relaxed whitespace-pre-line">
+                              {item.answer}
+                              {item.status === "streaming" &&
+                                (item.answer ? (
+                                  <span
+                                    aria-hidden
+                                    className="ms-0.5 inline-block h-3 w-1.5 animate-pulse bg-primary align-middle"
+                                  />
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                                    <Spinner className="size-3" />
+                                    {ai.analyzing}
+                                  </span>
+                                ))}
+                            </BubbleContent>
+                          </Bubble>
+                          {item.status === "fallback" && (
+                            <MessageFooter>
+                              <Badge
+                                variant="outline"
+                                className="font-mono text-nano uppercase"
+                              >
+                                {ai.basicBadge}
+                              </Badge>
+                            </MessageFooter>
+                          )}
+                        </MessageContent>
+                      </Message>
+                    </MessageScrollerItem>
+                  </React.Fragment>
+                ))}
+              </MessageScrollerContent>
+            </MessageScrollerViewport>
+            <MessageScrollerButton />
+          </MessageScroller>
+        </MessageScrollerProvider>
       )}
+
+      {/* Interactive Chat Input */}
+      <form onSubmit={handleSubmit} className="pt-1">
+        <InputGroup>
+          <InputGroupAddon>
+            <Sparkles className="text-primary" aria-hidden />
+          </InputGroupAddon>
+          <InputGroupInput
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder={ai.chatPlaceholder}
+            aria-label={ai.chatPlaceholder}
+            maxLength={500}
+            className="font-mono text-xs"
+          />
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton
+              type="submit"
+              variant="default"
+              disabled={!question.trim()}
+              className="font-mono"
+            >
+              <Send />
+              <span>{ai.askButton}</span>
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+      </form>
     </UniversalDialog>
   )
 }

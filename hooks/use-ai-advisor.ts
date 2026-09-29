@@ -5,6 +5,7 @@ import {
   buildAdvisorSnapshot,
   snapshotKey,
   type AdvisorBriefing,
+  type ClimateNormals,
 } from "@/lib/advisor"
 import type {
   CurrentWeather,
@@ -41,6 +42,8 @@ interface UseAiAdvisorOptions {
 // Briefings per location + observation + language, kept for the session so
 // reopening the dialog does not call the API again.
 const briefingCache = new Map<string, AdvisorBriefing>()
+// Climate normals per location (null = unavailable); they change once a day.
+const normalsCache = new Map<string, ClimateNormals | null>()
 const NO_ALERTS: WeatherAlert[] = []
 
 /**
@@ -59,9 +62,42 @@ export function useAiAdvisor({
   fallbackAnswer,
 }: UseAiAdvisorOptions) {
   const prefs = useDisplayPreferences()
+
+  // Today's long-term averages give the AI a "warmer/cooler than normal" baseline.
+  const normalsKey = `${current.lat.toFixed(2)},${current.lon.toFixed(2)}`
+  const [, setNormalsLoaded] = useState<string | null>(null)
+  const normals = normalsCache.get(normalsKey) // undefined = not fetched yet
+  useEffect(() => {
+    if (!enabled || normalsCache.has(normalsKey)) return
+    const controller = new AbortController()
+    fetch(`/api/climate?lat=${current.lat}&lon=${current.lon}`, {
+      signal: controller.signal,
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null)
+      .then((data: ClimateNormals | null) => {
+        if (controller.signal.aborted) return
+        normalsCache.set(
+          normalsKey,
+          data && typeof data.avgHigh === "number" ? data : null
+        )
+        setNormalsLoaded(normalsKey)
+      })
+    return () => controller.abort()
+  }, [enabled, normalsKey, current.lat, current.lon])
+
   const snapshot = useMemo(
-    () => buildAdvisorSnapshot(current, hourly, daily, alerts, unit, prefs),
-    [current, hourly, daily, alerts, unit, prefs]
+    () =>
+      buildAdvisorSnapshot(
+        current,
+        hourly,
+        daily,
+        alerts,
+        unit,
+        prefs,
+        normals
+      ),
+    [current, hourly, daily, alerts, unit, prefs, normals]
   )
   const key = snapshotKey(snapshot, language)
   const locationKey = `${snapshot.location.lat},${snapshot.location.lon}`
@@ -76,7 +112,8 @@ export function useAiAdvisor({
       : "loading"
 
   useEffect(() => {
-    if (!enabled || briefingCache.has(key)) return
+    // Wait for the normals lookup (success or failure) so the briefing includes them.
+    if (!enabled || briefingCache.has(key) || normals === undefined) return
     const controller = new AbortController()
     fetch("/api/advisor", {
       method: "POST",
@@ -93,7 +130,7 @@ export function useAiAdvisor({
         if ((err as Error).name !== "AbortError") setFailedKey(key)
       })
     return () => controller.abort()
-  }, [enabled, key, language, snapshot])
+  }, [enabled, key, language, snapshot, normals])
 
   const [answers, setAnswers] = useState<AdvisorAnswer[]>([])
   const answersRef = useRef(answers)

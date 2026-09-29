@@ -50,12 +50,65 @@ const CACHE_TTL_MS = 3 * 60 * 1000;
 // Keys come from request input, so bound the map (Map keeps insertion order).
 const CACHE_MAX_ENTRIES = 500;
 
-function setCachedWeather(key: string, data: WeatherData) {
+function setCachedWeather(key: string, data: WeatherData, ttlMs = CACHE_TTL_MS) {
   weatherCache.delete(key);
-  weatherCache.set(key, { data, expires: Date.now() + CACHE_TTL_MS });
+  weatherCache.set(key, { data, expires: Date.now() + ttlMs });
   while (weatherCache.size > CACHE_MAX_ENTRIES) {
     weatherCache.delete(weatherCache.keys().next().value!);
   }
+}
+
+// Last good air-quality reading per ~1 km cell. The air-quality API times out
+// now and then; reusing a reading under an hour old beats showing nothing
+// (the upstream data is hourly anyway).
+const AIR_QUALITY_MAX_AGE_MS = 60 * 60 * 1000
+const airQualityCache = new Map<string, { data: AirQualityData; at: number }>()
+/** Responses missing air quality are cached briefly so a retry comes soon. */
+const PARTIAL_CACHE_TTL_MS = 30 * 1000
+
+function mapOpenMeteoAirQuality(cAqi: Record<string, number | null | undefined>): AirQualityData | undefined {
+  if (cAqi.us_aqi == null) return undefined
+  const usAqi = cAqi.us_aqi
+  let aqiBand = 1
+  if (usAqi > 200) aqiBand = 5
+  else if (usAqi > 150) aqiBand = 4
+  else if (usAqi > 100) aqiBand = 3
+  else if (usAqi > 50) aqiBand = 2
+  const round1 = (v: number | null | undefined) => (v == null ? 0 : Math.round(v * 10) / 10)
+  return {
+    aqi: aqiBand,
+    usAqi: Math.round(usAqi),
+    europeanAqi: cAqi.european_aqi == null ? undefined : Math.round(cAqi.european_aqi),
+    co: round1(cAqi.carbon_monoxide),
+    no: 0,
+    no2: round1(cAqi.nitrogen_dioxide),
+    o3: round1(cAqi.ozone),
+    so2: round1(cAqi.sulphur_dioxide),
+    pm2_5: round1(cAqi.pm2_5),
+    pm10: round1(cAqi.pm10),
+    nh3: 0,
+  }
+}
+
+async function fetchOpenMeteoAirQuality(lat: number, lon: number): Promise<AirQualityData | undefined> {
+  const cellKey = `${lat.toFixed(2)}_${lon.toFixed(2)}`
+  const url = `${CONFIG.api.openMeteoAirQualityBaseUrl}/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi,us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(5000) })
+      if (res.ok) {
+        const data = mapOpenMeteoAirQuality((await res.json())?.current ?? {})
+        if (data) {
+          airQualityCache.set(cellKey, { data, at: Date.now() })
+          return data
+        }
+      }
+    } catch (err) {
+      console.warn(`Open-Meteo air quality attempt ${attempt + 1} failed:`, err)
+    }
+  }
+  const last = airQualityCache.get(cellKey)
+  return last && Date.now() - last.at < AIR_QUALITY_MAX_AGE_MS ? last.data : undefined
 }
 
 const WEATHER_SOURCES: readonly WeatherDataSource[] = ["open-meteo", "openweathermap", "simulation", "auto"];
@@ -423,17 +476,12 @@ async function fetchOpenMeteo(
       weatherUrl += `&models=${requestedStation}`;
     }
 
-    const aqiUrl = `${CONFIG.api.openMeteoAirQualityBaseUrl}/air-quality?latitude=${resolvedLat}&longitude=${resolvedLon}&current=european_aqi,us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone`;
-
-    const [weatherRes, aqiRes] = await Promise.all([
+    const [weatherRes, airQuality] = await Promise.all([
       fetch(weatherUrl, { signal: AbortSignal.timeout(6000) }).catch((err) => {
         console.warn("Open-Meteo weather fetch timeout or network error:", err);
         return null;
       }),
-      fetch(aqiUrl, { signal: AbortSignal.timeout(5000) }).catch((err) => {
-        console.warn("Open-Meteo AQI fetch timeout or network error:", err);
-        return null;
-      }),
+      fetchOpenMeteoAirQuality(resolvedLat, resolvedLon),
     ]);
 
     if (!weatherRes || !weatherRes.ok) {
@@ -442,7 +490,6 @@ async function fetchOpenMeteo(
     }
 
     const weatherJson = await weatherRes.json();
-    const aqiJson = aqiRes && aqiRes.ok ? await aqiRes.json() : null;
 
     const currentMeteo = weatherJson.current;
     const dailyMeteo = weatherJson.daily;
@@ -452,39 +499,21 @@ async function fetchOpenMeteo(
     const cond = mapWmoCode(currentMeteo.weather_code, Boolean(currentMeteo.is_day));
     const sunriseIso = dailyMeteo.sunrise?.[0];
     const sunsetIso = dailyMeteo.sunset?.[0];
-    const sunriseTs = sunriseIso ? Math.floor(new Date(sunriseIso).getTime() / 1000) : Math.floor(Date.now() / 1000) - 20000;
-    const sunsetTs = sunsetIso ? Math.floor(new Date(sunsetIso).getTime() / 1000) : Math.floor(Date.now() / 1000) + 20000;
 
-    const currentHourIdx = 0;
+    // Open-Meteo hourly data starts at local midnight. Times are local ISO strings
+    // (timezone=auto) without an offset; utc_offset_seconds converts them.
+    const utcOffset: number = weatherJson.utc_offset_seconds ?? 0;
+    const localIsoToUnix = (iso: string) => Math.floor(Date.parse(`${iso}Z`) / 1000) - utcOffset;
+    const currentHourIso = String(currentMeteo.time ?? "").slice(0, 13); // "YYYY-MM-DDTHH"
+    const currentHourIdx = Math.max(
+      0,
+      (hourlyMeteo.time as string[]).findIndex((t) => t.startsWith(currentHourIso))
+    );
     const currentUv = hourlyMeteo.uv_index?.[currentHourIdx] ?? dailyMeteo.uv_index_max?.[0] ?? 0;
     const currentDewPoint = hourlyMeteo.dew_point_2m?.[currentHourIdx] ?? 12;
     const currentVisibility = hourlyMeteo.visibility?.[currentHourIdx] ?? 10000;
-
-    // Air Quality mapping
-    let airQuality: AirQualityData | undefined;
-    if (aqiJson?.current) {
-      const cAqi = aqiJson.current;
-      const usAqi = cAqi.us_aqi ?? 25;
-      let aqiBand = 1;
-      if (usAqi > 200) aqiBand = 5;
-      else if (usAqi > 150) aqiBand = 4;
-      else if (usAqi > 100) aqiBand = 3;
-      else if (usAqi > 50) aqiBand = 2;
-
-      airQuality = {
-        aqi: aqiBand,
-        usAqi: Math.round(usAqi),
-        europeanAqi: Math.round(cAqi.european_aqi ?? 20),
-        co: parseFloat((cAqi.carbon_monoxide ?? 180).toFixed(1)),
-        no: 0.1,
-        no2: parseFloat((cAqi.nitrogen_dioxide ?? 10).toFixed(1)),
-        o3: parseFloat((cAqi.ozone ?? 45).toFixed(1)),
-        so2: parseFloat((cAqi.sulphur_dioxide ?? 2).toFixed(1)),
-        pm2_5: parseFloat((cAqi.pm2_5 ?? 5.5).toFixed(1)),
-        pm10: parseFloat((cAqi.pm10 ?? 12.0).toFixed(1)),
-        nh3: 0.5,
-      };
-    }
+    const sunriseTs = sunriseIso ? localIsoToUnix(sunriseIso) : Math.floor(Date.now() / 1000) - 20000;
+    const sunsetTs = sunsetIso ? localIsoToUnix(sunsetIso) : Math.floor(Date.now() / 1000) + 20000;
 
     const current: CurrentWeather = {
       cityName: resolvedCity,
@@ -504,6 +533,7 @@ async function fetchOpenMeteo(
       visibility: currentVisibility,
       uvIndex: currentUv,
       dewPoint: currentDewPoint,
+      precipitation: currentMeteo.precipitation ?? undefined,
       condition: {
         type: cond.type,
         main: translateCondition(cond.label, lang),
@@ -517,20 +547,19 @@ async function fetchOpenMeteo(
       airQuality,
     };
 
-    // 24 to 48 hours hourly sequence
+    // Next 48 hours, starting at the current local hour
     const hourly: HourlyForecastItem[] = [];
-    const maxHours = Math.min(48, hourlyMeteo.time.length);
-    for (let i = 0; i < maxHours; i++) {
-      const timeIso = hourlyMeteo.time[i];
+    const maxHours = Math.min(currentHourIdx + 48, hourlyMeteo.time.length);
+    for (let i = currentHourIdx; i < maxHours; i++) {
+      const timeIso: string = hourlyMeteo.time[i];
       if (!timeIso || hourlyMeteo.temperature_2m?.[i] == null) continue;
-      const date = new Date(timeIso);
-      const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+      const timeStr = timeIso.slice(11, 16); // local "HH:mm"
       const isDay = Boolean(hourlyMeteo.is_day?.[i] ?? 1);
       const hCond = mapWmoCode(hourlyMeteo.weather_code?.[i] ?? 0, isDay);
 
       hourly.push({
         time: timeStr,
-        timestamp: Math.floor(date.getTime() / 1000),
+        timestamp: localIsoToUnix(timeIso),
         temp: hourlyMeteo.temperature_2m[i],
         feelsLike: hourlyMeteo.apparent_temperature?.[i] ?? hourlyMeteo.temperature_2m[i],
         humidity: hourlyMeteo.relative_humidity_2m?.[i] ?? 60,
@@ -539,6 +568,9 @@ async function fetchOpenMeteo(
         uvIndex: hourlyMeteo.uv_index?.[i] ?? 0,
         dewPoint: hourlyMeteo.dew_point_2m?.[i] ?? 10,
         cloudCover: hourlyMeteo.cloud_cover?.[i] ?? 20,
+        precipitation: hourlyMeteo.precipitation?.[i] ?? undefined,
+        visibility: hourlyMeteo.visibility?.[i] ?? undefined,
+        pressure: hourlyMeteo.surface_pressure?.[i] != null ? Math.round(hourlyMeteo.surface_pressure[i]) : undefined,
         conditionType: hCond.type,
         description: translateCondition(hCond.label, lang),
         pop: (hourlyMeteo.precipitation_probability?.[i] ?? 0) / 100,
@@ -547,7 +579,8 @@ async function fetchOpenMeteo(
 
     // 10-day outlook sequence
     const daily: DailyForecastItem[] = [];
-    const todayIso = new Date().toISOString().split("T")[0];
+    // "Today" at the location, not on the server
+    const todayIso = String(currentMeteo.time ?? new Date().toISOString()).slice(0, 10);
     const numDays = Math.min(10, dailyMeteo.time.length);
 
     for (let i = 0; i < numDays; i++) {
@@ -561,8 +594,8 @@ async function fetchOpenMeteo(
           ? "TODAY"
           : date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
       const dCond = mapWmoCode(dailyMeteo.weather_code?.[i] ?? 0, true);
-      const sRise = dailyMeteo.sunrise?.[i] ? Math.floor(new Date(dailyMeteo.sunrise[i]).getTime() / 1000) : undefined;
-      const sSet = dailyMeteo.sunset?.[i] ? Math.floor(new Date(dailyMeteo.sunset[i]).getTime() / 1000) : undefined;
+      const sRise = dailyMeteo.sunrise?.[i] ? localIsoToUnix(dailyMeteo.sunrise[i]) : undefined;
+      const sSet = dailyMeteo.sunset?.[i] ? localIsoToUnix(dailyMeteo.sunset[i]) : undefined;
 
       daily.push({
         day: dayName,
@@ -576,6 +609,9 @@ async function fetchOpenMeteo(
         windSpeed: parseFloat((dailyMeteo.wind_speed_10m_max?.[i] ?? 4).toFixed(1)),
         windGusts: parseFloat(dailyMeteo.wind_gusts_10m_max?.[i]?.toFixed(1) ?? "0"),
         uvIndexMax: dailyMeteo.uv_index_max?.[i] ?? 3,
+        precipitationSum: dailyMeteo.precipitation_sum?.[i] ?? undefined,
+        feelsLikeMax: dailyMeteo.apparent_temperature_max?.[i] ?? undefined,
+        feelsLikeMin: dailyMeteo.apparent_temperature_min?.[i] ?? undefined,
         sunrise: sRise,
         sunset: sSet,
       });
@@ -595,7 +631,7 @@ async function fetchOpenMeteo(
       stationName,
     };
 
-    setCachedWeather(cacheKey, result);
+    setCachedWeather(cacheKey, result, airQuality ? CACHE_TTL_MS : PARTIAL_CACHE_TTL_MS);
     return result;
   } catch (err) {
     console.warn("fetchOpenMeteo error:", err);

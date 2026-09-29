@@ -75,6 +75,7 @@ export interface CurrentWeather {
   visibility: number; // meters
   uvIndex?: number; // 0 to 12+
   dewPoint?: number; // Celsius
+  precipitation?: number; // mm in the current interval
   condition: {
     type: WeatherConditionType;
     main: string;
@@ -99,6 +100,9 @@ export interface HourlyForecastItem {
   uvIndex?: number;
   dewPoint?: number;
   cloudCover?: number;
+  precipitation?: number; // mm
+  visibility?: number; // meters
+  pressure?: number; // hPa
   conditionType: WeatherConditionType;
   description: string;
   pop: number; // Probability of precipitation (0 to 1)
@@ -116,6 +120,9 @@ export interface DailyForecastItem {
   windSpeed: number;
   windGusts?: number;
   uvIndexMax?: number;
+  precipitationSum?: number; // mm
+  feelsLikeMax?: number; // Celsius
+  feelsLikeMin?: number; // Celsius
   sunrise?: number;
   sunset?: number;
 }
