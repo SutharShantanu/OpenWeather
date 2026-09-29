@@ -625,7 +625,15 @@
     "liveBadge": "AI na żywo",
     "basicBadge": "Podstawowa analiza",
     "analyzing": "Analizowanie bieżących warunków…",
-    "fallbackNotice": "Doradca AI jest teraz niedostępny, więc to podstawowa analiza prognozy."
+    "fallbackNotice": "Doradca AI jest teraz niedostępny, więc to podstawowa analiza prognozy.",
+    "typing": "AI pisze…",
+    "reply": "Odpowiedz",
+    "replyingTo": "W odpowiedzi na",
+    "cancelReply": "Anuluj odpowiedź",
+    "copy": "Kopiuj",
+    "copied": "Skopiowano",
+    "helpful": "Pomocne",
+    "notHelpful": "Niepomocne"
   },
   "notifications": {
     "title": "Centrum powiadomień",

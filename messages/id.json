@@ -625,7 +625,15 @@
     "liveBadge": "AI langsung",
     "basicBadge": "Analisis dasar",
     "analyzing": "Menganalisis kondisi terkini…",
-    "fallbackNotice": "Penasihat AI sedang tidak tersedia, jadi ini adalah analisis dasar prakiraan."
+    "fallbackNotice": "Penasihat AI sedang tidak tersedia, jadi ini adalah analisis dasar prakiraan.",
+    "typing": "AI sedang mengetik…",
+    "reply": "Balas",
+    "replyingTo": "Membalas",
+    "cancelReply": "Batalkan balasan",
+    "copy": "Salin",
+    "copied": "Disalin",
+    "helpful": "Membantu",
+    "notHelpful": "Tidak membantu"
   },
   "notifications": {
     "title": "Pusat Notifikasi",

@@ -625,7 +625,15 @@
     "liveBadge": "Live AI",
     "basicBadge": "Basisanalyse",
     "analyzing": "Actuele omstandigheden worden geanalyseerd…",
-    "fallbackNotice": "De AI-adviseur is nu niet beschikbaar, dus dit is een basisanalyse van de verwachting."
+    "fallbackNotice": "De AI-adviseur is nu niet beschikbaar, dus dit is een basisanalyse van de verwachting.",
+    "typing": "AI typt…",
+    "reply": "Beantwoorden",
+    "replyingTo": "Antwoord op",
+    "cancelReply": "Antwoord annuleren",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd",
+    "helpful": "Nuttig",
+    "notHelpful": "Niet nuttig"
   },
   "notifications": {
     "title": "Meldingencentrum",

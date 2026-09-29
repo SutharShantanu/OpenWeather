@@ -625,7 +625,15 @@
     "liveBadge": "IA en direct",
     "basicBadge": "Analyse de base",
     "analyzing": "Analyse des conditions actuelles…",
-    "fallbackNotice": "Le conseiller IA est indisponible pour le moment ; voici une analyse de base des prévisions."
+    "fallbackNotice": "Le conseiller IA est indisponible pour le moment ; voici une analyse de base des prévisions.",
+    "typing": "L'IA écrit…",
+    "reply": "Répondre",
+    "replyingTo": "En réponse à",
+    "cancelReply": "Annuler la réponse",
+    "copy": "Copier",
+    "copied": "Copié",
+    "helpful": "Utile",
+    "notHelpful": "Pas utile"
   },
   "notifications": {
     "title": "Centre de notifications",

@@ -538,6 +538,14 @@ export interface Translations {
     basicBadge: string;
     analyzing: string;
     fallbackNotice: string;
+    typing: string;
+    reply: string;
+    replyingTo: string;
+    cancelReply: string;
+    copy: string;
+    copied: string;
+    helpful: string;
+    notHelpful: string;
     bannerTitle: string;
     liveInsights: string;
     bannerDesc: string;

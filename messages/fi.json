@@ -625,7 +625,15 @@
     "liveBadge": "Live-tekoäly",
     "basicBadge": "Perusanalyysi",
     "analyzing": "Analysoidaan nykyisiä olosuhteita…",
-    "fallbackNotice": "Tekoälyneuvoja ei ole juuri nyt käytettävissä, joten tämä on ennusteen perusanalyysi."
+    "fallbackNotice": "Tekoälyneuvoja ei ole juuri nyt käytettävissä, joten tämä on ennusteen perusanalyysi.",
+    "typing": "Tekoäly kirjoittaa…",
+    "reply": "Vastaa",
+    "replyingTo": "Vastaus viestiin",
+    "cancelReply": "Peruuta vastaus",
+    "copy": "Kopioi",
+    "copied": "Kopioitu",
+    "helpful": "Hyödyllinen",
+    "notHelpful": "Ei hyödyllinen"
   },
   "notifications": {
     "title": "Ilmoituskeskus",

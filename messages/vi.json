@@ -625,7 +625,15 @@
     "liveBadge": "AI trực tiếp",
     "basicBadge": "Phân tích cơ bản",
     "analyzing": "Đang phân tích điều kiện hiện tại…",
-    "fallbackNotice": "Trợ lý AI hiện không khả dụng, nên đây là phân tích cơ bản của dự báo."
+    "fallbackNotice": "Trợ lý AI hiện không khả dụng, nên đây là phân tích cơ bản của dự báo.",
+    "typing": "AI đang nhập…",
+    "reply": "Trả lời",
+    "replyingTo": "Đang trả lời",
+    "cancelReply": "Hủy trả lời",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "helpful": "Hữu ích",
+    "notHelpful": "Không hữu ích"
   },
   "notifications": {
     "title": "Trung tâm thông báo",

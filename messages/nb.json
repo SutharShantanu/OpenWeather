@@ -625,7 +625,15 @@
     "liveBadge": "Live-KI",
     "basicBadge": "Grunnleggende analyse",
     "analyzing": "Analyserer gjeldende forhold…",
-    "fallbackNotice": "KI-rådgiveren er ikke tilgjengelig akkurat nå, så dette er en grunnleggende analyse av varselet."
+    "fallbackNotice": "KI-rådgiveren er ikke tilgjengelig akkurat nå, så dette er en grunnleggende analyse av varselet.",
+    "typing": "KI skriver…",
+    "reply": "Svar",
+    "replyingTo": "Svarer på",
+    "cancelReply": "Avbryt svar",
+    "copy": "Kopier",
+    "copied": "Kopiert",
+    "helpful": "Nyttig",
+    "notHelpful": "Ikke nyttig"
   },
   "notifications": {
     "title": "Varslingssenter",

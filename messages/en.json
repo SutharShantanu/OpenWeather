@@ -625,7 +625,15 @@
     "liveBadge": "Live AI",
     "basicBadge": "Basic analysis",
     "analyzing": "Analyzing live conditions…",
-    "fallbackNotice": "The AI advisor is unavailable right now, so this is a basic analysis of the forecast."
+    "fallbackNotice": "The AI advisor is unavailable right now, so this is a basic analysis of the forecast.",
+    "typing": "AI is typing…",
+    "reply": "Reply",
+    "replyingTo": "Replying to",
+    "cancelReply": "Cancel reply",
+    "copy": "Copy",
+    "copied": "Copied",
+    "helpful": "Helpful",
+    "notHelpful": "Not helpful"
   },
   "notifications": {
     "title": "Notification Center",

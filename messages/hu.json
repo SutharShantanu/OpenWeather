@@ -625,7 +625,15 @@
     "liveBadge": "Élő MI",
     "basicBadge": "Alapelemzés",
     "analyzing": "Az aktuális viszonyok elemzése…",
-    "fallbackNotice": "Az MI-tanácsadó most nem érhető el, ezért ez az előrejelzés alapelemzése."
+    "fallbackNotice": "Az MI-tanácsadó most nem érhető el, ezért ez az előrejelzés alapelemzése.",
+    "typing": "Az MI ír…",
+    "reply": "Válasz",
+    "replyingTo": "Válasz erre:",
+    "cancelReply": "Válasz megszakítása",
+    "copy": "Másolás",
+    "copied": "Másolva",
+    "helpful": "Hasznos",
+    "notHelpful": "Nem hasznos"
   },
   "notifications": {
     "title": "Értesítési központ",

@@ -625,7 +625,15 @@
     "liveBadge": "실시간 AI",
     "basicBadge": "기본 분석",
     "analyzing": "현재 상황을 분석하는 중…",
-    "fallbackNotice": "AI 어드바이저를 지금 사용할 수 없어 예보의 기본 분석을 표시합니다."
+    "fallbackNotice": "AI 어드바이저를 지금 사용할 수 없어 예보의 기본 분석을 표시합니다.",
+    "typing": "AI가 입력 중…",
+    "reply": "답장",
+    "replyingTo": "답장 대상",
+    "cancelReply": "답장 취소",
+    "copy": "복사",
+    "copied": "복사됨",
+    "helpful": "도움됨",
+    "notHelpful": "도움 안 됨"
   },
   "notifications": {
     "title": "알림 센터",

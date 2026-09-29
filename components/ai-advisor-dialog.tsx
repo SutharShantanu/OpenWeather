@@ -1,9 +1,19 @@
 "use client"
 
-import React, { useCallback, useState } from "react"
-import { Sparkles, AlertCircle, Send, Bot } from "lucide-react"
+import React, { useCallback, useRef, useState } from "react"
+import {
+  Sparkles,
+  AlertCircle,
+  Send,
+  Bot,
+  Reply,
+  ThumbsUp,
+  ThumbsDown,
+  X,
+} from "lucide-react"
+import { CopyButton } from "@/components/ui/copy-button"
 import { Spinner } from "@/components/ui/spinner"
-import { useAiAdvisor } from "@/hooks/use-ai-advisor"
+import { useAiAdvisor, type AdvisorAnswer } from "@/hooks/use-ai-advisor"
 import { UniversalDialog } from "@/components/universal-dialog"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,12 +24,13 @@ import {
 } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
 import { IconTile } from "@/components/ui/icon-tile"
-import { Bubble, BubbleContent } from "@/components/ui/bubble"
+import { Bubble, BubbleContent, BubbleReactions } from "@/components/ui/bubble"
 import {
   Message,
   MessageAvatar,
   MessageContent,
   MessageFooter,
+  MessageHeader,
 } from "@/components/ui/message"
 import {
   MessageScroller,
@@ -66,6 +77,8 @@ export function AiAdvisorDialog({
   const ai = t.aiAdvisor
   const prefs = useDisplayPreferences()
   const [question, setQuestion] = useState("")
+  const [replyTo, setReplyTo] = useState<AdvisorAnswer | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   /** Rule-based answer, used when the AI advisor is unavailable. */
   const fallbackAnswer = useCallback(
@@ -162,7 +175,7 @@ export function AiAdvisorDialog({
     [ai, current, daily, hourly, prefs, t, translateCondition, unit]
   )
 
-  const { briefing, briefingStatus, answers, ask } = useAiAdvisor({
+  const { briefing, briefingStatus, answers, ask, react } = useAiAdvisor({
     enabled: open,
     current,
     hourly,
@@ -182,9 +195,19 @@ export function AiAdvisorDialog({
   const outlook = briefing ? briefing.outlook : ruleBased!.plannedShifts
 
   const answerQuery = (q: string) => {
-    void ask(q)
+    void ask(q, replyTo?.id)
     setQuestion("")
+    setReplyTo(null)
   }
+
+  const startReply = (item: AdvisorAnswer) => {
+    setReplyTo(item)
+    inputRef.current?.focus()
+  }
+
+  const byId = new Map(answers.map((a) => [a.id, a]))
+  const snippet = (text: string) =>
+    text.length > 90 ? `${text.slice(0, 90)}…` : text
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -323,69 +346,158 @@ export function AiAdvisorDialog({
         </div>
       </div>
 
-      {/* Conversation: questions on the end side, AI answers with an avatar */}
+      {/* Conversation: questions on the end side, AI answers with an avatar.
+          Actions appear on hover/focus (always on touch screens). */}
       {answers.length > 0 && (
         <MessageScrollerProvider autoScroll defaultScrollPosition="end">
-          <MessageScroller className="h-72 border border-border bg-muted/10">
+          <MessageScroller className="h-80 border border-border bg-muted/10">
             <MessageScrollerViewport>
               <MessageScrollerContent
                 aria-busy={answers.some((a) => a.status === "streaming")}
                 className="gap-3 p-3"
               >
-                {[...answers].reverse().map((item) => (
-                  <React.Fragment key={item.id}>
-                    <MessageScrollerItem
-                      messageId={`${item.id}-q`}
-                      scrollAnchor
-                    >
-                      <Message align="end">
-                        <MessageContent>
-                          <Bubble>
-                            <BubbleContent>{item.question}</BubbleContent>
-                          </Bubble>
-                        </MessageContent>
-                      </Message>
-                    </MessageScrollerItem>
-                    <MessageScrollerItem messageId={`${item.id}-a`}>
-                      <Message>
-                        <MessageAvatar>
-                          <IconTile variant="soft" size="xs">
-                            <Bot />
-                          </IconTile>
-                        </MessageAvatar>
-                        <MessageContent>
-                          <Bubble variant="muted">
-                            <BubbleContent className="leading-relaxed whitespace-pre-line">
-                              {item.answer}
-                              {item.status === "streaming" &&
-                                (item.answer ? (
-                                  <span
-                                    aria-hidden
-                                    className="ms-0.5 inline-block h-3 w-1.5 animate-pulse bg-primary align-middle"
-                                  />
-                                ) : (
-                                  <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-                                    <Spinner className="size-3" />
-                                    {ai.analyzing}
-                                  </span>
-                                ))}
-                            </BubbleContent>
-                          </Bubble>
-                          {item.status === "fallback" && (
-                            <MessageFooter>
-                              <Badge
-                                variant="outline"
-                                className="font-mono text-nano uppercase"
-                              >
-                                {ai.basicBadge}
-                              </Badge>
+                {[...answers].reverse().map((item) => {
+                  const repliedTo = item.replyToId
+                    ? byId.get(item.replyToId)
+                    : undefined
+                  return (
+                    <React.Fragment key={item.id}>
+                      <MessageScrollerItem
+                        messageId={`${item.id}-q`}
+                        scrollAnchor
+                      >
+                        <Message align="end">
+                          <MessageContent>
+                            {repliedTo && (
+                              <MessageHeader className="gap-1 font-normal">
+                                <Reply className="size-3 shrink-0 -scale-x-100 rtl:scale-x-100" />
+                                <span className="truncate">
+                                  {ai.replyingTo}: {snippet(repliedTo.answer)}
+                                </span>
+                              </MessageHeader>
+                            )}
+                            <Bubble>
+                              <BubbleContent>{item.question}</BubbleContent>
+                            </Bubble>
+                            <MessageFooter className={HOVER_ACTIONS}>
+                              <CopyButton
+                                value={item.question}
+                                variant="ghost"
+                                size="icon-xs"
+                                aria-label={ai.copy}
+                                copyLabel={ai.copy}
+                                copiedLabel={ai.copied}
+                              />
                             </MessageFooter>
-                          )}
-                        </MessageContent>
-                      </Message>
-                    </MessageScrollerItem>
-                  </React.Fragment>
-                ))}
+                          </MessageContent>
+                        </Message>
+                      </MessageScrollerItem>
+
+                      <MessageScrollerItem messageId={`${item.id}-a`}>
+                        <Message>
+                          <MessageAvatar>
+                            <IconTile variant="soft" size="xs">
+                              <Bot />
+                            </IconTile>
+                          </MessageAvatar>
+                          <MessageContent>
+                            {item.status === "streaming" && !item.answer ? (
+                              <TypingIndicator label={ai.typing} />
+                            ) : (
+                              <Bubble variant="muted">
+                                <BubbleContent className="leading-relaxed whitespace-pre-line">
+                                  {item.answer}
+                                  {item.status === "streaming" && (
+                                    <span
+                                      aria-hidden
+                                      className="ms-0.5 inline-block h-3 w-1.5 animate-pulse bg-primary align-middle"
+                                    />
+                                  )}
+                                </BubbleContent>
+                                {item.reaction && (
+                                  <BubbleReactions align="start">
+                                    <span
+                                      role="img"
+                                      aria-label={
+                                        item.reaction === "up"
+                                          ? ai.helpful
+                                          : ai.notHelpful
+                                      }
+                                      className="px-1 text-xs"
+                                    >
+                                      {item.reaction === "up" ? "👍" : "👎"}
+                                    </span>
+                                  </BubbleReactions>
+                                )}
+                              </Bubble>
+                            )}
+                            {item.status !== "streaming" && (
+                              <MessageFooter
+                                className={`gap-0.5 ${HOVER_ACTIONS}`}
+                              >
+                                <Button
+                                  variant="ghost"
+                                  size="icon-xs"
+                                  aria-label={ai.helpful}
+                                  title={ai.helpful}
+                                  aria-pressed={item.reaction === "up"}
+                                  onClick={() => react(item.id, "up")}
+                                  className={
+                                    item.reaction === "up" ? "text-primary" : ""
+                                  }
+                                >
+                                  <ThumbsUp />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon-xs"
+                                  aria-label={ai.notHelpful}
+                                  title={ai.notHelpful}
+                                  aria-pressed={item.reaction === "down"}
+                                  onClick={() => react(item.id, "down")}
+                                  className={
+                                    item.reaction === "down"
+                                      ? "text-destructive"
+                                      : ""
+                                  }
+                                >
+                                  <ThumbsDown />
+                                </Button>
+                                <CopyButton
+                                  value={item.answer}
+                                  variant="ghost"
+                                  size="icon-xs"
+                                  aria-label={ai.copy}
+                                  copyLabel={ai.copy}
+                                  copiedLabel={ai.copied}
+                                />
+                                {item.status === "done" && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon-xs"
+                                    aria-label={ai.reply}
+                                    title={ai.reply}
+                                    onClick={() => startReply(item)}
+                                  >
+                                    <Reply />
+                                  </Button>
+                                )}
+                                {item.status === "fallback" && (
+                                  <Badge
+                                    variant="outline"
+                                    className="ms-1 font-mono text-nano uppercase"
+                                  >
+                                    {ai.basicBadge}
+                                  </Badge>
+                                )}
+                              </MessageFooter>
+                            )}
+                          </MessageContent>
+                        </Message>
+                      </MessageScrollerItem>
+                    </React.Fragment>
+                  )
+                })}
               </MessageScrollerContent>
             </MessageScrollerViewport>
             <MessageScrollerButton />
@@ -393,13 +505,34 @@ export function AiAdvisorDialog({
         </MessageScrollerProvider>
       )}
 
-      {/* Interactive Chat Input */}
+      {/* Reply target shown above the composer */}
+      {replyTo && (
+        <div className="flex items-center gap-2 border-s-2 border-primary bg-muted/30 px-2.5 py-1.5 text-mini">
+          <Reply className="size-3 shrink-0 -scale-x-100 text-primary rtl:scale-x-100" />
+          <span className="min-w-0 flex-1 truncate text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              {ai.replyingTo}:
+            </span>{" "}
+            {snippet(replyTo.answer)}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            aria-label={ai.cancelReply}
+            onClick={() => setReplyTo(null)}
+          >
+            <X />
+          </Button>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="pt-1">
         <InputGroup>
           <InputGroupAddon>
             <Sparkles className="text-primary" aria-hidden />
           </InputGroupAddon>
           <InputGroupInput
+            ref={inputRef}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             placeholder={ai.chatPlaceholder}
@@ -421,5 +554,31 @@ export function AiAdvisorDialog({
         </InputGroup>
       </form>
     </UniversalDialog>
+  )
+}
+
+/** Hover/focus reveal for message actions; always visible without a hover-capable pointer. */
+const HOVER_ACTIONS =
+  "opacity-0 transition-opacity group-hover/message:opacity-100 group-focus-within/message:opacity-100 [@media(hover:none)]:opacity-100"
+
+/** Three pulsing dots shown until the first words of an answer arrive. */
+function TypingIndicator({ label }: { label: string }) {
+  return (
+    <Bubble variant="muted">
+      <BubbleContent
+        role="status"
+        aria-label={label}
+        className="flex h-7 items-center gap-1"
+      >
+        {[0, 150, 300].map((delay) => (
+          <span
+            key={delay}
+            aria-hidden
+            style={{ animationDelay: `${delay}ms` }}
+            className="size-1.5 animate-bounce rounded-full bg-muted-foreground motion-reduce:animate-pulse"
+          />
+        ))}
+      </BubbleContent>
+    </Bubble>
   )
 }

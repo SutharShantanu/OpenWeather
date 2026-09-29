@@ -24,7 +24,12 @@ export interface AdvisorAnswer {
   /** "fallback" = Gemini unavailable, answer came from the local rules. */
   status: "streaming" | "done" | "fallback"
   locationKey: string
+  /** The answer this question replies to, if any. */
+  replyToId?: number
+  reaction?: AdvisorReaction
 }
+
+export type AdvisorReaction = "up" | "down"
 
 interface UseAiAdvisorOptions {
   /** Only fetch while the advisor is visible. */
@@ -145,20 +150,30 @@ export function useAiAdvisor({
   }, [])
 
   const ask = useCallback(
-    async (question: string) => {
+    async (question: string, replyToId?: number) => {
       const id = ++nextId.current
       const update = (patch: Partial<AdvisorAnswer>) =>
         setAnswers((prev) =>
           prev.map((a) => (a.id === id ? { ...a, ...patch } : a))
         )
-      // Recent completed turns for this location give follow-ups context.
-      const history = answersRef.current
-        .filter((a) => a.locationKey === locationKey && a.status === "done")
-        .slice(0, 3)
-        .reverse()
-        .map((a) => ({ q: a.question, a: a.answer }))
+      // Context for follow-ups: the replied-to turn when replying, otherwise
+      // the most recent completed turns for this location.
+      const done = answersRef.current.filter(
+        (a) => a.locationKey === locationKey && a.status === "done"
+      )
+      const repliedTo = done.find((a) => a.id === replyToId)
+      const history = (
+        repliedTo ? [repliedTo] : done.slice(0, 3).reverse()
+      ).map((a) => ({ q: a.question, a: a.answer }))
       setAnswers((prev) => [
-        { id, question, answer: "", status: "streaming", locationKey },
+        {
+          id,
+          question,
+          answer: "",
+          status: "streaming",
+          locationKey,
+          replyToId: repliedTo?.id,
+        },
         ...prev,
       ])
 
@@ -199,10 +214,22 @@ export function useAiAdvisor({
     [language, snapshot, locationKey, fallbackAnswer]
   )
 
+  /** Toggles a reaction on an answer (choosing the same one again clears it). */
+  const react = useCallback((id: number, reaction: AdvisorReaction) => {
+    setAnswers((prev) =>
+      prev.map((a) =>
+        a.id === id
+          ? { ...a, reaction: a.reaction === reaction ? undefined : reaction }
+          : a
+      )
+    )
+  }, [])
+
   return {
     briefing: cached,
     briefingStatus,
     answers: answers.filter((a) => a.locationKey === locationKey),
     ask,
+    react,
   }
 }

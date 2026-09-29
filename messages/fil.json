@@ -625,7 +625,15 @@
     "liveBadge": "Live AI",
     "basicBadge": "Pangunahing pagsusuri",
     "analyzing": "Sinusuri ang kasalukuyang lagay…",
-    "fallbackNotice": "Hindi available ang AI advisor ngayon, kaya ito ay pangunahing pagsusuri ng forecast."
+    "fallbackNotice": "Hindi available ang AI advisor ngayon, kaya ito ay pangunahing pagsusuri ng forecast.",
+    "typing": "Nagta-type ang AI…",
+    "reply": "Sumagot",
+    "replyingTo": "Sumasagot sa",
+    "cancelReply": "Kanselahin ang sagot",
+    "copy": "Kopyahin",
+    "copied": "Nakopya",
+    "helpful": "Nakatulong",
+    "notHelpful": "Hindi nakatulong"
   },
   "notifications": {
     "title": "Sentro ng Abiso",

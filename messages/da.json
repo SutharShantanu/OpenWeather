@@ -625,7 +625,15 @@
     "liveBadge": "Live AI",
     "basicBadge": "Grundlæggende analyse",
     "analyzing": "Analyserer aktuelle forhold…",
-    "fallbackNotice": "AI-rådgiveren er ikke tilgængelig lige nu, så dette er en grundlæggende analyse af prognosen."
+    "fallbackNotice": "AI-rådgiveren er ikke tilgængelig lige nu, så dette er en grundlæggende analyse af prognosen.",
+    "typing": "AI skriver…",
+    "reply": "Svar",
+    "replyingTo": "Svarer på",
+    "cancelReply": "Annuller svar",
+    "copy": "Kopiér",
+    "copied": "Kopieret",
+    "helpful": "Nyttigt",
+    "notHelpful": "Ikke nyttigt"
   },
   "notifications": {
     "title": "Notifikationscenter",

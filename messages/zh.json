@@ -625,7 +625,15 @@
     "liveBadge": "实时 AI",
     "basicBadge": "基础分析",
     "analyzing": "正在分析当前天气…",
-    "fallbackNotice": "AI 顾问暂时不可用，因此显示的是预报的基础分析。"
+    "fallbackNotice": "AI 顾问暂时不可用，因此显示的是预报的基础分析。",
+    "typing": "AI 正在输入…",
+    "reply": "回复",
+    "replyingTo": "回复",
+    "cancelReply": "取消回复",
+    "copy": "复制",
+    "copied": "已复制",
+    "helpful": "有帮助",
+    "notHelpful": "没有帮助"
   },
   "notifications": {
     "title": "通知中心",

@@ -625,7 +625,15 @@
     "liveBadge": "IA en vivo",
     "basicBadge": "Análisis básico",
     "analyzing": "Analizando las condiciones actuales…",
-    "fallbackNotice": "El asesor de IA no está disponible ahora, así que este es un análisis básico del pronóstico."
+    "fallbackNotice": "El asesor de IA no está disponible ahora, así que este es un análisis básico del pronóstico.",
+    "typing": "La IA está escribiendo…",
+    "reply": "Responder",
+    "replyingTo": "Respondiendo a",
+    "cancelReply": "Cancelar respuesta",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "helpful": "Útil",
+    "notHelpful": "No útil"
   },
   "notifications": {
     "title": "Centro de notificaciones",

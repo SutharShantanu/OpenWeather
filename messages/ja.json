@@ -625,7 +625,15 @@
     "liveBadge": "ライブAI",
     "basicBadge": "基本分析",
     "analyzing": "現在の状況を分析中…",
-    "fallbackNotice": "AIアドバイザーは現在利用できないため、予報の基本分析を表示しています。"
+    "fallbackNotice": "AIアドバイザーは現在利用できないため、予報の基本分析を表示しています。",
+    "typing": "AIが入力中…",
+    "reply": "返信",
+    "replyingTo": "返信先",
+    "cancelReply": "返信をキャンセル",
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "helpful": "役に立った",
+    "notHelpful": "役に立たなかった"
   },
   "notifications": {
     "title": "通知センター",

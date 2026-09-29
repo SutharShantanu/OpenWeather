@@ -625,7 +625,15 @@
     "liveBadge": "Živá AI",
     "basicBadge": "Základní analýza",
     "analyzing": "Analyzuji aktuální podmínky…",
-    "fallbackNotice": "AI poradce teď není k dispozici, proto zobrazujeme základní analýzu předpovědi."
+    "fallbackNotice": "AI poradce teď není k dispozici, proto zobrazujeme základní analýzu předpovědi.",
+    "typing": "AI píše…",
+    "reply": "Odpovědět",
+    "replyingTo": "Odpověď na",
+    "cancelReply": "Zrušit odpověď",
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno",
+    "helpful": "Užitečné",
+    "notHelpful": "Neužitečné"
   },
   "notifications": {
     "title": "Centrum oznámení",

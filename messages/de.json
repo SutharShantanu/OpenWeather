@@ -625,7 +625,15 @@
     "liveBadge": "Live-KI",
     "basicBadge": "Einfache Analyse",
     "analyzing": "Aktuelle Bedingungen werden analysiert…",
-    "fallbackNotice": "Der KI-Berater ist gerade nicht verfügbar, daher siehst du eine einfache Analyse der Vorhersage."
+    "fallbackNotice": "Der KI-Berater ist gerade nicht verfügbar, daher siehst du eine einfache Analyse der Vorhersage.",
+    "typing": "KI schreibt…",
+    "reply": "Antworten",
+    "replyingTo": "Antwort auf",
+    "cancelReply": "Antwort abbrechen",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "helpful": "Hilfreich",
+    "notHelpful": "Nicht hilfreich"
   },
   "notifications": {
     "title": "Benachrichtigungscenter",

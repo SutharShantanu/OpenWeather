@@ -625,7 +625,15 @@
     "liveBadge": "Canlı YZ",
     "basicBadge": "Temel analiz",
     "analyzing": "Güncel koşullar analiz ediliyor…",
-    "fallbackNotice": "YZ danışmanı şu anda kullanılamıyor, bu yüzden tahminin temel analizi gösteriliyor."
+    "fallbackNotice": "YZ danışmanı şu anda kullanılamıyor, bu yüzden tahminin temel analizi gösteriliyor.",
+    "typing": "YZ yazıyor…",
+    "reply": "Yanıtla",
+    "replyingTo": "Yanıtlanan",
+    "cancelReply": "Yanıtı iptal et",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "helpful": "Faydalı",
+    "notHelpful": "Faydalı değil"
   },
   "notifications": {
     "title": "Bildirim Merkezi",
