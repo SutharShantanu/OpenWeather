@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useCallback, useRef, useState } from "react"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import {
   Sparkles,
   AlertCircle,
@@ -10,6 +11,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   X,
+  Check,
 } from "lucide-react"
 import { CopyButton } from "@/components/ui/copy-button"
 import {
@@ -28,7 +30,6 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
-import { IconTile } from "@/components/ui/icon-tile"
 import { Bubble, BubbleContent, BubbleReactions } from "@/components/ui/bubble"
 import {
   Message,
@@ -211,6 +212,10 @@ export function AiAdvisorDialog({
   }
 
   const byId = new Map(answers.map((a) => [a.id, a]))
+  // Quick questions already asked for this location are disabled.
+  const askedQuestions = new Set(
+    answers.map((a) => a.question.trim().toLowerCase())
+  )
   const snippet = (text: string) =>
     text.length > 90 ? `${text.slice(0, 90)}…` : text
 
@@ -337,17 +342,22 @@ export function AiAdvisorDialog({
             ai.quickQuestionWear,
             ai.quickQuestionExercise,
             ai.quickQuestionTomorrow,
-          ].map((q, idx) => (
-            <Button
-              key={idx}
-              variant="outline"
-              size="xs"
-              onClick={() => answerQuery(q)}
-              className="h-6 font-mono text-mini"
-            >
-              {q}
-            </Button>
-          ))}
+          ].map((q, idx) => {
+            const asked = askedQuestions.has(q.trim().toLowerCase())
+            return (
+              <Button
+                key={idx}
+                variant="outline"
+                size="xs"
+                disabled={asked}
+                onClick={() => answerQuery(q)}
+                className="h-6 font-mono text-mini"
+              >
+                {asked && <Check className="text-primary" aria-hidden />}
+                {q}
+              </Button>
+            )
+          })}
         </div>
       </div>
 
@@ -403,10 +413,8 @@ export function AiAdvisorDialog({
 
                       <MessageScrollerItem messageId={`${item.id}-a`}>
                         <Message>
-                          <MessageAvatar>
-                            <IconTile variant="soft" size="xs">
-                              <Bot />
-                            </IconTile>
+                          <MessageAvatar className="size-8 rounded-full bg-primary/10 text-primary">
+                            <Bot className="size-5" />
                           </MessageAvatar>
                           <MessageContent>
                             {item.status === "streaming" && !item.answer ? (
@@ -414,16 +422,16 @@ export function AiAdvisorDialog({
                             ) : (
                               <Bubble variant="muted">
                                 <BubbleContent className="leading-relaxed whitespace-pre-line">
-                                  {item.answer}
-                                  {item.status === "streaming" && (
-                                    <span
-                                      aria-hidden
-                                      className="ms-0.5 inline-block h-3 w-1.5 animate-pulse bg-primary align-middle"
-                                    />
-                                  )}
+                                  <StreamingText
+                                    text={item.answer}
+                                    streaming={item.status === "streaming"}
+                                  />
                                 </BubbleContent>
                                 {item.reaction && (
-                                  <BubbleReactions align="start" className="rounded-full">
+                                  <BubbleReactions
+                                    align="start"
+                                    className="rounded-full"
+                                  >
                                     <span
                                       role="img"
                                       aria-label={
@@ -438,6 +446,15 @@ export function AiAdvisorDialog({
                                   </BubbleReactions>
                                 )}
                               </Bubble>
+                            )}
+                            {item.status === "streaming" && (
+                              <MessageFooter
+                                role="status"
+                                className="gap-1.5 font-normal"
+                              >
+                                <Spinner className="size-3" />
+                                {ai.typing}
+                              </MessageFooter>
                             )}
                             {item.status !== "streaming" && (
                               <MessageFooter
@@ -596,17 +613,63 @@ function TypingIndicator({ label }: { label: string }) {
       <BubbleContent
         role="status"
         aria-label={label}
-        className="flex h-7 items-center gap-1"
+        className="flex h-7 items-center"
       >
-        {[0, 150, 300].map((delay) => (
-          <span
-            key={delay}
-            aria-hidden
-            style={{ animationDelay: `${delay}ms` }}
-            className="size-1.5 animate-bounce rounded-full bg-muted-foreground motion-reduce:animate-pulse"
-          />
-        ))}
+        <TypingDots />
       </BubbleContent>
     </Bubble>
+  )
+}
+
+function TypingDots({ className = "" }: { className?: string }) {
+  return (
+    <span aria-hidden className={`inline-flex items-center gap-1 ${className}`}>
+      {[0, 150, 300].map((delay) => (
+        <span
+          key={delay}
+          style={{ animationDelay: `${delay}ms` }}
+          className="size-1.5 animate-bounce rounded-full bg-muted-foreground motion-reduce:animate-pulse"
+        />
+      ))}
+    </span>
+  )
+}
+
+/**
+ * Reveals streamed text progressively. Gemini sends whole sentences at a time,
+ * so this types them out, catching up faster the further behind it is.
+ * Typing dots trail the text until the answer is complete and fully shown.
+ */
+export function StreamingText({
+  text,
+  streaming,
+}: {
+  text: string
+  streaming: boolean
+}) {
+  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)")
+  // Answers already complete when mounted (e.g. dialog reopened) show at once.
+  const [shown, setShown] = useState(() => (streaming ? 0 : text.length))
+
+  useEffect(() => {
+    if (reduceMotion || shown >= text.length) return
+    const frame = requestAnimationFrame(() =>
+      setShown((n) =>
+        Math.min(
+          text.length,
+          n + Math.max(1, Math.ceil((text.length - n) / 12))
+        )
+      )
+    )
+    return () => cancelAnimationFrame(frame)
+  }, [shown, text.length, reduceMotion])
+
+  const visible = reduceMotion ? text : text.slice(0, shown)
+  const typing = streaming || visible.length < text.length
+  return (
+    <>
+      {visible}
+      {typing && <TypingDots className="ms-1.5 align-middle" />}
+    </>
   )
 }
