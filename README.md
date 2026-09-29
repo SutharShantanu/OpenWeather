@@ -47,9 +47,10 @@ All variables are documented in [`.env.example`](.env.example). None are require
 | `npm run build` / `npm start` | Production build / serve it |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript, no emit |
+| `npm test` | Vitest unit tests (`tests/`) |
 | `npm run format` | Prettier |
 
-CI (`.github/workflows/ci.yml`) runs lint, typecheck, build and `npm audit` on every push to `main` and on pull requests.
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, tests, build and `npm audit` on every push to `main` and on pull requests.
 
 ## API routes
 
