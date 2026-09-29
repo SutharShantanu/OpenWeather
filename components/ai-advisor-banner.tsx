@@ -151,7 +151,7 @@ export function AiAdvisorBanner({
             <AlertAction>
               <Badge
                 variant="outline"
-                className="border-emerald-500/30 bg-emerald-500/10 font-mono text-[10px] text-emerald-600 dark:text-emerald-400"
+                className="border-emerald-500/30 bg-emerald-500/10 font-mono text-tiny text-emerald-600 dark:text-emerald-400"
               >
                 {t.aiAdvisor.stable}
               </Badge>

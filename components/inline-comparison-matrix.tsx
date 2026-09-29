@@ -214,77 +214,86 @@ export function InlineComparisonMatrix({
           </div>
         </div>
 
-        {/* Delta Table */}
+        {/* Delta table */}
         {targetWeather && (
-          <div className="border border-border text-xs">
-            <div className="bg-muted/40 px-3 py-1.5 border-b border-border flex justify-between font-mono text-tiny text-muted-foreground font-semibold">
-              <span className="w-1/3">{t.compare.atmosphericMetric}</span>
-              <span className="w-1/4 text-center">{baseCurrent.cityName.toUpperCase()}</span>
-              <span className="w-1/4 text-center">{targetWeather.cityName.toUpperCase()}</span>
-              <span className="w-1/6 text-end">{t.compare.spreadDelta}</span>
-            </div>
-
-            <div className="divide-y divide-border">
-              <div className="px-3 py-2 flex justify-between items-center font-mono">
-                <div className="w-1/3 flex items-center gap-1.5">
-                  <CloudSun className="size-3 text-amber-700 dark:text-amber-500" />
-                  <span>{t.compare.temperature}</span>
-                </div>
-                <span className="w-1/4 text-center">{baseTemp}°{unit}</span>
-                <span className="w-1/4 text-center">{targetTemp}°{unit}</span>
-                <div className="w-1/6 flex justify-end">{renderDelta(tempDiff, `°${unit}`)}</div>
-              </div>
-
-              <div className="px-3 py-2 flex justify-between items-center font-mono">
-                <div className="w-1/3 flex items-center gap-1.5">
-                  <Droplets className="size-3 text-sky-700 dark:text-sky-500" />
-                  <span>{t.compare.humidity}</span>
-                </div>
-                <span className="w-1/4 text-center">{baseCurrent.humidity}%</span>
-                <span className="w-1/4 text-center">{targetWeather.humidity}%</span>
-                <div className="w-1/6 flex justify-end">{renderDelta(humidityDiff, "%")}</div>
-              </div>
-
-              <div className="px-3 py-2 flex justify-between items-center font-mono">
-                <div className="w-1/3 flex items-center gap-1.5">
-                  <Wind className="size-3 text-teal-700 dark:text-teal-500" />
-                  <span>{t.compare.windVelocity}</span>
-                </div>
-                <span className="w-1/4 text-center">{baseWind.val.toFixed(1)} {baseWind.unitStr}</span>
-                <span className="w-1/4 text-center">{targetWind.val.toFixed(1)} {targetWind.unitStr}</span>
-                <div className="w-1/6 flex justify-end">{renderDelta(windDiff, ` ${baseWind.unitStr}`)}</div>
-              </div>
-
-              <div className="px-3 py-2 flex justify-between items-center font-mono">
-                <div className="w-1/3 flex items-center gap-1.5">
-                  <Gauge className="size-3 text-amber-700 dark:text-amber-500" />
-                  <span>{t.compare.pressure}</span>
-                </div>
-                <span className="w-1/4 text-center">{basePressure.val} {basePressure.unitStr}</span>
-                <span className="w-1/4 text-center">{targetPressure.val} {targetPressure.unitStr}</span>
-                <div className="w-1/6 flex justify-end">
-                  {renderDelta(pressureDiff, ` ${basePressure.unitStr}`, false, pressureDecimals)}
-                </div>
-              </div>
-
-              <div className="px-3 py-2 flex justify-between items-center font-mono">
-                <div className="w-1/3 flex items-center gap-1.5">
-                  <Sparkles className="size-3 text-emerald-700 dark:text-emerald-500" />
-                  <span>{t.compare.airQuality}</span>
-                </div>
-                <span className="w-1/4 text-center">
-                  {baseCurrent.airQuality ? `AQI ${baseCurrent.airQuality.aqi}` : "—"}
-                </span>
-                <span className="w-1/4 text-center">
-                  {targetWeather.airQuality ? `AQI ${targetWeather.airQuality.aqi}` : "—"}
-                </span>
-                <div className="w-1/6 flex justify-end">
-                  {baseCurrent.airQuality && targetWeather.airQuality
-                    ? renderDelta(targetWeather.airQuality.aqi - baseCurrent.airQuality.aqi, "", true)
-                    : "—"}
-                </div>
-              </div>
-            </div>
+          <div className="overflow-x-auto border border-border">
+            <table className="w-full text-xs font-mono">
+              <thead className="bg-muted/40 text-tiny text-muted-foreground">
+                <tr className="border-b border-border">
+                  <th scope="col" className="px-3 py-1.5 text-start font-semibold">
+                    {t.compare.atmosphericMetric}
+                  </th>
+                  <th scope="col" className="px-3 py-1.5 text-center font-semibold uppercase">
+                    {baseCurrent.cityName}
+                  </th>
+                  <th scope="col" className="px-3 py-1.5 text-center font-semibold uppercase">
+                    {targetWeather.cityName}
+                  </th>
+                  <th scope="col" className="px-3 py-1.5 text-end font-semibold">
+                    {t.compare.spreadDelta}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {[
+                  {
+                    icon: CloudSun,
+                    iconClass: "text-amber-700 dark:text-amber-500",
+                    label: t.compare.temperature,
+                    base: `${baseTemp}°${unit}`,
+                    target: `${targetTemp}°${unit}`,
+                    delta: renderDelta(tempDiff, `°${unit}`),
+                  },
+                  {
+                    icon: Droplets,
+                    iconClass: "text-sky-700 dark:text-sky-500",
+                    label: t.compare.humidity,
+                    base: `${baseCurrent.humidity}%`,
+                    target: `${targetWeather.humidity}%`,
+                    delta: renderDelta(humidityDiff, "%"),
+                  },
+                  {
+                    icon: Wind,
+                    iconClass: "text-teal-700 dark:text-teal-500",
+                    label: t.compare.windVelocity,
+                    base: `${baseWind.val.toFixed(1)} ${baseWind.unitStr}`,
+                    target: `${targetWind.val.toFixed(1)} ${targetWind.unitStr}`,
+                    delta: renderDelta(windDiff, ` ${baseWind.unitStr}`),
+                  },
+                  {
+                    icon: Gauge,
+                    iconClass: "text-amber-700 dark:text-amber-500",
+                    label: t.compare.pressure,
+                    base: `${basePressure.val} ${basePressure.unitStr}`,
+                    target: `${targetPressure.val} ${targetPressure.unitStr}`,
+                    delta: renderDelta(pressureDiff, ` ${basePressure.unitStr}`, false, pressureDecimals),
+                  },
+                  {
+                    icon: Sparkles,
+                    iconClass: "text-emerald-700 dark:text-emerald-500",
+                    label: t.compare.airQuality,
+                    base: baseCurrent.airQuality ? `AQI ${baseCurrent.airQuality.aqi}` : "—",
+                    target: targetWeather.airQuality ? `AQI ${targetWeather.airQuality.aqi}` : "—",
+                    delta:
+                      baseCurrent.airQuality && targetWeather.airQuality
+                        ? renderDelta(targetWeather.airQuality.aqi - baseCurrent.airQuality.aqi, "", true)
+                        : "—",
+                  },
+                ].map(({ icon: Icon, iconClass, label, base, target, delta }) => (
+                  <tr key={label}>
+                    <th scope="row" className="px-3 py-2 text-start font-normal">
+                      <span className="flex items-center gap-1.5">
+                        <Icon className={`size-3 shrink-0 ${iconClass}`} />
+                        {label}
+                      </span>
+                    </th>
+                    <td className="px-3 py-2 text-center whitespace-nowrap">{base}</td>
+                    <td className="px-3 py-2 text-center whitespace-nowrap">{target}</td>
+                    <td className="px-3 py-2 text-end whitespace-nowrap">{delta}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </CardContent>

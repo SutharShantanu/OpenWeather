@@ -132,8 +132,8 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="chartTempGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="var(--chart-temp)" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="var(--chart-temp)" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" strokeOpacity={0.08} />
@@ -154,7 +154,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                     return null;
                   }}
                 />
-                <Area type="monotone" dataKey="temp" stroke="var(--primary)" strokeWidth={2} fillOpacity={1} fill="url(#chartTempGrad)" />
+                <Area type="monotone" dataKey="temp" stroke="var(--chart-temp)" strokeWidth={2} fillOpacity={1} fill="url(#chartTempGrad)" />
                 <Line type="monotone" dataKey="feelsLike" stroke="currentColor" strokeOpacity={0.4} strokeDasharray="3 3" dot={false} strokeWidth={1.5} />
               </AreaChart>
             ) : metric === "precip" ? (
@@ -176,7 +176,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                     return null;
                   }}
                 />
-                <Bar dataKey="precip" fill="#0ea5e9" radius={0} />
+                <Bar dataKey="precip" fill="var(--chart-precip)" radius={0} />
               </BarChart>
             ) : metric === "wind" ? (
               <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -197,14 +197,14 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                     return null;
                   }}
                 />
-                <Line type="monotone" dataKey="wind" stroke="#14b8a6" strokeWidth={2} dot={{ r: 3, fill: "#14b8a6" }} />
+                <Line type="monotone" dataKey="wind" stroke="var(--chart-wind)" strokeWidth={2} dot={{ r: 3, fill: "var(--chart-wind)" }} />
               </LineChart>
             ) : metric === "humidity" ? (
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="humidityGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="var(--chart-humidity)" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="var(--chart-humidity)" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" strokeOpacity={0.08} />
@@ -224,7 +224,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                     return null;
                   }}
                 />
-                <Area type="monotone" dataKey="humidity" stroke="#0ea5e9" strokeWidth={2} fillOpacity={1} fill="url(#humidityGradient)" />
+                <Area type="monotone" dataKey="humidity" stroke="var(--chart-humidity)" strokeWidth={2} fillOpacity={1} fill="url(#humidityGradient)" />
               </AreaChart>
             ) : (
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -245,7 +245,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                     return null;
                   }}
                 />
-                <Bar dataKey="uv" fill="#f59e0b" radius={0} />
+                <Bar dataKey="uv" fill="var(--chart-uv)" radius={0} />
               </BarChart>
             )}
           </ResponsiveContainer>

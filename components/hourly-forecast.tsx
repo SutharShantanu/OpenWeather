@@ -99,8 +99,8 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="tempGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="var(--chart-temp)" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="var(--chart-temp)" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <XAxis
@@ -132,7 +132,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                 <Area
                   type="monotone"
                   dataKey="temp"
-                  stroke="var(--primary)"
+                  stroke="var(--chart-temp)"
                   strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#tempGradient)"

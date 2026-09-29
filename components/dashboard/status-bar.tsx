@@ -61,7 +61,7 @@ export function StatusBar({
               </span>
             )}
           </span>
-          <span className="border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+          <span className="border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-tiny font-bold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
             {t.common.change}
           </span>
         </button>

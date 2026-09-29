@@ -71,7 +71,7 @@ export function NotificationsPopover({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent align="end" className="w-80 sm:w-96 p-3.5 space-y-3 font-mono text-xs">
+      <PopoverContent align="end" className="w-[min(20rem,calc(100vw-2rem))] sm:w-96 p-3.5 space-y-3 font-mono text-xs">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border pb-2.5">
           <div className="flex items-center gap-1.5 font-heading font-semibold text-foreground">

@@ -304,8 +304,8 @@ export function ClimateNormalsCard({
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="climateHighGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0.0} />
+                      <stop offset="5%" stopColor="var(--chart-temp)" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="var(--chart-temp)" stopOpacity={0.0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" strokeOpacity={0.08} />
@@ -327,8 +327,8 @@ export function ClimateNormalsCard({
                       return null;
                     }}
                   />
-                  <Area type="monotone" dataKey="high" stroke="var(--primary)" strokeWidth={2} fillOpacity={1} fill="url(#climateHighGrad)" />
-                  <Line type="monotone" dataKey="low" stroke="#0ea5e9" strokeWidth={2} dot={{ r: 2 }} />
+                  <Area type="monotone" dataKey="high" stroke="var(--chart-temp)" strokeWidth={2} fillOpacity={1} fill="url(#climateHighGrad)" />
+                  <Line type="monotone" dataKey="low" stroke="var(--chart-temp-low)" strokeWidth={2} dot={{ r: 2 }} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

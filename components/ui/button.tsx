@@ -259,7 +259,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {badge !== undefined && badge !== null && (
           <span
             data-slot="button-badge"
-            className="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-medium font-mono leading-none bg-muted/80 text-foreground/80 border border-border/50 rounded-none ms-1"
+            className="inline-flex items-center justify-center px-1.5 py-0.5 text-tiny font-medium font-mono leading-none bg-muted/80 text-foreground/80 border border-border/50 rounded-none ms-1"
           >
             {badge}
           </span>
@@ -276,13 +276,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               shortcut.map((key, i) => (
                 <kbd
                   key={i}
-                  className="font-mono text-[10px] uppercase text-muted-foreground bg-muted/70 px-1 py-0.5 border border-border/40 rounded-none leading-none select-none"
+                  className="font-mono text-tiny uppercase text-muted-foreground bg-muted/70 px-1 py-0.5 border border-border/40 rounded-none leading-none select-none"
                 >
                   {key}
                 </kbd>
               ))
             ) : (
-              <kbd className="font-mono text-[10px] uppercase text-muted-foreground bg-muted/70 px-1 py-0.5 border border-border/40 rounded-none leading-none select-none">
+              <kbd className="font-mono text-tiny uppercase text-muted-foreground bg-muted/70 px-1 py-0.5 border border-border/40 rounded-none leading-none select-none">
                 {shortcut}
               </kbd>
             )}
