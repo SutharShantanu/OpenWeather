@@ -1,51 +1,9 @@
-import { getRequestConfig } from "next-intl/server";
+import { getRequestConfig } from "next-intl/server"
+import { loadMessages, resolveUiLanguage } from "@/lib/translations"
 
-export const SUPPORTED_LOCALES = [
-  "en",
-  "es",
-  "fr",
-  "de",
-  "it",
-  "pt",
-  "ru",
-  "ja",
-  "ko",
-  "zh",
-  "hi",
-  "ar",
-  "bn",
-  "id",
-  "nl",
-  "tr",
-  "pl",
-  "vi",
-  "th",
-  "sv",
-  "da",
-  "nb",
-  "fi",
-  "el",
-  "cs",
-  "uk",
-  "ro",
-  "hu",
-  "he",
-  "ms",
-  "fil",
-] as const;
-
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
-
+// Server-side next-intl config (used by server components / getTranslations).
+// Shares the locale list and cached loader with the client in lib/translations.
 export default getRequestConfig(async ({ requestLocale }) => {
-  let locale = await requestLocale;
-  if (!locale || !(SUPPORTED_LOCALES as readonly string[]).includes(locale)) {
-    locale = "en";
-  }
-
-  const messages = (await import(`../messages/${locale}.json`)).default;
-
-  return {
-    locale,
-    messages,
-  };
-});
+  const locale = resolveUiLanguage(await requestLocale) ?? "en"
+  return { locale, messages: await loadMessages(locale) }
+})

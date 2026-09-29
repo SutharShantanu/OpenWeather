@@ -34,7 +34,13 @@
     "precip": "precip",
     "sourceTooltip": "Click to choose weather data source & forecast station",
     "simulatedSensor": "Simulated Sensor",
-    "consoleFooter": "OpenWeather Precision Meteorological Console"
+    "consoleFooter": "OpenWeather Precision Meteorological Console",
+    "retry": "Retry",
+    "weatherUnavailableTitle": "Weather data unavailable",
+    "weatherUnavailableDesc": "We couldn't reach the weather service. Check your connection and try again.",
+    "dataUnavailable": "Data unavailable right now.",
+    "approximateLocation": "Couldn't get your precise location. Showing an approximate one.",
+    "offline": "You're offline. Showing the last loaded data; it will refresh when you reconnect."
   },
   "tabs": {
     "overview": "Overview",
@@ -469,7 +475,7 @@
       "velocityValueText": "{rate} times playback speed",
       "pitchTitle": "Voice Pitch Modulation",
       "pitchDesc": "Semitone pitch shift. Only used by the browser speech fallback; neural voices ignore it.",
-      "pitchValueText": "NaN semitones",
+      "pitchValueText": "{semitones} semitones",
       "volumeTitle": "Volume Gain Calibration",
       "volumeDesc": "Playback volume in decibels, applied in the browser (0 dB = full volume)",
       "volumeValueText": "{decibels} decibels",
@@ -628,7 +634,7 @@
   "pinned": {
     "title": "Pinned Weather Stations",
     "desc": "Persistent quick-access telemetry locations",
-    "stationCount": "{count} Station(s)",
+    "stationCount": "{count, plural, one {# Station} other {# Stations}}",
     "loadingTelemetry": "Loading telemetry…",
     "unpinStation": "Unpin station"
   },
@@ -719,7 +725,7 @@
   },
   "alerts": {
     "bulletinTitle": "Meteorological Advisory Bulletin",
-    "activeAlerts": "{count} Active Alerts",
+    "activeAlerts": "{count, plural, one {# Active Alert} other {# Active Alerts}}",
     "bulletinDesc": "Official severe weather warning & public safety directives for {cityName}",
     "soundChime": "Sound Chime",
     "collapse": "Collapse",

@@ -70,7 +70,7 @@ export function AiAdvisorBanner({
   )
 
   return (
-    <Card className="w-full border-primary/40 bg-gradient-to-r from-primary/5 via-background to-background">
+    <Card className="w-full border-primary/40 bg-gradient-to-r rtl:bg-gradient-to-l from-primary/5 via-background to-background">
       <CardHeader className="flex flex-col justify-between gap-2 border-b border-border/60 p-3 sm:flex-row sm:items-center sm:p-4">
         <div className="flex items-center gap-2.5">
           <div className="flex size-8 shrink-0 items-center justify-center border border-primary/30 bg-primary/10 text-primary">
@@ -103,7 +103,7 @@ export function AiAdvisorBanner({
               className="gap-1.5 font-mono text-xs"
             >
               <span>{t.aiAdvisor.fullBrief}</span>
-              <ChevronRight className="size-3" />
+              <ChevronRight className="size-3 rtl:rotate-180" />
             </Button>
           </CardAction>
         )}
@@ -177,12 +177,12 @@ export function AiAdvisorBanner({
             <div className="space-y-1 border border-border bg-muted/20 p-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-tiny text-muted-foreground uppercase">
-                  <Bike className="size-3 text-teal-500" />
+                  <Bike className="size-3 text-teal-700 dark:text-teal-500" />
                   <span>{t.aiAdvisor.outdoorActivity}</span>
                 </div>
                 <Badge
                   variant="outline"
-                  className="font-mono text-micro text-teal-500"
+                  className="font-mono text-micro text-teal-700 dark:text-teal-500"
                 >
                   {sportsAdvice.score}/10
                 </Badge>
@@ -196,7 +196,7 @@ export function AiAdvisorBanner({
           {analysis.plannedShifts[0] && (
             <div className="space-y-1 border border-border bg-muted/20 p-2.5 sm:col-span-2 lg:col-span-1">
               <div className="flex items-center gap-1.5 text-tiny text-muted-foreground uppercase">
-                <Thermometer className="size-3 text-amber-500" />
+                <Thermometer className="size-3 text-amber-700 dark:text-amber-500" />
                 <span>{t.aiAdvisor.tomorrowShift}</span>
               </div>
               <p className="text-mini leading-snug text-foreground">

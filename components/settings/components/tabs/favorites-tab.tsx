@@ -153,7 +153,7 @@ export function FavoritesTabContent({
                 {city || CONFIG.location.defaultCity}
               </strong>
               {coords && (
-                <span className="font-mono ml-1 text-muted-foreground/80">
+                <span className="font-mono ms-1 text-muted-foreground/80">
                   ({coords.lat.toFixed(2)}°, {coords.lon.toFixed(2)}°)
                 </span>
               )}
@@ -228,7 +228,7 @@ export function FavoritesTabContent({
                   className="font-sans text-xs"
                 />
                 {(isSearching || newCityInput) && (
-                  <InputGroupAddon align="inline-end" className="pr-1.5 gap-1">
+                  <InputGroupAddon align="inline-end" className="pe-1.5 gap-1">
                     {isSearching && (
                       <Spinner className="size-3 text-primary" />
                     )}
@@ -251,7 +251,7 @@ export function FavoritesTabContent({
 
             {/* Live Autocomplete Search Results Dropdown */}
             {isDropdownOpen && (
-              <Card className="absolute top-full left-0 right-0 z-50 mt-1 max-h-64 text-xs gap-0 pb-0">
+              <Card className="absolute top-full start-0 end-0 z-50 mt-1 max-h-64 text-xs gap-0 pb-0">
                 <CardHeader className="flex flex-row items-center justify-between font-mono text-tiny text-muted-foreground uppercase sticky top-0 z-10">
                   <CardTitle className="font-mono text-tiny font-normal text-muted-foreground uppercase">
                     {text.resultsTitle}

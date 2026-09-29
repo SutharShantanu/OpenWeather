@@ -72,7 +72,7 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
                   </span>
                 )}
                 {popPercent > 10 ? (
-                  <span className="flex items-center gap-1 text-tiny font-mono text-sky-500 font-semibold">
+                  <span className="flex items-center gap-1 text-tiny font-mono text-sky-700 dark:text-sky-500 font-semibold">
                     <CloudRain className="size-2.5" />
                     {popPercent}%
                   </span>
@@ -90,7 +90,7 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
                   {translateCondition(day.description)}
                 </span>
                 {day.uvIndexMax !== undefined && (
-                  <span className="hidden md:flex items-center gap-0.5 text-micro font-mono text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1 py-0.5">
+                  <span className="hidden md:flex items-center gap-0.5 text-micro font-mono text-amber-700 dark:text-amber-500 bg-amber-500/10 border border-amber-500/20 px-1 py-0.5">
                     <SunMedium className="size-2.5" />
                     UV {Math.round(day.uvIndexMax)}
                   </span>
@@ -99,7 +99,7 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
 
               {/* Thermal Range Bar & Min/Max Temperatures */}
               <div className="flex items-center gap-3 w-40 sm:w-56 shrink-0 justify-end">
-                <span className="w-7 text-right text-xs font-mono text-muted-foreground">
+                <span className="w-7 text-end text-xs font-mono text-muted-foreground">
                   <NumberFlow value={minTemp} />°
                 </span>
 
@@ -107,13 +107,13 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
                   <div
                     className="absolute top-0 bottom-0 bg-primary"
                     style={{
-                      left: `${leftPct}%`,
+                      insetInlineStart: `${leftPct}%`,
                       width: `${widthPct}%`,
                     }}
                   />
                 </div>
 
-                <span className="w-7 text-left text-xs font-mono font-semibold text-foreground">
+                <span className="w-7 text-start text-xs font-mono font-semibold text-foreground">
                   <NumberFlow value={maxTemp} />°
                 </span>
               </div>

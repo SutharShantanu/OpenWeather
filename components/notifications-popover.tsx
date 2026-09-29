@@ -63,7 +63,7 @@ export function NotificationsPopover({
           {unreadCount > 0 && (
             <Badge
               variant="destructive"
-              className="absolute -top-1.5 -right-1.5 size-4 p-0 text-micro font-mono font-bold flex items-center justify-center border border-destructive/30"
+              className="absolute -top-1.5 -end-1.5 size-4 p-0 text-micro font-mono font-bold flex items-center justify-center border border-destructive/30"
             >
               {unreadCount}
             </Badge>
@@ -78,7 +78,7 @@ export function NotificationsPopover({
             <Bell className="size-3.5 text-primary" />
             <span>{t.notifications.title}</span>
             {unreadCount > 0 && (
-              <Badge variant="outline" className="text-micro font-mono ml-1">
+              <Badge variant="outline" className="text-micro font-mono ms-1">
                 {t.notifications.activeCount(unreadCount)}
               </Badge>
             )}
@@ -91,7 +91,7 @@ export function NotificationsPopover({
               onClick={handleClearAll}
               className="h-5 px-1.5 text-tiny text-muted-foreground hover:text-foreground"
             >
-              <Trash2 className="size-2.5 mr-1" />
+              <Trash2 className="size-2.5 me-1" />
               {t.common.clear}
             </Button>
           )}
@@ -104,7 +104,7 @@ export function NotificationsPopover({
           </div>
 
           {activeAlerts.length > 0 ? (
-            <div className="space-y-2 max-h-64 overflow-y-auto pr-0.5">
+            <div className="space-y-2 max-h-64 overflow-y-auto pe-0.5">
               {activeAlerts.map((alert) => (
                 <div
                   key={alert.id}
@@ -112,7 +112,7 @@ export function NotificationsPopover({
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <AlertTriangle className="size-3 text-amber-500 shrink-0" />
+                      <AlertTriangle className="size-3 text-amber-700 dark:text-amber-500 shrink-0" />
                       <span className="font-bold text-foreground text-mini">
                         {alert.event}
                       </span>
@@ -142,8 +142,8 @@ export function NotificationsPopover({
             <EmptyState
               variant="muted"
               size="sm"
-              icon={<ShieldCheck className="text-emerald-500 size-4" />}
-              iconStackClassName="text-emerald-500"
+              icon={<ShieldCheck className="text-emerald-700 dark:text-emerald-500 size-4" />}
+              iconStackClassName="text-emerald-700 dark:text-emerald-500"
               title={t.notifications.allClearTitle}
               description={t.notifications.allClearDesc(current?.cityName || t.common.stationTelemetry)}
             />

@@ -18,5 +18,6 @@ export * from "./use-nearby-cities"
 
 export * from "./use-geocode-search"
 export * from "./use-media-query"
+export * from "./use-online-status"
 export * from "./use-tts-player"
 export * from "./use-copy-to-clipboard"

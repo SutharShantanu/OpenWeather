@@ -67,7 +67,7 @@ export function AppearanceTabContent() {
                 key={item.id}
                 value={item.id}
                 className={cn(
-                  "group relative flex h-auto min-h-24 w-full min-w-0 cursor-pointer flex-col justify-between p-3.5 text-left whitespace-normal border border-border transition-all hover:border-primary/50 hover:bg-muted/30",
+                  "group relative flex h-auto min-h-24 w-full min-w-0 cursor-pointer flex-col justify-between p-3.5 text-start whitespace-normal border border-border transition-all hover:border-primary/50 hover:bg-muted/30",
                   isSelected &&
                     "data-[state=on]:border-primary data-[state=on]:bg-primary/5"
                 )}

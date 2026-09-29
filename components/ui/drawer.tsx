@@ -64,9 +64,9 @@ function DrawerContent({
           side === "bottom" &&
             "inset-x-0 bottom-0 max-h-[85vh] rounded-t-xl border-t data-open:animate-in data-open:slide-in-from-bottom data-closed:animate-out data-closed:slide-out-to-bottom",
           side === "left" &&
-            "inset-y-0 left-0 w-4/5 max-w-sm border-r data-open:animate-in data-open:slide-in-from-left data-closed:animate-out data-closed:slide-out-to-left",
+            "inset-y-0 start-0 w-4/5 max-w-sm border-e data-open:animate-in data-open:slide-in-from-left data-closed:animate-out data-closed:slide-out-to-left",
           side === "right" &&
-            "inset-y-0 right-0 w-4/5 max-w-sm border-l data-open:animate-in data-open:slide-in-from-right data-closed:animate-out data-closed:slide-out-to-right",
+            "inset-y-0 end-0 w-4/5 max-w-sm border-s data-open:animate-in data-open:slide-in-from-right data-closed:animate-out data-closed:slide-out-to-right",
           side === "top" &&
             "inset-x-0 top-0 max-h-[85vh] rounded-b-xl border-b data-open:animate-in data-open:slide-in-from-top data-closed:animate-out data-closed:slide-out-to-top",
           className
@@ -82,7 +82,7 @@ function DrawerContent({
             <Button
               variant="destructive"
               size="icon-xs"
-              className="absolute top-3 right-3 size-7 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/80"
+              className="absolute top-3 end-3 size-7 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/80"
             >
               <XIcon className="size-3.5" />
               <span className="sr-only">Close</span>
@@ -98,7 +98,7 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="drawer-header"
-      className={cn("flex flex-col gap-1 p-4 pb-2 text-left", className)}
+      className={cn("flex flex-col gap-1 p-4 pb-2 text-start", className)}
       {...props}
     />
   )

@@ -117,7 +117,7 @@ export function SourceTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                   key={provider.id}
                   value={provider.id}
                   className={cn(
-                    "group relative flex h-auto min-h-23 w-full min-w-0 cursor-pointer flex-col justify-between p-3.5 text-left whitespace-normal border border-border transition-all hover:border-primary/50 hover:bg-muted/30",
+                    "group relative flex h-auto min-h-23 w-full min-w-0 cursor-pointer flex-col justify-between p-3.5 text-start whitespace-normal border border-border transition-all hover:border-primary/50 hover:bg-muted/30",
                     isSelected &&
                       "data-[state=on]:border-primary data-[state=on]:bg-primary/5"
                   )}
@@ -241,7 +241,7 @@ export function SourceTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                   value={model.id}
                   textValue={`${model.name} (${model.resolution})`}
                 >
-                  <div className="space-x-2 text-left">
+                  <div className="space-x-2 rtl:space-x-reverse text-start">
                     <span className="font-heading text-xs font-semibold text-foreground">
                       {model.name}
                     </span>

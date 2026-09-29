@@ -1,9 +1,9 @@
 "use client"
 
-import React, { useCallback, useMemo } from "react"
+import React, { useCallback, useMemo, useRef } from "react"
+import dynamic from "next/dynamic"
 import { WeatherHeader } from "@/components/weather-header"
 import { WeatherHero } from "@/components/weather-hero"
-import { HourlyForecast } from "@/components/hourly-forecast"
 import { DailyForecast } from "@/components/daily-forecast"
 import { WindWidget } from "@/components/widgets/wind-widget"
 import { HumidityWidget } from "@/components/widgets/humidity-widget"
@@ -13,14 +13,11 @@ import { UvWidget } from "@/components/widgets/uv-widget"
 import { PinnedLocations } from "@/components/pinned-locations"
 import { EmbeddedRadarCard } from "@/components/embedded-radar-card"
 import { InlineAlertBanner } from "@/components/inline-alert-banner"
-import { InlineComparisonMatrix } from "@/components/inline-comparison-matrix"
-import { WeatherChartsCard } from "@/components/weather-charts-card"
-import { AirQualityDeepView } from "@/components/air-quality-deep-view"
-import { ClimateNormalsCard } from "@/components/climate-normals-card"
-import { SettingsDialog } from "@/components/settings-dialog"
 import { AiAdvisorBanner } from "@/components/ai-advisor-banner"
-import { AiAdvisorDialog } from "@/components/ai-advisor-dialog"
-import { LanguageProvider } from "@/components/language-provider"
+import {
+  LanguageProvider,
+  useActiveLocale,
+} from "@/components/language-provider"
 import { DisplayPreferencesProvider } from "@/components/display-preferences-provider"
 import { getTranslation } from "@/lib/translations"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -36,6 +33,7 @@ import {
   useUserLocation,
   useUrlSync,
   useScrollLock,
+  useOnlineStatus,
 } from "@/hooks"
 import {
   RefreshCw,
@@ -46,7 +44,49 @@ import {
   Sparkles,
   ArrowRightLeft,
   History,
+  CloudOff,
+  MapPinOff,
+  WifiOff,
+  X,
 } from "lucide-react"
+import { EmptyState } from "@/components/empty-state"
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  AlertAction,
+} from "@/components/ui/alert"
+
+
+// Code-split: recharts (charts, hourly, climate) and the dialogs are large and
+// not needed for first paint; weather data takes longer to arrive than these chunks.
+const cardFallback = () => <Skeleton className="h-64 w-full" />
+const HourlyForecast = dynamic(
+  () => import("@/components/hourly-forecast").then((m) => m.HourlyForecast),
+  { loading: cardFallback }
+)
+const WeatherChartsCard = dynamic(
+  () => import("@/components/weather-charts-card").then((m) => m.WeatherChartsCard),
+  { loading: cardFallback }
+)
+const InlineComparisonMatrix = dynamic(
+  () => import("@/components/inline-comparison-matrix").then((m) => m.InlineComparisonMatrix),
+  { loading: cardFallback }
+)
+const AirQualityDeepView = dynamic(
+  () => import("@/components/air-quality-deep-view").then((m) => m.AirQualityDeepView),
+  { loading: cardFallback }
+)
+const ClimateNormalsCard = dynamic(
+  () => import("@/components/climate-normals-card").then((m) => m.ClimateNormalsCard),
+  { loading: cardFallback }
+)
+const SettingsDialog = dynamic(() =>
+  import("@/components/settings-dialog").then((m) => m.SettingsDialog)
+)
+const AiAdvisorDialog = dynamic(() =>
+  import("@/components/ai-advisor-dialog").then((m) => m.AiAdvisorDialog)
+)
 
 export default function WeatherDashboardPage() {
   const { settings, unit, updateSettings, resetSettings } = useSettings()
@@ -58,11 +98,21 @@ export default function WeatherDashboardPage() {
     removePinnedCity,
   } = usePinnedCities()
 
-  const { detectUserLocation } = useUserLocation()
+  const { detectUserLocation, locationError, clearLocationError } =
+    useUserLocation({
+      language: settings.language,
+    })
+
+  // Each location change bumps this id. A geolocation lookup can take seconds
+  // (permission prompt), so its result is dropped if the user picked another
+  // location in the meantime.
+  const locationRequestRef = useRef(0)
+  const online = useOnlineStatus()
 
   const {
     weather,
     loading,
+    error,
     setLoading,
     city,
     setCity,
@@ -78,6 +128,7 @@ export default function WeatherDashboardPage() {
       coords?: { lat: number; lon: number }
       fallbackToGeo?: boolean
     }) => {
+      const requestId = ++locationRequestRef.current
       if (target.coords) {
         setCoords(target.coords)
         await fetchWeather(undefined, target.coords)
@@ -88,6 +139,7 @@ export default function WeatherDashboardPage() {
       } else if (target.fallbackToGeo) {
         setLoading(true)
         const loc = await detectUserLocation()
+        if (requestId !== locationRequestRef.current) return
         if (loc) {
           setCoords(loc.coords)
           if (loc.city) setCity(loc.city)
@@ -134,8 +186,10 @@ export default function WeatherDashboardPage() {
 
   // GPS Locate with URL update. If location request is denied, cascades to network location.
   const handleLocate = useCallback(async () => {
+    const requestId = ++locationRequestRef.current
     setLoading(true)
     const loc = await detectUserLocation({ highAccuracy: true, timeout: 7000 })
+    if (requestId !== locationRequestRef.current) return
     if (loc) {
       setCoords(loc.coords)
       if (loc.city) setCity(loc.city)
@@ -159,6 +213,7 @@ export default function WeatherDashboardPage() {
   // User Actions: City selection with URL history push
   const handleSelectCity = useCallback(
     (newCity: string) => {
+      locationRequestRef.current++
       setCoords(null)
       setCity(newCity)
       try {
@@ -197,8 +252,10 @@ export default function WeatherDashboardPage() {
     if (typeof window !== "undefined") {
       window.history.pushState(null, "", "/")
     }
+    const requestId = ++locationRequestRef.current
     setLoading(true)
     const loc = await detectUserLocation()
+    if (requestId !== locationRequestRef.current) return
     if (loc) {
       setCoords(loc.coords)
       if (loc.city) setCity(loc.city)
@@ -219,7 +276,7 @@ export default function WeatherDashboardPage() {
   ])
 
   const isPinned = weather ? isCityPinned(weather.current.cityName) : false
-  const t = getTranslation(settings.language || "en")
+  const t = getTranslation(useActiveLocale(settings.language || "en"))
 
   const displayPreferences = useMemo(
     () => ({
@@ -269,7 +326,9 @@ export default function WeatherDashboardPage() {
             {/* Status Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-2.5 font-mono text-xs text-muted-foreground">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="size-2 shrink-0 animate-pulse bg-emerald-500" />
+                <span
+                  className={`size-2 shrink-0 ${weather && !error ? "animate-pulse bg-emerald-500" : "bg-muted-foreground"}`}
+                />
                 <span className="font-semibold text-foreground uppercase">
                   {t.common.stationTelemetryActive}
                 </span>
@@ -277,7 +336,7 @@ export default function WeatherDashboardPage() {
                 <button
                   type="button"
                   onClick={() => handleOpenSettings("source")}
-                  className="group inline-flex cursor-pointer items-center gap-1.5 text-left uppercase transition-colors hover:text-foreground"
+                  className="group inline-flex cursor-pointer items-center gap-1.5 text-start uppercase transition-colors hover:text-foreground"
                   title={t.common.sourceTooltip}
                 >
                   <span className="text-muted-foreground group-hover:text-foreground">
@@ -289,7 +348,7 @@ export default function WeatherDashboardPage() {
                           : t.common.simulatedSensor)}
                     </strong>
                     {weather?.stationName && (
-                      <span className="ml-1 font-semibold text-primary">
+                      <span className="ms-1 font-semibold text-primary">
                         [{weather.stationName}]
                       </span>
                     )}
@@ -320,6 +379,42 @@ export default function WeatherDashboardPage() {
               </div>
             </div>
 
+            {/* Last request failed while older data is still shown */}
+            {error && weather && !loading && online && (
+              <Alert variant="warning" role="alert">
+                <CloudOff />
+                <AlertTitle>{t.common.weatherUnavailableTitle}</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {!online && (
+              <Alert variant="warning" role="status">
+                <WifiOff />
+                <AlertDescription>{t.common.offline}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* GPS denied or timed out: data is for an IP-based location */}
+            {locationError && (
+              <Alert role="status">
+                <MapPinOff />
+                <AlertDescription>
+                  {t.common.approximateLocation}
+                </AlertDescription>
+                <AlertAction>
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    onClick={clearLocationError}
+                    aria-label={t.notifications.dismiss}
+                  >
+                    <X />
+                  </Button>
+                </AlertAction>
+              </Alert>
+            )}
+
             {/* Inline Active Weather Advisories Banner */}
             {weather && !loading && (
               <InlineAlertBanner
@@ -329,126 +424,194 @@ export default function WeatherDashboardPage() {
             )}
 
             {/* MSN Weather Navigation Tabs */}
-            <Tabs
-              value={activeTab}
-              onValueChange={handleTabChange}
-              className="w-full space-y-4"
-            >
-              <TabsList className="w-full justify-start overflow-x-auto overflow-y-hidden">
-                <TabsTrigger
-                  value="overview"
-                  className="gap-1.5 font-heading text-xs font-medium"
-                >
-                  <LayoutGrid className="size-3.5" />
-                  <span>{t.tabs.overview}</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="charts"
-                  className="gap-1.5 font-heading text-xs font-medium"
-                >
-                  <TrendingUp className="size-3.5" />
-                  <span>{t.tabs.charts}</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="radar"
-                  className="gap-1.5 font-heading text-xs font-medium"
-                >
-                  <CloudRain className="size-3.5" />
-                  <span>{t.tabs.radar}</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="air-quality"
-                  className="gap-1.5 font-heading text-xs font-medium"
-                >
-                  <Sparkles className="size-3.5" />
-                  <span>{t.tabs.airQuality}</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="climate"
-                  className="gap-1.5 font-heading text-xs font-medium"
-                >
-                  <History className="size-3.5" />
-                  <span>{t.tabs.climate}</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="compare"
-                  className="gap-1.5 font-heading text-xs font-medium"
-                >
-                  <ArrowRightLeft className="size-3.5" />
-                  <span>{t.tabs.compare}</span>
-                </TabsTrigger>
-              </TabsList>
+            {error && !weather && !loading ? (
+              <EmptyState
+                role="alert"
+                icon={CloudOff}
+                title={t.common.weatherUnavailableTitle}
+                description={t.common.weatherUnavailableDesc}
+                primaryAction={{
+                  label: t.common.retry,
+                  icon: RefreshCw,
+                  onClick: () => void refetch(),
+                }}
+              />
+            ) : (
+              <Tabs
+                value={activeTab}
+                onValueChange={handleTabChange}
+                className="w-full space-y-4"
+              >
+                <TabsList className="w-full justify-start overflow-x-auto overflow-y-hidden">
+                  <TabsTrigger value="overview" className="gap-1.5">
+                    <LayoutGrid className="size-3.5" />
+                    <span>{t.tabs.overview}</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="charts" className="gap-1.5">
+                    <TrendingUp className="size-3.5" />
+                    <span>{t.tabs.charts}</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="radar" className="gap-1.5">
+                    <CloudRain className="size-3.5" />
+                    <span>{t.tabs.radar}</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="air-quality" className="gap-1.5">
+                    <Sparkles className="size-3.5" />
+                    <span>{t.tabs.airQuality}</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="climate" className="gap-1.5">
+                    <History className="size-3.5" />
+                    <span>{t.tabs.climate}</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="compare" className="gap-1.5">
+                    <ArrowRightLeft className="size-3.5" />
+                    <span>{t.tabs.compare}</span>
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* TAB 1: OVERVIEW */}
-              <TabsContent value="overview" className="space-y-4">
-                {/* Hero Current Conditions */}
-                {weather && !loading ? (
-                  <WeatherHero
-                    current={weather.current}
-                    unit={unit}
-                    isPinned={isPinned}
-                    onTogglePin={() => togglePinCity(weather.current.cityName)}
-                  />
-                ) : (
-                  <Skeleton className="h-72 w-full" />
-                )}
+                {/* TAB 1: OVERVIEW */}
+                <TabsContent value="overview" className="space-y-4">
+                  {/* Hero Current Conditions */}
+                  {weather && !loading ? (
+                    <WeatherHero
+                      current={weather.current}
+                      unit={unit}
+                      isPinned={isPinned}
+                      onTogglePin={() =>
+                        togglePinCity(weather.current.cityName)
+                      }
+                    />
+                  ) : (
+                    <Skeleton className="h-72 w-full" />
+                  )}
 
-                {/* AI Synoptic Intelligence & Sudden Alert Advisor */}
-                {weather && !loading && (
-                  <AiAdvisorBanner
-                    current={weather.current}
-                    hourly={weather.hourly}
-                    daily={weather.daily}
-                    unit={unit}
-                    onOpenDetailedAi={handleOpenAiAdvisor}
-                  />
-                )}
+                  {/* AI Synoptic Intelligence & Sudden Alert Advisor */}
+                  {weather && !loading && (
+                    <AiAdvisorBanner
+                      current={weather.current}
+                      hourly={weather.hourly}
+                      daily={weather.daily}
+                      unit={unit}
+                      onOpenDetailedAi={handleOpenAiAdvisor}
+                    />
+                  )}
 
-                {/* Hourly Trajectory Sequence */}
-                {weather && !loading ? (
-                  <HourlyForecast hourly={weather.hourly} unit={unit} />
-                ) : (
-                  <Skeleton className="h-44 w-full" />
-                )}
+                  {/* Hourly Trajectory Sequence */}
+                  {weather && !loading ? (
+                    <HourlyForecast hourly={weather.hourly} unit={unit} />
+                  ) : (
+                    <Skeleton className="h-44 w-full" />
+                  )}
 
-                {/* Embedded Live Doppler Radar Card */}
-                {weather && !loading && (
-                  <EmbeddedRadarCard
-                    lat={weather.current.lat}
-                    lon={weather.current.lon}
-                    cityName={weather.current.cityName}
-                    heightClass="h-[340px]"
-                    onExpand={() => handleTabChange("radar")}
-                    customCartoApiKey={settings.customCartoApiKey}
-                  />
-                )}
+                  {/* Embedded Live Doppler Radar Card */}
+                  {weather && !loading && (
+                    <EmbeddedRadarCard
+                      lat={weather.current.lat}
+                      lon={weather.current.lon}
+                      cityName={weather.current.cityName}
+                      heightClass="h-[340px]"
+                      onExpand={() => handleTabChange("radar")}
+                      customCartoApiKey={settings.customCartoApiKey}
+                    />
+                  )}
 
-                {/* Multi-Metric Progression Graph */}
-                {weather && !loading ? (
-                  <WeatherChartsCard hourly={weather.hourly} unit={unit} />
-                ) : (
-                  <Skeleton className="h-64 w-full" />
-                )}
+                  {/* Multi-Metric Progression Graph */}
+                  {weather && !loading ? (
+                    <WeatherChartsCard hourly={weather.hourly} unit={unit} />
+                  ) : (
+                    <Skeleton className="h-64 w-full" />
+                  )}
 
-                {/* Bento Grid: 10-day outlook + atmospheric sensors */}
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  {/* Left 2 Cols: 10-day Forecast */}
-                  <div className="lg:col-span-2">
-                    {weather && !loading ? (
-                      <DailyForecast daily={weather.daily} unit={unit} />
-                    ) : (
-                      <Skeleton className="h-96 w-full" />
-                    )}
+                  {/* Bento Grid: 10-day outlook + atmospheric sensors */}
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    {/* Left 2 Cols: 10-day Forecast */}
+                    <div className="lg:col-span-2">
+                      {weather && !loading ? (
+                        <DailyForecast daily={weather.daily} unit={unit} />
+                      ) : (
+                        <Skeleton className="h-96 w-full" />
+                      )}
+                    </div>
+
+                    {/* Right 1 Col: Telemetry widgets */}
+                    <div className="space-y-4">
+                      {weather && !loading ? (
+                        <>
+                          <UvWidget
+                            uvIndex={weather.current.uvIndex}
+                            uvMax={weather.daily[0]?.uvIndexMax}
+                          />
+                          <WindWidget
+                            speed={weather.current.windSpeed}
+                            deg={weather.current.windDeg}
+                          />
+                          <HumidityWidget
+                            humidity={weather.current.humidity}
+                            tempC={weather.current.temp}
+                            unit={unit}
+                          />
+                          <AirQualityWidget
+                            airQuality={weather.current.airQuality}
+                          />
+                          <SolarWidget
+                            sunrise={weather.current.sunrise}
+                            sunset={weather.current.sunset}
+                            currentDt={weather.current.dt}
+                            moon={weather.current.moon}
+                          />
+                        </>
+                      ) : (
+                        <Skeleton className="h-96 w-full" />
+                      )}
+                    </div>
                   </div>
 
-                  {/* Right 1 Col: Telemetry widgets */}
-                  <div className="space-y-4">
-                    {weather && !loading ? (
-                      <>
-                        <UvWidget
-                          uvIndex={weather.current.uvIndex}
-                          uvMax={weather.daily[0]?.uvIndexMax}
-                        />
+                  {/* Pinned Locations */}
+                  <PinnedLocations
+                    pinnedCities={pinnedCities}
+                    unit={unit}
+                    onSelectCity={handleSelectCity}
+                    onUnpinCity={removePinnedCity}
+                  />
+                </TabsContent>
+
+                {/* TAB 2: GRAPHS & TRENDS */}
+                <TabsContent
+                  value="charts"
+                  className="space-y-4 focus-visible:outline-none"
+                >
+                  {weather && !loading ? (
+                    <>
+                      <WeatherChartsCard hourly={weather.hourly} unit={unit} />
+                      <HourlyForecast hourly={weather.hourly} unit={unit} />
+                      <ClimateNormalsCard
+                        lat={weather.current.lat}
+                        lon={weather.current.lon}
+                        currentTemp={weather.current.temp}
+                        unit={unit}
+                      />
+                      <DailyForecast daily={weather.daily} unit={unit} />
+                    </>
+                  ) : (
+                    <Skeleton className="h-96 w-full" />
+                  )}
+                </TabsContent>
+
+                {/* TAB 3: RADAR & SATELLITE */}
+                <TabsContent
+                  value="radar"
+                  className="space-y-4 focus-visible:outline-none"
+                >
+                  {weather && !loading ? (
+                    <>
+                      <EmbeddedRadarCard
+                        lat={weather.current.lat}
+                        lon={weather.current.lon}
+                        cityName={weather.current.cityName}
+                        heightClass="h-[60svh] min-h-80 md:h-[560px]"
+                        customCartoApiKey={settings.customCartoApiKey}
+                      />
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <WindWidget
                           speed={weather.current.windSpeed}
                           deg={weather.current.windDeg}
@@ -458,140 +621,72 @@ export default function WeatherDashboardPage() {
                           tempC={weather.current.temp}
                           unit={unit}
                         />
-                        <AirQualityWidget
-                          airQuality={weather.current.airQuality}
-                        />
-                        <SolarWidget
-                          sunrise={weather.current.sunrise}
-                          sunset={weather.current.sunset}
-                          currentDt={weather.current.dt}
-                          moon={weather.current.moon}
-                        />
-                      </>
-                    ) : (
-                      <Skeleton className="h-96 w-full" />
-                    )}
-                  </div>
-                </div>
+                      </div>
+                    </>
+                  ) : (
+                    <Skeleton className="h-140 w-full" />
+                  )}
+                </TabsContent>
 
-                {/* Pinned Locations */}
-                <PinnedLocations
-                  pinnedCities={pinnedCities}
-                  unit={unit}
-                  onSelectCity={handleSelectCity}
-                  onUnpinCity={removePinnedCity}
-                />
-              </TabsContent>
-
-              {/* TAB 2: GRAPHS & TRENDS */}
-              <TabsContent
-                value="charts"
-                className="space-y-4 focus-visible:outline-none"
-              >
-                {weather && !loading ? (
-                  <>
-                    <WeatherChartsCard hourly={weather.hourly} unit={unit} />
-                    <HourlyForecast hourly={weather.hourly} unit={unit} />
-                    <ClimateNormalsCard
-                      lat={weather.current.lat}
-                      lon={weather.current.lon}
-                      currentTemp={weather.current.temp}
-                      unit={unit}
+                {/* TAB 4: AIR QUALITY & HEALTH */}
+                <TabsContent
+                  value="air-quality"
+                  className="space-y-4 focus-visible:outline-none"
+                >
+                  {weather && !loading ? (
+                    <AirQualityDeepView
+                      airQuality={weather.current.airQuality}
                     />
-                    <DailyForecast daily={weather.daily} unit={unit} />
-                  </>
-                ) : (
-                  <Skeleton className="h-96 w-full" />
-                )}
-              </TabsContent>
+                  ) : (
+                    <Skeleton className="h-96 w-full" />
+                  )}
+                </TabsContent>
 
-              {/* TAB 3: RADAR & SATELLITE */}
-              <TabsContent
-                value="radar"
-                className="space-y-4 focus-visible:outline-none"
-              >
-                {weather && !loading ? (
-                  <>
-                    <EmbeddedRadarCard
-                      lat={weather.current.lat}
-                      lon={weather.current.lon}
-                      cityName={weather.current.cityName}
-                      heightClass="h-[560px]"
-                      customCartoApiKey={settings.customCartoApiKey}
-                    />
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <WindWidget
-                        speed={weather.current.windSpeed}
-                        deg={weather.current.windDeg}
-                      />
-                      <HumidityWidget
-                        humidity={weather.current.humidity}
-                        tempC={weather.current.temp}
+                {/* TAB 5: HISTORICAL & CLIMATE */}
+                <TabsContent
+                  value="climate"
+                  className="space-y-4 focus-visible:outline-none"
+                >
+                  {weather && !loading ? (
+                    <>
+                      <ClimateNormalsCard
+                        lat={weather.current.lat}
+                        lon={weather.current.lon}
+                        currentTemp={weather.current.temp}
                         unit={unit}
                       />
-                    </div>
-                  </>
-                ) : (
-                  <Skeleton className="h-140 w-full" />
-                )}
-              </TabsContent>
+                      <DailyForecast daily={weather.daily} unit={unit} />
+                    </>
+                  ) : (
+                    <Skeleton className="h-96 w-full" />
+                  )}
+                </TabsContent>
 
-              {/* TAB 4: AIR QUALITY & HEALTH */}
-              <TabsContent
-                value="air-quality"
-                className="space-y-4 focus-visible:outline-none"
-              >
-                {weather && !loading ? (
-                  <AirQualityDeepView airQuality={weather.current.airQuality} />
-                ) : (
-                  <Skeleton className="h-96 w-full" />
-                )}
-              </TabsContent>
-
-              {/* TAB 5: HISTORICAL & CLIMATE */}
-              <TabsContent
-                value="climate"
-                className="space-y-4 focus-visible:outline-none"
-              >
-                {weather && !loading ? (
-                  <>
-                    <ClimateNormalsCard
-                      lat={weather.current.lat}
-                      lon={weather.current.lon}
-                      currentTemp={weather.current.temp}
-                      unit={unit}
-                    />
-                    <DailyForecast daily={weather.daily} unit={unit} />
-                  </>
-                ) : (
-                  <Skeleton className="h-96 w-full" />
-                )}
-              </TabsContent>
-
-              {/* TAB 6: STATION COMPARISON */}
-              <TabsContent
-                value="compare"
-                className="space-y-4 focus-visible:outline-none"
-              >
-                {weather && !loading ? (
-                  <>
-                    <InlineComparisonMatrix
-                      baseCurrent={weather.current}
-                      unit={unit}
-                      onSwitchCity={handleSelectCity}
-                    />
-                    <PinnedLocations
-                      pinnedCities={pinnedCities}
-                      unit={unit}
-                      onSelectCity={handleSelectCity}
-                      onUnpinCity={removePinnedCity}
-                    />
-                  </>
-                ) : (
-                  <Skeleton className="h-96 w-full" />
-                )}
-              </TabsContent>
-            </Tabs>
+                {/* TAB 6: STATION COMPARISON */}
+                <TabsContent
+                  value="compare"
+                  className="space-y-4 focus-visible:outline-none"
+                >
+                  {weather && !loading ? (
+                    <>
+                      <InlineComparisonMatrix
+                        baseCurrent={weather.current}
+                        unit={unit}
+                        onSwitchCity={handleSelectCity}
+                      />
+                      <PinnedLocations
+                        pinnedCities={pinnedCities}
+                        unit={unit}
+                        onSelectCity={handleSelectCity}
+                        onUnpinCity={removePinnedCity}
+                      />
+                    </>
+                  ) : (
+                    <Skeleton className="h-96 w-full" />
+                  )}
+                </TabsContent>
+              </Tabs>
+            )}
           </main>
 
           {/* AI Synoptic Advisor Interactive Dialog */}

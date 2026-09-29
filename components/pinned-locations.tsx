@@ -92,14 +92,20 @@ export function PinnedLocations({
             return (
               <div
                 key={city}
-                onClick={() => onSelectCity(city)}
-                className="group p-3 bg-muted/20 border border-border hover:bg-muted/40 transition-colors cursor-pointer flex flex-col justify-between h-28"
+                className="group relative p-3 bg-muted/20 border border-border hover:bg-muted/40 transition-colors flex flex-col justify-between h-28 has-focus-visible:ring-2 has-focus-visible:ring-ring"
               >
                 {/* Header: Name + Unpin Button */}
                 <div className="flex items-start justify-between">
                   <div>
                     <h4 className="text-sm font-heading font-semibold text-foreground group-hover:text-primary transition-colors flex items-center gap-1">
-                      {weather?.cityName || city}
+                      {/* The button's ::after stretches over the card so the whole card is clickable. */}
+                      <button
+                        type="button"
+                        onClick={() => onSelectCity(city)}
+                        className="text-start outline-none after:absolute after:inset-0 after:content-['']"
+                      >
+                        {weather?.cityName || city}
+                      </button>
                       <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </h4>
                     <p className="text-mini text-muted-foreground capitalize">
@@ -114,8 +120,9 @@ export function PinnedLocations({
                       e.stopPropagation();
                       onUnpinCity(city);
                     }}
-                    className="hover:text-destructive text-muted-foreground"
+                    className="relative z-10 hover:text-destructive text-muted-foreground"
                     title={t.pinned.unpinStation}
+                    aria-label={t.pinned.unpinStation}
                   >
                     <X className="size-3" />
                   </Button>

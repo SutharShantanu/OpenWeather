@@ -27,10 +27,10 @@ export function HumidityWidget({ humidity, tempC, unit }: HumidityWidgetProps) {
   const displayDewPoint = formatTemperature(dewPointC, unit);
 
   const getComfortLevel = (rh: number) => {
-    if (rh < 30) return { label: t.widgets.humidity.dry || "Arid", color: "text-amber-500" };
-    if (rh <= 60) return { label: t.widgets.humidity.comfortable || "Optimal", color: "text-emerald-500" };
-    if (rh <= 80) return { label: t.widgets.humidity.humid || "Humid", color: "text-sky-500" };
-    return { label: t.widgets.humidity.veryHumid || "Saturated", color: "text-indigo-500" };
+    if (rh < 30) return { label: t.widgets.humidity.dry || "Arid", color: "text-amber-700 dark:text-amber-500" };
+    if (rh <= 60) return { label: t.widgets.humidity.comfortable || "Optimal", color: "text-emerald-700 dark:text-emerald-500" };
+    if (rh <= 80) return { label: t.widgets.humidity.humid || "Humid", color: "text-sky-700 dark:text-sky-500" };
+    return { label: t.widgets.humidity.veryHumid || "Saturated", color: "text-indigo-700 dark:text-indigo-500" };
   };
 
   const comfort = getComfortLevel(humidity);
@@ -40,7 +40,7 @@ export function HumidityWidget({ humidity, tempC, unit }: HumidityWidgetProps) {
       <CardHeader className="border-b border-border pb-3 flex flex-row items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Droplets className="size-3.5 text-sky-500" />
+            <Droplets className="size-3.5 text-sky-700 dark:text-sky-500" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
               {t.widgets.humidity.title}
             </CardTitle>
@@ -63,7 +63,7 @@ export function HumidityWidget({ humidity, tempC, unit }: HumidityWidgetProps) {
             <span className="text-sm font-mono text-muted-foreground">%</span>
           </div>
 
-          <div className="text-right text-xs font-mono">
+          <div className="text-end text-xs font-mono">
             <span className="text-muted-foreground">{t.widgets.humidity.dewPoint}: </span>
             <span className="font-bold text-foreground">
               <NumberFlow value={displayDewPoint} />°{unit}
@@ -82,7 +82,7 @@ export function HumidityWidget({ humidity, tempC, unit }: HumidityWidgetProps) {
         {/* Heat Index Callout */}
         <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-2">
-            <ThermometerSun className="size-3.5 text-amber-500" />
+            <ThermometerSun className="size-3.5 text-amber-700 dark:text-amber-500" />
             <span className="text-muted-foreground">{t.widgets.humidity.heatIndex}</span>
           </div>
           <span className="font-bold text-foreground">

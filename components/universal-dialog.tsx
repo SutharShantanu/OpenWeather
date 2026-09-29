@@ -141,7 +141,7 @@ export function UniversalDialog({
           }
         }}
         className={cn(
-          "flex h-auto max-h-[90vh] sm:h-auto sm:max-h-[86vh] w-full flex-col gap-0 overflow-hidden p-0 text-xs",
+          "flex h-auto max-h-[90dvh] sm:h-auto sm:max-h-[86dvh] w-full flex-col gap-0 overflow-hidden p-0 text-xs",
           sizeClasses[size],
           contentClassName
         )}
@@ -149,7 +149,7 @@ export function UniversalDialog({
         {!hideHeader && (title || description || icon) && (
           <DialogHeader
             className={cn(
-              "shrink-0 border-b border-border bg-muted/20 p-4 pr-14 pb-3.5 sm:p-5",
+              "shrink-0 border-b border-border bg-muted/20 p-4 pe-14 pb-3.5 sm:p-5",
               headerClassName
             )}
           >
@@ -175,7 +175,7 @@ export function UniversalDialog({
                 )}
               </div>
               {headerAction && (
-                <div className="shrink-0 mr-2">{headerAction}</div>
+                <div className="shrink-0 me-2">{headerAction}</div>
               )}
             </div>
           </DialogHeader>
@@ -225,7 +225,7 @@ export function UniversalDialogHeader({
   return (
     <DialogHeader
       className={cn(
-        "shrink-0 border-b border-border bg-muted/20 p-4 pr-14 pb-3.5 sm:p-5",
+        "shrink-0 border-b border-border bg-muted/20 p-4 pe-14 pb-3.5 sm:p-5",
         className
       )}
       {...props}

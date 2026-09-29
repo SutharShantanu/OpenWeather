@@ -35,7 +35,10 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
 
 function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
+    // Card titles are section headings for assistive tech; override via props.
     <div
+      role="heading"
+      aria-level={2}
       data-slot="card-title"
       className={cn(
         "font-heading text-sm font-medium group-data-[size=sm]/card:text-sm",

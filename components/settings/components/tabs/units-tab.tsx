@@ -136,7 +136,7 @@ export function UnitsTabContent({
 
         <UnitSettingCard
           icon={Wind}
-          iconColor="text-sky-500"
+          iconColor="text-sky-700 dark:text-sky-500"
           title={unitLabels.windTitle}
           description={unitLabels.windDesc}
           badgeText={settings.windUnit}
@@ -148,7 +148,7 @@ export function UnitsTabContent({
 
         <UnitSettingCard
           icon={Gauge}
-          iconColor="text-amber-500"
+          iconColor="text-amber-700 dark:text-amber-500"
           title={unitLabels.pressureTitle}
           description={unitLabels.pressureDesc}
           badgeText={settings.pressureUnit}
@@ -160,7 +160,7 @@ export function UnitsTabContent({
 
         <UnitSettingCard
           icon={CloudRain}
-          iconColor="text-blue-500"
+          iconColor="text-blue-700 dark:text-blue-500"
           title={unitLabels.precipTitle}
           description={unitLabels.precipDesc}
           badgeText={settings.precipUnit}

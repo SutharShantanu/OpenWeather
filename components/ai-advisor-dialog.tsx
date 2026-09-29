@@ -231,7 +231,7 @@ export function AiAdvisorDialog({
                 <Bot className="size-3" />
                 <span>{ai.consultationPrefix}{item.q}</span>
               </div>
-              <p className="text-foreground leading-relaxed pl-4 border-l border-primary/30">
+              <p className="text-foreground leading-relaxed ps-4 border-s border-primary/30">
                 {item.a}
               </p>
             </div>

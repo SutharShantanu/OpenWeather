@@ -68,11 +68,13 @@ function ThemeHotkey() {
         return
       }
 
-      if (event.metaKey || event.ctrlKey || event.altKey) {
+      // Alt+Shift+D: a bare letter shortcut fires by accident for speech-input
+      // users (WCAG 2.1.4). event.code keeps it layout-independent.
+      if (!event.altKey || !event.shiftKey || event.metaKey || event.ctrlKey) {
         return
       }
 
-      if (event.key.toLowerCase() !== "d") {
+      if (event.code !== "KeyD") {
         return
       }
 

@@ -3,6 +3,9 @@ import { CONFIG } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
+// Place names rarely change; let browsers/CDNs reuse successful lookups.
+const CACHE_HEADERS = { "Cache-Control": "public, max-age=3600, s-maxage=86400" };
+
 interface OpenMeteoGeoResult {
   name: string;
   country?: string;
@@ -71,7 +74,7 @@ export async function GET(request: NextRequest) {
           lon: item.longitude,
           population: item.population,
         }));
-        return NextResponse.json({ results });
+        return NextResponse.json({ results }, { headers: CACHE_HEADERS });
       }
     }
   } catch (err) {
@@ -95,7 +98,7 @@ export async function GET(request: NextRequest) {
             lat: item.lat,
             lon: item.lon,
           }));
-          return NextResponse.json({ results });
+          return NextResponse.json({ results }, { headers: CACHE_HEADERS });
         }
       }
     } catch (err) {

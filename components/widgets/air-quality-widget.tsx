@@ -14,14 +14,31 @@ interface AirQualityWidgetProps {
 
 export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
   const { t } = useTranslation();
-  const aqi = airQuality?.aqi ?? 1;
+  if (!airQuality) {
+    return (
+      <Card className="w-full">
+        <CardHeader className="border-b border-border pb-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="size-3.5 text-muted-foreground" />
+            <CardTitle className="text-sm font-heading font-semibold tracking-tight">
+              {t.widgets.airQuality.title}
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent role="status" className="py-6 text-center text-sm text-muted-foreground">
+          {t.common.dataUnavailable}
+        </CardContent>
+      </Card>
+    );
+  }
+  const aqi = airQuality.aqi;
   const classification = getAQIClassification(aqi);
 
   const pollutants = [
-    { label: "PM2.5", val: airQuality?.pm2_5 ?? 8, max: 50, unit: "µg/m³" },
-    { label: "PM10", val: airQuality?.pm10 ?? 15, max: 100, unit: "µg/m³" },
-    { label: "O₃", val: airQuality?.o3 ?? 45, max: 180, unit: "µg/m³" },
-    { label: "NO₂", val: airQuality?.no2 ?? 12, max: 200, unit: "µg/m³" },
+    { label: "PM2.5", val: airQuality.pm2_5, max: 50, unit: "µg/m³" },
+    { label: "PM10", val: airQuality.pm10, max: 100, unit: "µg/m³" },
+    { label: "O₃", val: airQuality.o3, max: 180, unit: "µg/m³" },
+    { label: "NO₂", val: airQuality.no2, max: 200, unit: "µg/m³" },
   ];
 
   const getTranslatedAqiLabel = (level: number) => {
@@ -46,7 +63,7 @@ export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
       <CardHeader className="border-b border-border pb-3 flex flex-row items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Sparkles className="size-3.5 text-emerald-500" />
+            <Sparkles className="size-3.5 text-emerald-700 dark:text-emerald-500" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
               {t.widgets.airQuality.title}
             </CardTitle>
@@ -82,7 +99,7 @@ export function AirQualityWidget({ airQuality }: AirQualityWidgetProps) {
             </p>
           </div>
 
-          <div className="size-8 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
+          <div className="size-8 bg-emerald-500/10 text-emerald-700 dark:text-emerald-500 border border-emerald-500/20 flex items-center justify-center shrink-0">
             <ShieldCheck className="size-4" />
           </div>
         </div>

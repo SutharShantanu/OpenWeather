@@ -29,7 +29,7 @@ export function WindWidget({ speed, deg }: WindWidgetProps) {
       <CardHeader className="border-b border-border pb-3 flex flex-row items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Wind className="size-3.5 text-teal-500" />
+            <Wind className="size-3.5 text-teal-700 dark:text-teal-500" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
               {t.widgets.wind.title}
             </CardTitle>
@@ -47,12 +47,12 @@ export function WindWidget({ speed, deg }: WindWidgetProps) {
         {/* Compass Dial */}
         <div className="relative size-24 border border-border bg-muted/20 flex items-center justify-center shrink-0">
           <span className="absolute top-1 font-mono text-micro font-bold text-muted-foreground">N</span>
-          <span className="absolute right-1.5 font-mono text-micro font-bold text-muted-foreground">E</span>
+          <span className="absolute end-1.5 font-mono text-micro font-bold text-muted-foreground">E</span>
           <span className="absolute bottom-1 font-mono text-micro font-bold text-muted-foreground">S</span>
-          <span className="absolute left-1.5 font-mono text-micro font-bold text-muted-foreground">W</span>
+          <span className="absolute start-1.5 font-mono text-micro font-bold text-muted-foreground">W</span>
 
           <div
-            className="transition-transform duration-500 ease-out flex items-center justify-center text-teal-500"
+            className="transition-transform duration-500 ease-out flex items-center justify-center text-teal-700 dark:text-teal-500"
             style={{ transform: `rotate(${deg}deg)` }}
           >
             <Navigation2 className="size-6 fill-teal-500/20" />
@@ -78,7 +78,7 @@ export function WindWidget({ speed, deg }: WindWidgetProps) {
               <span className="text-muted-foreground">{t.widgets.wind.beaufortScale}</span>
               <span className="font-bold text-foreground">{t.widgets.wind.forceScale(beaufort.scale)}</span>
             </div>
-            <p className="text-mini font-mono text-teal-500 font-medium mt-0.5">
+            <p className="text-mini font-mono text-teal-700 dark:text-teal-500 font-medium mt-0.5">
               {beaufort.scale === 0
                 ? t.widgets.wind.calm
                 : beaufort.scale <= 2

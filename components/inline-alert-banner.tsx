@@ -159,7 +159,7 @@ export function InlineAlertBanner({
         variant="default"
         className="border-border bg-card py-2.5 shadow-2xs"
       >
-        <ShieldCheck className="size-4 text-emerald-500" />
+        <ShieldCheck className="size-4 text-emerald-700 dark:text-emerald-500" />
         <AlertTitle className="text-xs font-semibold tracking-tight">
           {t.common.advisorySystem}
         </AlertTitle>
@@ -180,12 +180,12 @@ export function InlineAlertBanner({
 
   return (
     <Card
-      className={`w-full border-l-4 ${hasCritical ? "border-border border-l-destructive" : "border-border border-l-amber-500"}`}
+      className={`w-full border-s-4 ${hasCritical ? "border-border border-s-destructive" : "border-border border-s-amber-500"}`}
     >
       <CardHeader className="flex flex-col justify-between gap-2 p-3 sm:flex-row sm:items-center sm:p-4">
         <div className="flex items-center gap-2.5">
           <div
-            className={`shrink-0 border border-border p-1.5 ${hasCritical ? "bg-destructive/10 text-destructive" : "bg-amber-500/10 text-amber-500"}`}
+            className={`shrink-0 border border-border p-1.5 ${hasCritical ? "bg-destructive/10 text-destructive" : "bg-amber-500/10 text-amber-700 dark:text-amber-500"}`}
           >
             <AlertTriangle className="size-4" />
           </div>
@@ -224,6 +224,7 @@ export function InlineAlertBanner({
             variant="ghost"
             size="xs"
             onClick={() => setIsExpanded(!isExpanded)}
+            aria-expanded={isExpanded}
             className="h-6 gap-1 px-2 font-mono text-tiny text-muted-foreground hover:text-foreground"
           >
             <span>{isExpanded ? t.alerts.collapse : t.alerts.expand}</span>
@@ -286,16 +287,19 @@ export function InlineAlertBanner({
                     </p>
 
                     {/* Safety Protocol Checklist */}
-                    <div
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={isChecked}
                       onClick={() => toggleProtocol(alert.id)}
-                      className={`flex cursor-pointer items-start gap-2.5 border p-2.5 font-mono text-xs transition-colors ${
+                      className={`flex w-full cursor-pointer items-start gap-2.5 border p-2.5 text-start font-mono text-xs transition-colors ${
                         isChecked
-                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
+                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-500"
                           : "border-border bg-muted/20 text-foreground hover:bg-muted/40"
                       }`}
                     >
                       {isChecked ? (
-                        <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />
+                        <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-700 dark:text-emerald-500" />
                       ) : (
                         <Circle className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                       )}
@@ -308,7 +312,7 @@ export function InlineAlertBanner({
                           {alert.instruction}
                         </span>
                       </div>
-                    </div>
+                    </button>
                   </div>
                 )
               })}

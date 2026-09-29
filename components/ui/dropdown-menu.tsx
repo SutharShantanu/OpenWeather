@@ -66,13 +66,13 @@ function DropdownMenuSubTrigger({
       data-slot="dropdown-menu-sub-trigger"
       data-inset={inset}
       className={cn(
-        "flex cursor-pointer items-center justify-between gap-2 rounded-none px-2.5 py-1.5 text-xs select-none outline-hidden focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground data-[inset]:pl-8",
+        "flex cursor-pointer items-center justify-between gap-2 rounded-none px-2.5 py-1.5 text-xs select-none outline-hidden focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground data-[inset]:ps-8",
         className
       )}
       {...props}
     >
       {children}
-      <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+      <ChevronRight className="size-3.5 shrink-0 text-muted-foreground rtl:rotate-180" />
     </DropdownMenuPrimitive.SubTrigger>
   )
 }
@@ -130,7 +130,7 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-none px-2.5 py-1.5 text-xs select-none outline-hidden transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive",
+        "relative flex cursor-pointer items-center gap-2 rounded-none px-2.5 py-1.5 text-xs select-none outline-hidden transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:ps-8 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive",
         className
       )}
       {...props}
@@ -148,13 +148,13 @@ function DropdownMenuCheckboxItem({
     <DropdownMenuPrimitive.CheckboxItem
       data-slot="dropdown-menu-checkbox-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-none py-1.5 pr-2.5 pl-8 text-xs select-none outline-hidden transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex cursor-pointer items-center gap-2 rounded-none py-1.5 pe-2.5 ps-8 text-xs select-none outline-hidden transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
       checked={checked}
       {...props}
     >
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+      <span className="pointer-events-none absolute start-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <Check className="size-3.5" />
         </DropdownMenuPrimitive.ItemIndicator>
@@ -181,12 +181,12 @@ function DropdownMenuRadioItem({
     <DropdownMenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-none py-1.5 pr-2.5 pl-8 text-xs select-none outline-hidden transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex cursor-pointer items-center gap-2 rounded-none py-1.5 pe-2.5 ps-8 text-xs select-none outline-hidden transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
       {...props}
     >
-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+      <span className="pointer-events-none absolute start-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <Circle className="size-2 fill-current" />
         </DropdownMenuPrimitive.ItemIndicator>
@@ -208,7 +208,7 @@ function DropdownMenuLabel({
       data-slot="dropdown-menu-label"
       data-inset={inset}
       className={cn(
-        "px-2.5 py-1.5 font-heading text-nano font-semibold tracking-wider text-muted-foreground uppercase data-[inset]:pl-8",
+        "px-2.5 py-1.5 font-heading text-nano font-semibold tracking-wider text-muted-foreground uppercase data-[inset]:ps-8",
         className
       )}
       {...props}
@@ -236,7 +236,7 @@ function DropdownMenuShortcut({
   return (
     <span
       data-slot="dropdown-menu-shortcut"
-      className={cn("ml-auto font-mono text-nano tracking-widest text-muted-foreground", className)}
+      className={cn("ms-auto font-mono text-nano tracking-widest text-muted-foreground", className)}
       {...props}
     />
   )

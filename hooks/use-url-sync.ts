@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { useLatest } from "./use-latest"
 import {
   APP_TABS,
   SETTINGS_TABS,
@@ -137,9 +138,16 @@ export function useUrlSync({
   // 1. Initial Mount: Read URL query parameters to restore state.
   // The URL is an external system that is only readable after hydration, so
   // restoring from it inside a mount effect is intentional.
+  // Callbacks are read through refs so this runs once per mount: their
+  // identity changes with every settings change, and re-running the restore
+  // refetched weather on each keystroke in the API key field.
+  const onLocationChangeRef = useLatest(onLocationChange)
+  const onUnitRestoreRef = useLatest(onUnitRestore)
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (typeof window === "undefined") return
+    const onLocationChange = onLocationChangeRef.current
+    const onUnitRestore = onUnitRestoreRef.current
 
     const params = new URLSearchParams(window.location.search)
     const urlCity =
@@ -206,7 +214,7 @@ export function useUrlSync({
     }
 
     isInitializedRef.current = true
-  }, [onLocationChange, onUnitRestore])
+  }, [onLocationChangeRef, onUnitRestoreRef])
   /* eslint-enable react-hooks/set-state-in-effect */
 
   // 2. Popstate Listener: Browser Back/Forward navigation support

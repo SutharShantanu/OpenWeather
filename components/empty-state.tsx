@@ -127,11 +127,11 @@ function renderAction(
   const renderIcon = () => {
     if (!act.icon) return null
     if (React.isValidElement(act.icon)) {
-      return <span className="mr-1.5 shrink-0">{act.icon}</span>
+      return <span className="me-1.5 shrink-0">{act.icon}</span>
     }
     if (typeof act.icon === "function" || (typeof act.icon === "object" && act.icon !== null)) {
       const IconComp = act.icon as React.ComponentType<{ className?: string }>
-      return <IconComp className="mr-1.5 size-3.5 shrink-0" />
+      return <IconComp className="me-1.5 size-3.5 shrink-0" />
     }
     return null
   }

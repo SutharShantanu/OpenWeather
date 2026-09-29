@@ -67,19 +67,24 @@ export function ClimateNormalsCard({
   const prefs = useDisplayPreferences();
   const [data, setData] = useState<ClimateData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
   const [prevCoords, setPrevCoords] = useState({ lat, lon });
   const [viewMode, setViewMode] = useState<"daily" | "annual">("daily");
 
   if (prevCoords.lat !== lat || prevCoords.lon !== lon) {
     setPrevCoords({ lat, lon });
     setLoading(true);
+    setFailed(false);
   }
 
   useEffect(() => {
     let cancelled = false;
 
     fetch(`/api/climate?lat=${lat}&lon=${lon}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`Climate API returned ${res.status}`);
+        return res.json();
+      })
       .then((json) => {
         if (!cancelled) {
           setData(json);
@@ -88,13 +93,27 @@ export function ClimateNormalsCard({
       })
       .catch((err) => {
         console.warn("Failed to load climate data", err);
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setData(null);
+          setFailed(true);
+          setLoading(false);
+        }
       });
 
     return () => {
       cancelled = true;
     };
   }, [lat, lon]);
+
+  if (failed && !loading) {
+    return (
+      <Card className="w-full">
+        <CardContent role="status" className="py-8 text-center text-sm text-muted-foreground">
+          {t.common.dataUnavailable}
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (loading || !data) {
     return (
@@ -150,6 +169,7 @@ export function ClimateNormalsCard({
           <div className="flex items-center border border-border p-0.5 text-xs font-mono">
             <Button
               variant={viewMode === "daily" ? "default" : "ghost"}
+              aria-pressed={viewMode === "daily"}
               size="xs"
               onClick={() => setViewMode("daily")}
               className="h-6 px-2 font-mono text-tiny"
@@ -158,6 +178,7 @@ export function ClimateNormalsCard({
             </Button>
             <Button
               variant={viewMode === "annual" ? "default" : "ghost"}
+              aria-pressed={viewMode === "annual"}
               size="xs"
               onClick={() => setViewMode("annual")}
               className="h-6 px-2 font-mono text-tiny"
@@ -177,8 +198,8 @@ export function ClimateNormalsCard({
                 <div
                   className={`size-9 border border-border flex items-center justify-center shrink-0 ${
                     isAboveNormal
-                      ? "bg-amber-500/10 text-amber-500"
-                      : "bg-sky-500/10 text-sky-500"
+                      ? "bg-amber-500/10 text-amber-700 dark:text-amber-500"
+                      : "bg-sky-500/10 text-sky-700 dark:text-sky-500"
                   }`}
                 >
                   {isAboveNormal ? (
@@ -200,7 +221,7 @@ export function ClimateNormalsCard({
                     <Badge
                       variant="outline"
                       className={`text-tiny font-mono ${
-                        isAboveNormal ? "text-amber-500" : "text-sky-500"
+                        isAboveNormal ? "text-amber-700 dark:text-amber-500" : "text-sky-700 dark:text-sky-500"
                       }`}
                     >
                       {isAboveNormal ? t.climate.aboveClimateNormal : t.climate.belowClimateNormal}
@@ -209,7 +230,7 @@ export function ClimateNormalsCard({
                 </div>
               </div>
 
-              <div className="text-right sm:border-l sm:border-border sm:pl-4">
+              <div className="text-end sm:border-s sm:border-border sm:ps-4">
                 <div className="text-tiny font-mono text-muted-foreground uppercase">
                   {t.climate.currentVsExpected}
                 </div>
@@ -227,7 +248,7 @@ export function ClimateNormalsCard({
                   {t.climate.histAvgHigh}
                 </span>
                 <div className="flex items-center gap-1 text-base font-bold text-foreground">
-                  <ArrowUp className="size-3 text-amber-500" />
+                  <ArrowUp className="size-3 text-amber-700 dark:text-amber-500" />
                   <span>{dispAvgHigh}°{unit}</span>
                 </div>
                 <span className="text-micro text-muted-foreground">{t.climate.thirtyDayBaseline}</span>
@@ -238,7 +259,7 @@ export function ClimateNormalsCard({
                   {t.climate.histAvgLow}
                 </span>
                 <div className="flex items-center gap-1 text-base font-bold text-foreground">
-                  <ArrowDown className="size-3 text-sky-500" />
+                  <ArrowDown className="size-3 text-sky-700 dark:text-sky-500" />
                   <span>{dispAvgLow}°{unit}</span>
                 </div>
                 <span className="text-micro text-muted-foreground">{t.climate.diurnalMinimum}</span>
@@ -248,8 +269,8 @@ export function ClimateNormalsCard({
                 <span className="text-micro text-muted-foreground uppercase block mb-1">
                   {t.climate.recordHigh}
                 </span>
-                <div className="flex items-center gap-1 text-base font-bold text-rose-500">
-                  <ArrowUp className="size-3 text-rose-500" />
+                <div className="flex items-center gap-1 text-base font-bold text-rose-700 dark:text-rose-500">
+                  <ArrowUp className="size-3 text-rose-700 dark:text-rose-500" />
                   <span>{dispRecHigh}°{unit}</span>
                 </div>
                 <span className="text-micro text-muted-foreground">
@@ -261,8 +282,8 @@ export function ClimateNormalsCard({
                 <span className="text-micro text-muted-foreground uppercase block mb-1">
                   {t.climate.recordLow}
                 </span>
-                <div className="flex items-center gap-1 text-base font-bold text-indigo-400">
-                  <ArrowDown className="size-3 text-indigo-400" />
+                <div className="flex items-center gap-1 text-base font-bold text-indigo-700 dark:text-indigo-400">
+                  <ArrowDown className="size-3 text-indigo-700 dark:text-indigo-400" />
                   <span>{dispRecLow}°{unit}</span>
                 </div>
                 <span className="text-micro text-muted-foreground">
@@ -297,8 +318,8 @@ export function ClimateNormalsCard({
                         return (
                           <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                             <div className="font-semibold text-foreground">{d.month}</div>
-                            <div className="text-amber-500">{t.climate.normalHigh} {d.high}°{unit}</div>
-                            <div className="text-sky-500">{t.climate.normalLow} {d.low}°{unit}</div>
+                            <div className="text-amber-700 dark:text-amber-500">{t.climate.normalHigh} {d.high}°{unit}</div>
+                            <div className="text-sky-700 dark:text-sky-500">{t.climate.normalLow} {d.low}°{unit}</div>
                             <div className="text-muted-foreground text-tiny">{t.climate.monthlyRainfall} ~{prefs.precipText(d.rainfall)}</div>
                           </div>
                         );

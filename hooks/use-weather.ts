@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
+import { useLatest } from "./use-latest"
 import {
   type WeatherData,
   type WeatherDataSource,
@@ -17,6 +18,9 @@ type Coords = { lat: number; lon: number }
 
 /** Delay before refetching after the OpenWeatherMap key text changes. */
 const API_KEY_DEBOUNCE_MS = 500
+/** Data older than this is refreshed in the background while the tab is visible. */
+const STALE_AFTER_MS = 10 * 60 * 1000
+const STALE_CHECK_INTERVAL_MS = 60 * 1000
 
 /**
  * Custom hook to manage weather data fetching, meteorological telemetry state,
@@ -27,6 +31,7 @@ export function useWeather({ settings, isInitialized = true }: UseWeatherOptions
   const [coords, setCoords] = useState<Coords | null>(null)
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const cityRef = useRef(city)
   useEffect(() => {
@@ -43,6 +48,9 @@ export function useWeather({ settings, isInitialized = true }: UseWeatherOptions
   // Only the most recent request may commit results; older ones are aborted.
   const requestIdRef = useRef(0)
   const abortRef = useRef<AbortController | null>(null)
+  // Background refreshes keep the current data on screen (no loading state).
+  const silentRef = useRef(false)
+  const lastSuccessAtRef = useRef(0)
 
   useEffect(() => {
     return () => abortRef.current?.abort()
@@ -56,6 +64,8 @@ export function useWeather({ settings, isInitialized = true }: UseWeatherOptions
       stationOverride?: ForecastStationModel,
       keyOverride?: string
     ) => {
+      const silent = silentRef.current
+      silentRef.current = false
       const src = sourceOverride ?? settings.weatherSource ?? "open-meteo"
       const stn = stationOverride ?? settings.forecastStation ?? "best_match"
       const apiKey = (keyOverride ?? settings.customApiKey ?? "").trim()
@@ -72,8 +82,10 @@ export function useWeather({ settings, isInitialized = true }: UseWeatherOptions
           abortRef.current.abort()
           abortRef.current = null
           requestIdRef.current++
-          setLoading(false)
         }
+        // Callers may have set loading before calling; always release it.
+        setLoading(false)
+        setError(null)
         return lastDataRef.current
       }
 
@@ -82,7 +94,7 @@ export function useWeather({ settings, isInitialized = true }: UseWeatherOptions
       abortRef.current = controller
       const requestId = ++requestIdRef.current
 
-      setLoading(true)
+      if (!silent) setLoading(true)
       try {
         const params = new URLSearchParams()
         if (targetCoords) {
@@ -104,6 +116,7 @@ export function useWeather({ settings, isInitialized = true }: UseWeatherOptions
           if (requestId !== requestIdRef.current) return null
           setWeather(data)
           lastDataRef.current = data
+          lastSuccessAtRef.current = Date.now()
           lastFetchKeyRef.current = fetchKey
           if (data.current?.cityName) {
             setCity(data.current.cityName)
@@ -117,11 +130,19 @@ export function useWeather({ settings, isInitialized = true }: UseWeatherOptions
             coordsRef.current = nextCoords
             setCoords(nextCoords)
           }
+          setError(null)
           return data
+        }
+        const body = await res.json().catch(() => null)
+        if (requestId === requestIdRef.current) {
+          setError(body?.error || `Weather request failed (${res.status})`)
         }
       } catch (err) {
         if ((err as Error)?.name !== "AbortError") {
           console.warn("Failed to load meteorological telemetry:", err)
+          if (requestId === requestIdRef.current) {
+            setError((err as Error)?.message || "Network error")
+          }
         }
       } finally {
         if (requestId === requestIdRef.current) {
@@ -174,12 +195,40 @@ export function useWeather({ settings, isInitialized = true }: UseWeatherOptions
   }, [fetchWeather, customApiKey, isInitialized])
 
   const refetch = useCallback(() => {
+    // Refresh must hit the network, so bypass the dedupe cache.
+    lastFetchKeyRef.current = ""
     return fetchWeather(city, coords || undefined)
   }, [city, coords, fetchWeather])
+
+  // Keep data fresh without user action: refresh in the background when data is
+  // stale and the tab is visible, and retry as soon as the connection returns.
+  const refreshInBackground = useLatest(() => {
+    if (!lastDataRef.current && !lastFetchKeyRef.current && !error) return // initial load not done yet
+    silentRef.current = !!lastDataRef.current
+    lastFetchKeyRef.current = ""
+    const currentCoords = coordsRef.current
+    void fetchWeather(currentCoords ? undefined : cityRef.current, currentCoords ?? undefined)
+  })
+  useEffect(() => {
+    const refreshIfStale = () => {
+      if (document.hidden || !navigator.onLine || !lastDataRef.current) return
+      if (Date.now() - lastSuccessAtRef.current >= STALE_AFTER_MS) refreshInBackground.current()
+    }
+    const onOnline = () => refreshInBackground.current()
+    const timer = setInterval(refreshIfStale, STALE_CHECK_INTERVAL_MS)
+    document.addEventListener("visibilitychange", refreshIfStale)
+    window.addEventListener("online", onOnline)
+    return () => {
+      clearInterval(timer)
+      document.removeEventListener("visibilitychange", refreshIfStale)
+      window.removeEventListener("online", onOnline)
+    }
+  }, [refreshInBackground])
 
   return {
     weather,
     loading,
+    error,
     setLoading,
     city,
     setCity,

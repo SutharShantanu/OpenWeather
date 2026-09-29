@@ -53,9 +53,9 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
         <div>
           <div className="flex items-center gap-2">
             {activeTab === "sun" ? (
-              <Sun className="size-3.5 text-amber-500" />
+              <Sun className="size-3.5 text-amber-700 dark:text-amber-500" />
             ) : (
-              <Moon className="size-3.5 text-indigo-400" />
+              <Moon className="size-3.5 text-indigo-700 dark:text-indigo-400" />
             )}
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
               {t.widgets.solar.title}
@@ -111,7 +111,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
             {/* Timings Grid */}
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center gap-2.5 p-2 bg-muted/20 border border-border">
-                <Sunrise className="size-4 text-amber-500 shrink-0" />
+                <Sunrise className="size-4 text-amber-700 dark:text-amber-500 shrink-0" />
                 <div className="flex flex-col">
                   <span className="text-micro font-mono text-muted-foreground uppercase">{t.widgets.solar.sunrise}</span>
                   <span className="text-xs font-mono font-bold text-foreground">{sunriseTime}</span>
@@ -119,7 +119,7 @@ export function SolarWidget({ sunrise, sunset, currentDt, moon }: SolarWidgetPro
               </div>
 
               <div className="flex items-center gap-2.5 p-2 bg-muted/20 border border-border">
-                <Sunset className="size-4 text-indigo-400 shrink-0" />
+                <Sunset className="size-4 text-indigo-700 dark:text-indigo-400 shrink-0" />
                 <div className="flex flex-col">
                   <span className="text-micro font-mono text-muted-foreground uppercase">{t.widgets.solar.sunset}</span>
                   <span className="text-xs font-mono font-bold text-foreground">{sunsetTime}</span>

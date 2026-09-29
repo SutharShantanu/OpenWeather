@@ -62,7 +62,7 @@ function DialogContent({
         data-slot="dialog-content"
         data-lenis-prevent="true"
         className={cn(
-          "fixed top-1/2 left-1/2 z-9999 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-none bg-popover p-4 text-xs/relaxed text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed top-1/2 start-1/2 z-9999 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 rtl:translate-x-1/2 rtl:translate-x-1/2 -translate-y-1/2 gap-4 rounded-none bg-popover p-4 text-xs/relaxed text-popover-foreground ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
         {...props}
@@ -72,7 +72,7 @@ function DialogContent({
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button
               variant="destructive"
-              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground hover:bg-muted/80 size-7 transition-colors rounded-none"
+              className="absolute top-3 end-3 text-muted-foreground hover:text-foreground hover:bg-muted/80 size-7 transition-colors rounded-none"
               size="icon-xs"
             >
               <XIcon className="size-3.5" />
@@ -89,7 +89,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-1 text-left", className)}
+      className={cn("flex flex-col gap-1 text-start", className)}
       {...props}
     />
   )

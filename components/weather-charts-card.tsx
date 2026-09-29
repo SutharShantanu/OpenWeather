@@ -73,6 +73,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
           <div className="flex items-center border border-border p-0.5 text-xs font-mono overflow-x-auto">
             <Button
               variant={metric === "temp" ? "default" : "ghost"}
+              aria-pressed={metric === "temp"}
               size="xs"
               onClick={() => setMetric("temp")}
               className="gap-1 font-mono text-xs h-6 px-2"
@@ -82,6 +83,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
             </Button>
             <Button
               variant={metric === "precip" ? "default" : "ghost"}
+              aria-pressed={metric === "precip"}
               size="xs"
               onClick={() => setMetric("precip")}
               className="gap-1 font-mono text-xs h-6 px-2"
@@ -91,6 +93,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
             </Button>
             <Button
               variant={metric === "wind" ? "default" : "ghost"}
+              aria-pressed={metric === "wind"}
               size="xs"
               onClick={() => setMetric("wind")}
               className="gap-1 font-mono text-xs h-6 px-2"
@@ -100,6 +103,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
             </Button>
             <Button
               variant={metric === "humidity" ? "default" : "ghost"}
+              aria-pressed={metric === "humidity"}
               size="xs"
               onClick={() => setMetric("humidity")}
               className="gap-1 font-mono text-xs h-6 px-2"
@@ -109,6 +113,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
             </Button>
             <Button
               variant={metric === "uv" ? "default" : "ghost"}
+              aria-pressed={metric === "uv"}
               size="xs"
               onClick={() => setMetric("uv")}
               className="gap-1 font-mono text-xs h-6 px-2"
@@ -164,7 +169,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                       return (
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
-                          <div className="text-sky-500 font-bold">{t.charts.precipProbability} {data.precip}%</div>
+                          <div className="text-sky-700 dark:text-sky-500 font-bold">{t.charts.precipProbability} {data.precip}%</div>
                         </div>
                       );
                     }
@@ -185,7 +190,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                       return (
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
-                          <div className="text-teal-500 font-bold">{t.charts.windSpeed} {data.wind} {windUnitLabel}</div>
+                          <div className="text-teal-700 dark:text-teal-500 font-bold">{t.charts.windSpeed} {data.wind} {windUnitLabel}</div>
                         </div>
                       );
                     }
@@ -212,7 +217,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                       return (
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
-                          <div className="text-sky-500 font-bold">{t.charts.relativeHumidity} {data.humidity}%</div>
+                          <div className="text-sky-700 dark:text-sky-500 font-bold">{t.charts.relativeHumidity} {data.humidity}%</div>
                         </div>
                       );
                     }
@@ -233,7 +238,7 @@ export function WeatherChartsCard({ hourly, unit }: WeatherChartsCardProps) {
                       return (
                         <div className="bg-popover border border-border p-2.5 shadow-md text-xs font-mono">
                           <div className="font-semibold text-foreground">{data.time}</div>
-                          <div className="text-amber-500 font-bold">{t.charts.uvRadiation} {data.uv}</div>
+                          <div className="text-amber-700 dark:text-amber-500 font-bold">{t.charts.uvRadiation} {data.uv}</div>
                         </div>
                       );
                     }

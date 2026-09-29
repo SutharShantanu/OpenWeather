@@ -83,8 +83,10 @@ function useHorizontalOverflow(ref: React.RefObject<HTMLElement | null>) {
   const update = React.useCallback(() => {
     const el = ref.current
     if (!el) return
-    const left = el.scrollLeft > 1
-    const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+    // left/right mean start/end: in RTL scrollLeft runs from 0 to negative.
+    const pos = Math.abs(el.scrollLeft)
+    const left = pos > 1
+    const right = pos + el.clientWidth < el.scrollWidth - 1
     setOverflow((prev) =>
       prev.left === left && prev.right === right ? prev : { left, right }
     )
@@ -223,7 +225,8 @@ export function SettingsDialog({
   const scrollTabs = (direction: -1 | 1) => {
     const el = tabsListRef.current
     if (!el) return
-    el.scrollBy({ left: direction * el.clientWidth * 0.6, behavior: "smooth" })
+    const sign = getComputedStyle(el).direction === "rtl" ? -1 : 1
+    el.scrollBy({ left: sign * direction * el.clientWidth * 0.6, behavior: "smooth" })
   }
 
   const handleConfirmReset = () => {
@@ -436,9 +439,9 @@ export function SettingsDialog({
               type="button"
               aria-label={t.settingsDialog.scrollTabsLeft}
               onClick={() => scrollTabs(-1)}
-              className="absolute inset-y-0 left-0 flex w-8 items-center justify-start bg-linear-to-r from-background via-background/90 to-transparent pl-1 text-muted-foreground hover:text-foreground"
+              className="absolute inset-y-0 start-0 flex w-8 items-center justify-start bg-linear-to-r rtl:bg-linear-to-l from-background via-background/90 to-transparent ps-1 text-muted-foreground hover:text-foreground"
             >
-              <ChevronLeft className="size-4" />
+              <ChevronLeft className="size-4 rtl:rotate-180" />
             </button>
           )}
           {tabsOverflow.right && (
@@ -446,9 +449,9 @@ export function SettingsDialog({
               type="button"
               aria-label={t.settingsDialog.scrollTabsRight}
               onClick={() => scrollTabs(1)}
-              className="absolute inset-y-0 right-0 flex w-8 items-center justify-end bg-linear-to-l from-background via-background/90 to-transparent pr-1 text-muted-foreground hover:text-foreground"
+              className="absolute inset-y-0 end-0 flex w-8 items-center justify-end bg-linear-to-l rtl:bg-linear-to-r from-background via-background/90 to-transparent pe-1 text-muted-foreground hover:text-foreground"
             >
-              <ChevronRight className="size-4" />
+              <ChevronRight className="size-4 rtl:rotate-180" />
             </button>
           )}
         </div>

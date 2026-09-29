@@ -147,7 +147,7 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                 <ComboboxValue>
                   {(lang: RegionalLanguageOption) =>
                     lang ? (
-                      <span className="flex min-w-0 flex-1 items-center gap-2 text-left font-mono truncate">
+                      <span className="flex min-w-0 flex-1 items-center gap-2 text-start font-mono truncate">
                         <span>{lang.flag}</span>
                         <span className="font-semibold text-foreground truncate">
                           {lang.label}
@@ -173,7 +173,7 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                 />
                 <ComboboxEmpty>{regional.noLanguageFound}</ComboboxEmpty>
                 <ScrollArea className="h-72 max-h-[min(calc(var(--available-height)-4rem),32rem)]">
-                  <ComboboxList className="mt-1 max-h-none overflow-visible pr-2">
+                  <ComboboxList className="mt-1 max-h-none overflow-visible pe-2">
                     {(lang: RegionalLanguageOption) => (
                       <ComboboxItem key={lang.code} value={lang} className="py-1">
                         <span className="flex min-w-0 flex-1 items-center gap-2 font-mono">
@@ -187,7 +187,7 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                             </span>
                           </span>
                           {resolveUiLanguage(lang.code) === null && (
-                            <span className="ml-auto shrink-0 text-nano text-muted-foreground uppercase">
+                            <span className="ms-auto shrink-0 text-nano text-muted-foreground uppercase">
                               {regional.voiceOnly}
                             </span>
                           )}

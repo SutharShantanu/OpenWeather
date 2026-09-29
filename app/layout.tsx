@@ -1,17 +1,13 @@
-import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LenisProvider } from "@/components/lenis-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-const fontSans = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
+// Body text uses the Helvetica/system stack from globals.css; only the mono
+// face for numeric telemetry is downloaded.
 const fontMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
@@ -20,7 +16,15 @@ const fontMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "OpenWeather — Precision Weather Console",
-  description: "Precision meteorological telemetry station built with Next.js, shadcn radix-lyra, NumberFlow, and Lenis.",
+  description:
+    "Live weather, hourly and 7-day forecasts, precipitation radar, air quality and climate normals for any city.",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#1b1c17" },
+  ],
 };
 
 export default function RootLayout({
@@ -34,7 +38,6 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(
         "h-full antialiased font-sans",
-        fontSans.variable,
         fontMono.variable
       )}
     >

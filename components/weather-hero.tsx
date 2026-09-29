@@ -98,7 +98,7 @@ export function WeatherHero({
             </span>
           </div>
 
-          <CardTitle className="text-2xl sm:text-4xl font-heading font-semibold tracking-tight text-foreground">
+          <CardTitle aria-level={1} className="text-2xl sm:text-4xl font-heading font-semibold tracking-tight text-foreground">
             {current.cityName}
           </CardTitle>
 
@@ -124,8 +124,8 @@ export function WeatherHero({
           >
             {copied ? (
               <>
-                <Check className="size-3.5 text-emerald-500" />
-                <span className="text-emerald-500">{t.common.copied}</span>
+                <Check className="size-3.5 text-emerald-700 dark:text-emerald-500" />
+                <span className="text-emerald-700 dark:text-emerald-500">{t.common.copied}</span>
               </>
             ) : (
               <>
@@ -165,14 +165,14 @@ export function WeatherHero({
 
             <div className="flex flex-col gap-1 text-xs font-mono text-muted-foreground">
               <div className="flex items-center gap-1.5">
-                <ArrowDown className="size-3 text-sky-500" />
+                <ArrowDown className="size-3 text-sky-700 dark:text-sky-500" />
                 <span>{t.hero.min}: </span>
                 <span className="font-semibold text-foreground">
                   <NumberFlow value={displayMin} />°{unit}
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <ArrowUp className="size-3 text-amber-500" />
+                <ArrowUp className="size-3 text-amber-700 dark:text-amber-500" />
                 <span>{t.hero.max}: </span>
                 <span className="font-semibold text-foreground">
                   <NumberFlow value={displayMax} />°{unit}
@@ -185,7 +185,7 @@ export function WeatherHero({
         {/* Primary Telemetry Metric Cells */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 pt-2">
           <div className="p-3 bg-muted/30 border border-border flex items-center gap-3">
-            <div className="size-7 bg-background border border-border flex items-center justify-center text-sky-500 shrink-0">
+            <div className="size-7 bg-background border border-border flex items-center justify-center text-sky-700 dark:text-sky-500 shrink-0">
               <Droplets className="size-3.5" />
             </div>
             <div className="flex flex-col">
@@ -197,7 +197,7 @@ export function WeatherHero({
           </div>
 
           <div className="p-3 bg-muted/30 border border-border flex items-center gap-3">
-            <div className="size-7 bg-background border border-border flex items-center justify-center text-teal-500 shrink-0">
+            <div className="size-7 bg-background border border-border flex items-center justify-center text-teal-700 dark:text-teal-500 shrink-0">
               <Wind className="size-3.5" />
             </div>
             <div className="flex flex-col">
@@ -209,7 +209,7 @@ export function WeatherHero({
           </div>
 
           <div className="p-3 bg-muted/30 border border-border flex items-center gap-3">
-            <div className="size-7 bg-background border border-border flex items-center justify-center text-amber-500 shrink-0">
+            <div className="size-7 bg-background border border-border flex items-center justify-center text-amber-700 dark:text-amber-500 shrink-0">
               <Gauge className="size-3.5" />
             </div>
             <div className="flex flex-col">
@@ -225,7 +225,7 @@ export function WeatherHero({
           </div>
 
           <div className="p-3 bg-muted/30 border border-border flex items-center gap-3">
-            <div className="size-7 bg-background border border-border flex items-center justify-center text-indigo-500 shrink-0">
+            <div className="size-7 bg-background border border-border flex items-center justify-center text-indigo-700 dark:text-indigo-500 shrink-0">
               <Eye className="size-3.5" />
             </div>
             <div className="flex flex-col">
@@ -242,7 +242,7 @@ export function WeatherHero({
           {current.uvIndex !== undefined && (
             <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
-                <SunMedium className="size-3 text-amber-500" />
+                <SunMedium className="size-3 text-amber-700 dark:text-amber-500" />
                 <span className="uppercase">{t.hero.uvIndex}</span>
               </div>
               <span className="font-bold text-foreground">{current.uvIndex.toFixed(1)}</span>
@@ -252,7 +252,7 @@ export function WeatherHero({
           {displayDewPoint !== null && (
             <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
-                <Thermometer className="size-3 text-sky-500" />
+                <Thermometer className="size-3 text-sky-700 dark:text-sky-500" />
                 <span className="uppercase">{t.hero.dewPoint}</span>
               </div>
               <span className="font-bold text-foreground">{displayDewPoint}°{unit}</span>
@@ -270,7 +270,7 @@ export function WeatherHero({
           {current.windGusts !== undefined && (
             <div className="p-2.5 bg-muted/20 border border-border flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-muted-foreground text-tiny">
-                <Wind className="size-3 text-teal-500" />
+                <Wind className="size-3 text-teal-700 dark:text-teal-500" />
                 <span className="uppercase">{t.widgets.wind.gusts}</span>
               </div>
               <span className="font-bold text-foreground">{prefs.windText(current.windGusts)}</span>

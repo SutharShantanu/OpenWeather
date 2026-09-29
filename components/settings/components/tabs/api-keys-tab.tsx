@@ -196,7 +196,7 @@ export function ApiKeysTabContent({
               placeholder={text.owmPlaceholder}
               className="font-mono text-xs"
             />
-            <InputGroupAddon align="inline-end" className="gap-1 pr-1.5">
+            <InputGroupAddon align="inline-end" className="gap-1 pe-1.5">
               {hasCustomOwm && (
                 <InputGroupButton
                   size="icon-xs"
@@ -262,7 +262,7 @@ export function ApiKeysTabContent({
                           )}
                         />
                       </ItemMedia>
-                      <ItemContent className="min-w-0 pr-2">
+                      <ItemContent className="min-w-0 pe-2">
                         <div className="flex flex-wrap items-center gap-1.5">
                           <code className="font-mono text-tiny font-medium text-foreground">
                             {item.maskedKey}
@@ -386,7 +386,7 @@ export function ApiKeysTabContent({
               placeholder={text.cartoPlaceholder}
               className="font-mono text-xs"
             />
-            <InputGroupAddon align="inline-end" className="gap-1 pr-1.5">
+            <InputGroupAddon align="inline-end" className="gap-1 pe-1.5">
               {hasCustomCarto && (
                 <InputGroupButton
                   size="icon-xs"
@@ -454,7 +454,7 @@ export function ApiKeysTabContent({
                           )}
                         />
                       </ItemMedia>
-                      <ItemContent className="min-w-0 pr-2">
+                      <ItemContent className="min-w-0 pe-2">
                         <div className="flex flex-wrap items-center gap-1.5">
                           <code className="font-mono text-tiny font-medium text-foreground">
                             {item.maskedKey}

@@ -52,7 +52,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
       <CardHeader className="border-b border-border pb-3 flex flex-row items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <SunMedium className="size-3.5 text-amber-500" />
+            <SunMedium className="size-3.5 text-amber-700 dark:text-amber-500" />
             <CardTitle className="text-sm font-heading font-semibold tracking-tight">
               {t.widgets.uv.title}
             </CardTitle>
@@ -77,7 +77,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
               {t.widgets.uv.currentIntensity}
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <div className="text-base font-mono font-semibold text-foreground">
               {maxVal.toFixed(1)}
             </div>
@@ -90,18 +90,18 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
         {/* Segmented UV Spectrum Bar */}
         <div className="space-y-1.5">
           <div className="h-2 w-full bg-muted border border-border relative overflow-hidden flex">
-            <div className="h-full w-1/4 bg-emerald-500/80 border-r border-background/20" title={`0-3 ${t.widgets.uv.low}`} />
-            <div className="h-full w-1/4 bg-amber-500/80 border-r border-background/20" title={`3-6 ${t.widgets.uv.moderate}`} />
-            <div className="h-full w-1/6 bg-orange-500/80 border-r border-background/20" title={`6-8 ${t.widgets.uv.high}`} />
-            <div className="h-full w-1/4 bg-rose-500/80 border-r border-background/20" title={`8-11 ${t.widgets.uv.veryHigh}`} />
+            <div className="h-full w-1/4 bg-emerald-500/80 border-e border-background/20" title={`0-3 ${t.widgets.uv.low}`} />
+            <div className="h-full w-1/4 bg-amber-500/80 border-e border-background/20" title={`3-6 ${t.widgets.uv.moderate}`} />
+            <div className="h-full w-1/6 bg-orange-500/80 border-e border-background/20" title={`6-8 ${t.widgets.uv.high}`} />
+            <div className="h-full w-1/4 bg-rose-500/80 border-e border-background/20" title={`8-11 ${t.widgets.uv.veryHigh}`} />
             <div className="h-full flex-1 bg-purple-500/80" title={`11+ ${t.widgets.uv.extreme}`} />
           </div>
 
           {/* Marker pointer */}
           <div className="relative h-2 w-full">
             <div
-              className="absolute top-0 -translate-x-1/2 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-b-[6px] border-b-foreground"
-              style={{ left: `${pct}%` }}
+              className="absolute top-0 -translate-x-1/2 rtl:translate-x-1/2 w-0 h-0 border-s-[4px] border-s-transparent border-e-[4px] border-e-transparent border-b-[6px] border-b-foreground"
+              style={{ insetInlineStart: `${pct}%` }}
             />
           </div>
 
@@ -128,7 +128,7 @@ export function UvWidget({ uvIndex = 0, uvMax = 0 }: UvWidgetProps) {
 
           <div className="p-2 bg-muted/20 border border-border">
             <div className="flex items-center gap-1.5 text-muted-foreground text-tiny mb-1">
-              <ShieldAlert className="size-3 text-amber-500" />
+              <ShieldAlert className="size-3 text-amber-700 dark:text-amber-500" />
               <span>{t.widgets.uv.recommendedSpf}</span>
             </div>
             <div className="font-bold text-foreground">

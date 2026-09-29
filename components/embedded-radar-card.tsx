@@ -106,6 +106,15 @@ export function EmbeddedRadarCard({
     };
   }, [isPlaying, radarFrames.length, playbackSpeed]);
 
+  // Keep state in sync when the browser exits fullscreen itself (Esc key).
+  useEffect(() => {
+    const onChange = () => {
+      if (!document.fullscreenElement) setIsFullscreen(false)
+    }
+    document.addEventListener("fullscreenchange", onChange)
+    return () => document.removeEventListener("fullscreenchange", onChange)
+  }, [])
+
   const toggleFullscreen = () => {
     if (!cardContainerRef.current) return;
     if (!isFullscreen) {
@@ -127,7 +136,7 @@ export function EmbeddedRadarCard({
     : "--:--";
 
   return (
-    <Card ref={cardContainerRef} className={`w-full overflow-hidden ${isFullscreen ? "fixed inset-0 z-50 rounded-none h-screen" : ""}`}>
+    <Card ref={cardContainerRef} className={`w-full overflow-hidden ${isFullscreen ? "fixed inset-0 z-50 rounded-none h-dvh" : ""}`}>
       <CardHeader className="border-b border-border pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <div className="flex items-center gap-2">
@@ -149,6 +158,7 @@ export function EmbeddedRadarCard({
           <div className="flex items-center border border-border p-0.5 text-xs font-mono">
             <Button
               variant={mapStyle === "dark" ? "default" : "ghost"}
+              aria-pressed={mapStyle === "dark"}
               size="xs"
               onClick={() => setMapStyle("dark")}
               className="h-6 px-2 text-tiny font-mono"
@@ -157,6 +167,7 @@ export function EmbeddedRadarCard({
             </Button>
             <Button
               variant={mapStyle === "voyager" ? "default" : "ghost"}
+              aria-pressed={mapStyle === "voyager"}
               size="xs"
               onClick={() => setMapStyle("voyager")}
               className="h-6 px-2 text-tiny font-mono"
@@ -165,6 +176,7 @@ export function EmbeddedRadarCard({
             </Button>
             <Button
               variant={mapStyle === "osm" ? "default" : "ghost"}
+              aria-pressed={mapStyle === "osm"}
               size="xs"
               onClick={() => setMapStyle("osm")}
               className="h-6 px-2 text-tiny font-mono"
@@ -177,6 +189,7 @@ export function EmbeddedRadarCard({
           <div className="flex items-center border border-border p-0.5 text-xs font-mono">
             <Button
               variant={activeLayer === "radar" ? "default" : "ghost"}
+              aria-pressed={activeLayer === "radar"}
               size="xs"
               onClick={() => setActiveLayer("radar")}
               className="gap-1 font-mono text-tiny h-6 px-2"
@@ -186,6 +199,7 @@ export function EmbeddedRadarCard({
             </Button>
             <Button
               variant={activeLayer === "satellite" ? "default" : "ghost"}
+              aria-pressed={activeLayer === "satellite"}
               size="xs"
               onClick={() => setActiveLayer("satellite")}
               className="gap-1 font-mono text-tiny h-6 px-2"
@@ -195,6 +209,7 @@ export function EmbeddedRadarCard({
             </Button>
             <Button
               variant={activeLayer === "none" ? "default" : "ghost"}
+              aria-pressed={activeLayer === "none"}
               size="xs"
               onClick={() => setActiveLayer("none")}
               className="font-mono text-tiny h-6 px-2"
@@ -241,7 +256,7 @@ export function EmbeddedRadarCard({
 
       <CardContent
         className={`p-0 relative isolate overflow-hidden z-0 ${
-          isFullscreen ? "h-[calc(100vh-110px)]" : heightClass
+          isFullscreen ? "h-[calc(100dvh-110px)]" : heightClass
         } bg-muted/10`}
       >
         <MapInner
@@ -256,7 +271,7 @@ export function EmbeddedRadarCard({
         />
 
         {/* Live Legend Overlay on Map */}
-        <div className="absolute top-3 right-3 z-10 bg-background/90 border border-border p-2 text-tiny font-mono shadow-md backdrop-blur-sm hidden sm:block">
+        <div className="absolute top-3 end-3 z-10 bg-background/90 border border-border p-2 text-tiny font-mono shadow-md backdrop-blur-sm hidden sm:block">
           <div className="font-bold text-foreground mb-1">{t.radar.precipDbz}</div>
           <div className="flex items-center gap-1">
             <div className="w-4 h-2 bg-[#00ffff]" title="Light Drizzle" />
@@ -307,6 +322,8 @@ export function EmbeddedRadarCard({
               setCurrentFrameIndex(parseInt(e.target.value, 10));
             }}
             disabled={radarFrames.length === 0}
+            aria-label={t.radar.frame}
+            aria-valuetext={frameTimeStr}
             className="w-full accent-primary h-1 bg-muted cursor-pointer"
           />
           <span className="text-tiny font-mono text-muted-foreground shrink-0">{t.common.now}</span>

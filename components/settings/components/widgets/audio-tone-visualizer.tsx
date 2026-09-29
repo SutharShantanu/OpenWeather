@@ -235,7 +235,7 @@ export function AudioToneVisualizer({
             )}
             style={{ width: `${progressPercent}%` }}
           >
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 size-2.5 rounded-full bg-foreground shadow-xs opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute end-0 top-1/2 -translate-y-1/2 size-2.5 rounded-full bg-foreground shadow-xs opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
         </div>
 

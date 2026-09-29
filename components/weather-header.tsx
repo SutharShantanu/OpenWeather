@@ -392,7 +392,7 @@ export function WeatherHeader({
                             <>
                               <MapPin className="size-3" />
                               <span>{t.header.locateAction}</span>
-                              <ArrowRight className="size-3" />
+                              <ArrowRight className="size-3 rtl:rotate-180" />
                             </>
                           )}
                         </Button>
@@ -607,7 +607,7 @@ export function WeatherHeader({
             aria-describedby={undefined}
             className="lg:hidden"
           >
-            <DrawerHeader className="border-b border-border pr-12">
+            <DrawerHeader className="border-b border-border pe-12">
               <DrawerTitle className="flex items-center gap-2">
                 <IconTile variant="solid" size="xs">
                   <Compass />
@@ -628,7 +628,7 @@ export function WeatherHeader({
                       variant="ghost"
                       disabled={item.disabled}
                       onClick={runFromMenu(item.onSelect)}
-                      className="h-auto flex-nowrap justify-start text-left whitespace-normal"
+                      className="h-auto flex-nowrap justify-start text-start whitespace-normal"
                     >
                       <ItemMedia>
                         <IconTile variant="soft" size="sm">
@@ -644,7 +644,7 @@ export function WeatherHeader({
                         </ItemDescription>
                       </ItemContent>
                       <ItemActions>
-                        <ChevronRight className="size-4 text-muted-foreground" />
+                        <ChevronRight className="size-4 text-muted-foreground rtl:rotate-180" />
                       </ItemActions>
                     </Button>
                   </Item>

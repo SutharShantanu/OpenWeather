@@ -18,6 +18,20 @@ interface RadarMapInnerProps {
   customCartoApiKey?: string;
 }
 
+const OSM_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
+
+// Tile licences (OSM ODbL, CARTO) require visible attribution.
+function baseAttribution(style: string) {
+  return style === "osm"
+    ? OSM_ATTRIBUTION
+    : `${OSM_ATTRIBUTION} &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>`;
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
 export function RadarMapInner({
   lat,
   lon,
@@ -30,7 +44,8 @@ export function RadarMapInner({
 }: RadarMapInnerProps) {
   const { t } = useTranslation();
   const prefs = useDisplayPreferences();
-  const popupHtml = `<b>${t.radar.stationPopup(cityName)}</b><br/>${prefs.coords(lat, lon, 3)}`;
+  // Leaflet popups render HTML; the city name comes from upstream data, so escape it.
+  const popupHtml = `<b>${escapeHtml(t.radar.stationPopup(cityName))}</b><br/>${prefs.coords(lat, lon, 3)}`;
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -67,12 +82,14 @@ export function RadarMapInner({
       center: [lat, lon],
       zoom: 7,
       zoomControl: true,
-      attributionControl: false,
+      attributionControl: true,
     });
+    map.attributionControl.setPrefix(false);
 
     const baseTile = L.tileLayer(getBaseTileUrl(mapStyle), {
       maxZoom: 19,
       subdomains: "abcd",
+      attribution: baseAttribution(mapStyle),
     }).addTo(map);
     baseTileRef.current = baseTile;
 
@@ -107,6 +124,7 @@ export function RadarMapInner({
     const newBase = L.tileLayer(getBaseTileUrl(mapStyle), {
       maxZoom: 19,
       subdomains: "abcd",
+      attribution: baseAttribution(mapStyle),
     }).addTo(mapRef.current);
     baseTileRef.current = newBase;
     if (overlayRef.current) {
@@ -147,6 +165,7 @@ export function RadarMapInner({
     const overlay = L.tileLayer(tileUrl, {
       opacity: opacity,
       zIndex: 10,
+      attribution: '<a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>',
       maxNativeZoom: 7,
       maxZoom: 19,
     });
@@ -158,6 +177,8 @@ export function RadarMapInner({
   return (
     <div
       ref={containerRef}
+      role="region"
+      aria-label={t.tabs.radar}
       className="w-full h-full relative isolate overflow-hidden z-0"
     />
   );

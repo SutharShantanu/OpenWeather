@@ -14,8 +14,9 @@ import {
   calculateMoonInfo,
   OPENWEATHER_API_KEY,
 } from "@/lib/weather";
-import { translateCondition } from "@/lib/translations";
+import { loadMessages, translateCondition } from "@/lib/translations";
 import { CONFIG } from "@/lib/config";
+import { detectLocationFromRequest } from "@/lib/geo";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,23 @@ interface CacheEntry<T> {
 }
 const weatherCache = new Map<string, CacheEntry<WeatherData>>();
 const CACHE_TTL_MS = 3 * 60 * 1000;
+// Keys come from request input, so bound the map (Map keeps insertion order).
+const CACHE_MAX_ENTRIES = 500;
+
+function setCachedWeather(key: string, data: WeatherData) {
+  weatherCache.delete(key);
+  weatherCache.set(key, { data, expires: Date.now() + CACHE_TTL_MS });
+  while (weatherCache.size > CACHE_MAX_ENTRIES) {
+    weatherCache.delete(weatherCache.keys().next().value!);
+  }
+}
+
+const WEATHER_SOURCES: readonly WeatherDataSource[] = ["open-meteo", "openweathermap", "simulation", "auto"];
+const MAX_CITY_LENGTH = 100;
+
+function errorResponse(error: string, status: number) {
+  return NextResponse.json({ error }, { status });
+}
 
 async function reverseGeocodeCoords(
   lat: number,
@@ -94,92 +112,6 @@ async function reverseGeocodeCoords(
     city: `${latStr}, ${lonStr}`,
     country: "GPS",
   };
-}
-
-async function detectUserLocationFromRequest(request: NextRequest): Promise<{
-  city: string;
-  country: string;
-  lat: number;
-  lon: number;
-} | null> {
-  try {
-    const vercelCity = request.headers.get("x-vercel-ip-city");
-    const vercelCountry = request.headers.get("x-vercel-ip-country");
-    const vercelLat = request.headers.get("x-vercel-ip-latitude");
-    const vercelLon = request.headers.get("x-vercel-ip-longitude");
-
-    if (vercelCity && vercelLat && vercelLon) {
-      const lat = parseFloat(vercelLat);
-      const lon = parseFloat(vercelLon);
-      if (!isNaN(lat) && !isNaN(lon)) {
-        return {
-          city: decodeURIComponent(vercelCity),
-          country: vercelCountry ? decodeURIComponent(vercelCountry) : "",
-          lat,
-          lon,
-        };
-      }
-    }
-
-    const cfCity = request.headers.get("cf-ipcity");
-    const cfCountry = request.headers.get("cf-ipcountry");
-    const cfLat = request.headers.get("cf-iplatitude");
-    const cfLon = request.headers.get("cf-iplongitude");
-
-    if (cfCity && cfLat && cfLon) {
-      const lat = parseFloat(cfLat);
-      const lon = parseFloat(cfLon);
-      if (!isNaN(lat) && !isNaN(lon)) {
-        return {
-          city: decodeURIComponent(cfCity),
-          country: cfCountry ? decodeURIComponent(cfCountry) : "",
-          lat,
-          lon,
-        };
-      }
-    }
-
-    const forwardedFor = request.headers.get("x-forwarded-for");
-    const realIp = request.headers.get("x-real-ip");
-    let clientIp = "";
-    if (forwardedFor) {
-      clientIp = forwardedFor.split(",")[0].trim();
-    } else if (realIp) {
-      clientIp = realIp.trim();
-    }
-
-    const isPrivateIp =
-      !clientIp ||
-      clientIp === "127.0.0.1" ||
-      clientIp === "::1" ||
-      clientIp.startsWith("192.168.") ||
-      clientIp.startsWith("10.") ||
-      clientIp.startsWith("172.16.") ||
-      clientIp.startsWith("172.31.");
-
-    const bdcUrl = isPrivateIp
-      ? `${CONFIG.api.bigDataCloudGeoBaseUrl}/reverse-geocode-client?localityLanguage=en`
-      : `${CONFIG.api.bigDataCloudGeoBaseUrl}/reverse-geocode-client?ip=${encodeURIComponent(
-          clientIp
-        )}&localityLanguage=en`;
-
-    const res = await fetch(bdcUrl, { signal: AbortSignal.timeout(3000) });
-    if (res.ok) {
-      const data = await res.json();
-      const city =
-        data.city || data.locality || data.principalSubdivision || "";
-      const country = data.countryName || data.countryCode || "";
-      const lat = data.latitude;
-      const lon = data.longitude;
-
-      if (lat !== undefined && lon !== undefined && !isNaN(lat) && !isNaN(lon)) {
-        return { city, country, lat, lon };
-      }
-    }
-  } catch (err) {
-    console.warn("User location auto-detection error:", err);
-  }
-  return null;
 }
 
 async function validateOpenWeatherKey(key: string, city: string) {
@@ -328,9 +260,27 @@ export async function GET(request: NextRequest) {
     const requestedSource = (searchParams.get("source") || CONFIG.settings.defaultWeatherSource) as WeatherDataSource;
     const requestedStation = (searchParams.get("station") || CONFIG.settings.defaultForecastStation) as ForecastStationModel;
     const lang = searchParams.get("lang")?.trim() || CONFIG.settings.defaultLanguage;
+    // Condition labels are translated synchronously below; load that locale first (cached after).
+    await loadMessages(lang);
+
+    if (!WEATHER_SOURCES.includes(requestedSource)) {
+      return errorResponse(`Unknown source "${requestedSource}".`, 400);
+    }
+    if (!FORECAST_STATION_MODELS.some((m) => m.id === requestedStation)) {
+      return errorResponse(`Unknown station "${requestedStation}".`, 400);
+    }
+    if (city && city.length > MAX_CITY_LENGTH) {
+      return errorResponse("City name is too long.", 400);
+    }
 
     let resolvedLat = latParam ? parseFloat(latParam) : null;
     let resolvedLon = lonParam ? parseFloat(lonParam) : null;
+    if (
+      (latParam || lonParam) &&
+      (resolvedLat === null || resolvedLon === null || !(Math.abs(resolvedLat) <= 90) || !(Math.abs(resolvedLon) <= 180))
+    ) {
+      return errorResponse("lat must be within ±90 and lon within ±180.", 400);
+    }
     let resolvedCity = city?.trim() || "";
     let resolvedCountry = "";
 
@@ -353,7 +303,7 @@ export async function GET(request: NextRequest) {
       }
     } else if (!resolvedCity) {
       // 2. If neither coordinates nor city are provided: auto-detect from user's location via IP / geo headers
-      const detected = await detectUserLocationFromRequest(request);
+      const detected = await detectLocationFromRequest(request);
       if (detected) {
         resolvedCity = detected.city;
         resolvedCountry = detected.country;
@@ -407,25 +357,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(owmData);
       }
 
-      // Fallback with informational advisory if user's key or OWM call failed
-      const fallback = generateFallbackWeather(resolvedCity, resolvedLat, resolvedLon, resolvedCountry);
-      fallback.providerName = "OpenWeatherMap (Simulation Failover)";
-      fallback.stationName = "OWM Auth Failover Station";
-      fallback.alerts = [
-        {
-          id: "alert-owm-offline",
-          source: "Station Telemetry Gateway",
-          event: "OWM Station Communication Warning",
-          headline: apiKey
-            ? "Unable to authenticate with OpenWeatherMap API using provided key. Reverting to synoptic simulation."
-            : "No OpenWeatherMap API Key configured. Please add an API key in Settings > Source & Station.",
-          severity: "Moderate",
-          urgency: "Immediate",
-          instruction: "Configure a valid OpenWeather API key in Settings > Source & Station or choose Open-Meteo as primary source.",
-        },
-        ...(fallback.alerts || []),
-      ];
-      return NextResponse.json(fallback);
+      return errorResponse(
+        apiKey
+          ? "OpenWeatherMap request failed. Check your API key in Settings > Source & Station, or switch to Open-Meteo."
+          : "No OpenWeatherMap API key configured. Add one in Settings > Source & Station, or switch to Open-Meteo.",
+        502
+      );
     }
 
     // 6. Open-Meteo High-Resolution Engine (Default or Auto)
@@ -439,7 +376,9 @@ export async function GET(request: NextRequest) {
         lang
       );
       if (openMeteoData) {
-        return NextResponse.json(openMeteoData);
+        return NextResponse.json(openMeteoData, {
+          headers: { "Cache-Control": "public, max-age=60, s-maxage=180, stale-while-revalidate=300" },
+        });
       }
     }
 
@@ -451,17 +390,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 8. Tertiary Fallback: Autonomous Synoptic Simulator
-    const mock = generateFallbackWeather(resolvedCity, resolvedLat, resolvedLon, resolvedCountry);
-    mock.providerName = "Autonomous Synoptic Simulator";
-    mock.stationName = "Synthetic Mathematical Station";
-    return NextResponse.json(mock);
+    // 8. No provider answered. Report it rather than serving simulated data
+    // as if it were real; simulation is only used when explicitly requested.
+    if (resolvedLat === null || resolvedLon === null || isNaN(resolvedLat) || isNaN(resolvedLon)) {
+      return errorResponse(`Could not find a location named "${resolvedCity}".`, 404);
+    }
+    return errorResponse("Weather service is unavailable. Please try again shortly.", 502);
   } catch (err) {
     console.error("Unhandled error in /api/weather GET:", err);
-    const fallback = generateFallbackWeather("New York");
-    fallback.providerName = "Autonomous Synoptic Simulator";
-    fallback.stationName = "Synthetic Mathematical Station";
-    return NextResponse.json(fallback);
+    return errorResponse("Unexpected error while loading weather.", 500);
   }
 }
 
@@ -546,20 +483,6 @@ async function fetchOpenMeteo(
         pm2_5: parseFloat((cAqi.pm2_5 ?? 5.5).toFixed(1)),
         pm10: parseFloat((cAqi.pm10 ?? 12.0).toFixed(1)),
         nh3: 0.5,
-      };
-    } else {
-      airQuality = {
-        aqi: 1,
-        usAqi: 28,
-        europeanAqi: 22,
-        co: 150,
-        no: 0.1,
-        no2: 8.5,
-        o3: 42,
-        so2: 1.8,
-        pm2_5: 4.8,
-        pm10: 9.5,
-        nh3: 0.4,
       };
     }
 
@@ -672,7 +595,7 @@ async function fetchOpenMeteo(
       stationName,
     };
 
-    weatherCache.set(cacheKey, { data: result, expires: Date.now() + CACHE_TTL_MS });
+    setCachedWeather(cacheKey, result);
     return result;
   } catch (err) {
     console.warn("fetchOpenMeteo error:", err);
@@ -741,22 +664,6 @@ async function fetchOpenWeather(
       // air quality non-critical
     }
 
-    if (!airQuality) {
-      airQuality = {
-        aqi: 2,
-        usAqi: 45,
-        europeanAqi: 30,
-        co: 240.3,
-        no: 0.1,
-        no2: 12.4,
-        o3: 48.2,
-        so2: 3.1,
-        pm2_5: 8.6,
-        pm10: 16.2,
-        nh3: 0.8,
-      };
-    }
-
     const primaryCond = currentJson.weather?.[0] || { main: "Clear", description: "clear sky", icon: "01d" };
 
     const current: CurrentWeather = {
@@ -775,7 +682,7 @@ async function fetchOpenWeather(
       windGusts: currentJson.wind.gust,
       clouds: currentJson.clouds?.all ?? 0,
       visibility: currentJson.visibility ?? 10000,
-      uvIndex: 4.2,
+      uvIndex: undefined, // not provided by the OWM 2.5 current endpoint
       dewPoint: currentJson.main.temp - (100 - currentJson.main.humidity) / 5,
       condition: {
         type: mapOpenWeatherCondition(primaryCond.icon, primaryCond.main),

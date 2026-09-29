@@ -121,7 +121,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                           <div className="text-tiny text-muted-foreground">{t.common.precip}: {data.pop}%</div>
                           <div className="text-tiny text-muted-foreground">{t.hero.wind}: {data.wind} {prefs.wind(0).unitStr}</div>
                           {data.uv > 0 && (
-                            <div className="text-tiny text-amber-500">{t.hero.uvIndex}: {data.uv}</div>
+                            <div className="text-tiny text-amber-700 dark:text-amber-500">{t.hero.uvIndex}: {data.uv}</div>
                           )}
                         </div>
                       );
@@ -164,7 +164,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                   </span>
 
                   {popPercent > 10 ? (
-                    <div className="flex items-center gap-0.5 text-tiny font-mono text-sky-500 font-semibold">
+                    <div className="flex items-center gap-0.5 text-tiny font-mono text-sky-700 dark:text-sky-500 font-semibold">
                       <CloudRain className="size-2.5" />
                       <span>{popPercent}%</span>
                     </div>

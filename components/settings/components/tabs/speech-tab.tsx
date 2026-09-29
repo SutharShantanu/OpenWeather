@@ -151,7 +151,7 @@ export function SpeechTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                   />
                 }
               >
-                <div className="flex items-center gap-2 truncate text-left">
+                <div className="flex items-center gap-2 truncate text-start">
                   <div className="flex size-4.5 shrink-0 items-center justify-center rounded bg-primary/10 text-primary">
                     <Volume2 className="size-3" />
                   </div>
@@ -217,7 +217,7 @@ export function SpeechTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                         <Sparkles className="size-3.5 text-primary" />
                         <span>{text.filterByTone}</span>
                       </div>
-                      <span className="font-mono text-nano text-muted-foreground ml-auto pr-1">
+                      <span className="font-mono text-nano text-muted-foreground ms-auto pe-1">
                         {selectedTone ? toneLabel(selectedTone) : text.allTonesShort}
                       </span>
                     </DropdownMenuSubTrigger>
@@ -259,7 +259,7 @@ export function SpeechTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                         <Users className="size-3.5 text-primary" />
                         <span>{text.allVoices}</span>
                       </div>
-                      <span className="font-mono text-nano text-muted-foreground ml-auto pr-1">
+                      <span className="font-mono text-nano text-muted-foreground ms-auto pe-1">
                         {filteredAllVoices.length}
                       </span>
                     </DropdownMenuSubTrigger>
@@ -308,10 +308,10 @@ export function SpeechTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       <div className="flex items-center gap-2">
-                        <User className="size-3.5 text-sky-500" />
+                        <User className="size-3.5 text-sky-700 dark:text-sky-500" />
                         <span>{text.maleVoices}</span>
                       </div>
-                      <span className="font-mono text-nano text-muted-foreground ml-auto pr-1">
+                      <span className="font-mono text-nano text-muted-foreground ms-auto pe-1">
                         {filteredMaleVoices.length}
                       </span>
                     </DropdownMenuSubTrigger>
@@ -359,7 +359,7 @@ export function SpeechTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                         <UserCheck className="size-3.5 text-primary" />
                         <span>{text.femaleVoices}</span>
                       </div>
-                      <span className="font-mono text-nano text-muted-foreground ml-auto pr-1">
+                      <span className="font-mono text-nano text-muted-foreground ms-auto pe-1">
                         {filteredFemaleVoices.length}
                       </span>
                     </DropdownMenuSubTrigger>
@@ -428,7 +428,7 @@ export function SpeechTabContent({ settings, onUpdateSettings }: TabBaseProps) {
                     playbackStatus === "playing"
                       ? "text-primary shadow-xs ring-2 ring-primary/25"
                       : playbackStatus === "paused"
-                      ? "text-amber-500"
+                      ? "text-amber-700 dark:text-amber-500"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
