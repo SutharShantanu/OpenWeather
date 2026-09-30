@@ -652,7 +652,9 @@
     "helpful": "Nyttig",
     "notHelpful": "Ikke nyttig",
     "stop": "Stopp",
-    "offlinePlaceholder": "Du er frakoblet. Koble til igjen for å spørre KI-en."
+    "offlinePlaceholder": "Du er frakoblet. Koble til igjen for å spørre KI-en.",
+    "greeting": "Hei! Spør meg om været hvor som helst, nå eller de neste to ukene. For eksempel: «Regner det i Tokyo på lørdag?» eller «Hvor varmt blir det i Delhi i morgen?»",
+    "briefingLabel": "Dagens oversikt"
   },
   "notifications": {
     "title": "Varslingssenter",

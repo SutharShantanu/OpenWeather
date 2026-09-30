@@ -652,7 +652,9 @@
     "helpful": "Nakatulong",
     "notHelpful": "Hindi nakatulong",
     "stop": "Ihinto",
-    "offlinePlaceholder": "Offline ka. Kumonekta ulit para magtanong sa AI."
+    "offlinePlaceholder": "Offline ka. Kumonekta ulit para magtanong sa AI.",
+    "greeting": "Hi! Tanungin mo ako tungkol sa panahon kahit saan, ngayon o sa susunod na dalawang linggo. Halimbawa: “Uulan ba sa Tokyo sa Sabado?” o “Gaano kainit sa Delhi bukas?”",
+    "briefingLabel": "Buod ngayong araw"
   },
   "notifications": {
     "title": "Sentro ng Abiso",

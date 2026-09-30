@@ -652,7 +652,9 @@
     "helpful": "有帮助",
     "notHelpful": "没有帮助",
     "stop": "停止",
-    "offlinePlaceholder": "您已离线。请重新连接后再向 AI 提问。"
+    "offlinePlaceholder": "您已离线。请重新连接后再向 AI 提问。",
+    "greeting": "你好！可以问我任何地方现在或未来两周的天气。例如：“东京周六会下雨吗？”或“德里明天会有多热？”",
+    "briefingLabel": "今日概要"
   },
   "notifications": {
     "title": "通知中心",

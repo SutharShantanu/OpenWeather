@@ -652,7 +652,9 @@
     "helpful": "Hữu ích",
     "notHelpful": "Không hữu ích",
     "stop": "Dừng",
-    "offlinePlaceholder": "Bạn đang ngoại tuyến. Kết nối lại để hỏi AI."
+    "offlinePlaceholder": "Bạn đang ngoại tuyến. Kết nối lại để hỏi AI.",
+    "greeting": "Chào bạn! Hãy hỏi tôi về thời tiết ở bất kỳ đâu, bây giờ hoặc trong hai tuần tới. Ví dụ: “Thứ Bảy Tokyo có mưa không?” hoặc “Ngày mai Delhi nóng cỡ nào?”",
+    "briefingLabel": "Tóm tắt hôm nay"
   },
   "notifications": {
     "title": "Trung tâm thông báo",

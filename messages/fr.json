@@ -652,7 +652,9 @@
     "helpful": "Utile",
     "notHelpful": "Pas utile",
     "stop": "Arrêter",
-    "offlinePlaceholder": "Vous êtes hors ligne. Reconnectez-vous pour interroger l'IA."
+    "offlinePlaceholder": "Vous êtes hors ligne. Reconnectez-vous pour interroger l'IA.",
+    "greeting": "Salut ! Demande-moi la météo n'importe où, maintenant ou dans les deux prochaines semaines. Par exemple : « Va-t-il pleuvoir à Tokyo samedi ? » ou « Quelle chaleur fera-t-il demain à Delhi ? »",
+    "briefingLabel": "Point du jour"
   },
   "notifications": {
     "title": "Centre de notifications",

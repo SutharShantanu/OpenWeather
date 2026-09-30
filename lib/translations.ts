@@ -565,6 +565,8 @@ export interface Translations {
     notHelpful: string;
     stop: string;
     offlinePlaceholder: string;
+    greeting: string;
+    briefingLabel: string;
     bannerTitle: string;
     liveInsights: string;
     bannerDesc: string;

@@ -652,7 +652,9 @@
     "helpful": "도움됨",
     "notHelpful": "도움 안 됨",
     "stop": "중지",
-    "offlinePlaceholder": "오프라인 상태입니다. AI에게 질문하려면 다시 연결하세요."
+    "offlinePlaceholder": "오프라인 상태입니다. AI에게 질문하려면 다시 연결하세요.",
+    "greeting": "안녕하세요! 어디든 지금부터 2주 후까지의 날씨를 물어보세요. 예: “토요일에 도쿄에 비가 올까?” 또는 “내일 델리는 얼마나 더울까?”",
+    "briefingLabel": "오늘의 요약"
   },
   "notifications": {
     "title": "알림 센터",

@@ -652,7 +652,9 @@
     "helpful": "Nuttig",
     "notHelpful": "Niet nuttig",
     "stop": "Stoppen",
-    "offlinePlaceholder": "Je bent offline. Maak opnieuw verbinding om de AI iets te vragen."
+    "offlinePlaceholder": "Je bent offline. Maak opnieuw verbinding om de AI iets te vragen.",
+    "greeting": "Hoi! Vraag me naar het weer waar dan ook, nu of de komende twee weken. Bijvoorbeeld: ‘Regent het zaterdag in Tokio?’ of ‘Hoe warm wordt het morgen in Delhi?’",
+    "briefingLabel": "Overzicht van vandaag"
   },
   "notifications": {
     "title": "Meldingencentrum",

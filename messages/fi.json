@@ -652,7 +652,9 @@
     "helpful": "Hyödyllinen",
     "notHelpful": "Ei hyödyllinen",
     "stop": "Pysäytä",
-    "offlinePlaceholder": "Olet offline-tilassa. Muodosta yhteys kysyäksesi tekoälyltä."
+    "offlinePlaceholder": "Olet offline-tilassa. Muodosta yhteys kysyäksesi tekoälyltä.",
+    "greeting": "Hei! Kysy minulta säästä missä tahansa, nyt tai seuraavan kahden viikon aikana. Esimerkiksi: ”Sataako Tokiossa lauantaina?” tai ”Kuinka kuuma Delhissä on huomenna?”",
+    "briefingLabel": "Päivän katsaus"
   },
   "notifications": {
     "title": "Ilmoituskeskus",

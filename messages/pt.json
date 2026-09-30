@@ -652,7 +652,9 @@
     "helpful": "Útil",
     "notHelpful": "Não útil",
     "stop": "Parar",
-    "offlinePlaceholder": "Você está offline. Reconecte-se para perguntar à IA."
+    "offlinePlaceholder": "Você está offline. Reconecte-se para perguntar à IA.",
+    "greeting": "Oi! Pergunte sobre o tempo em qualquer lugar, agora ou nas próximas duas semanas. Por exemplo: “Vai chover em Tóquio no sábado?” ou “Quão quente vai estar Délhi amanhã?”",
+    "briefingLabel": "Resumo de hoje"
   },
   "notifications": {
     "title": "Central de notificações",

@@ -652,7 +652,9 @@
     "helpful": "Utile",
     "notHelpful": "Non utile",
     "stop": "Interrompi",
-    "offlinePlaceholder": "Sei offline. Riconnettiti per fare domande all'IA."
+    "offlinePlaceholder": "Sei offline. Riconnettiti per fare domande all'IA.",
+    "greeting": "Ciao! Chiedimi il meteo ovunque, ora o nelle prossime due settimane. Per esempio: «Pioverà a Tokyo sabato?» o «Quanto farà caldo domani a Delhi?»",
+    "briefingLabel": "Riepilogo di oggi"
   },
   "notifications": {
     "title": "Centro notifiche",

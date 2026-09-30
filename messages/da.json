@@ -652,7 +652,9 @@
     "helpful": "Nyttigt",
     "notHelpful": "Ikke nyttigt",
     "stop": "Stop",
-    "offlinePlaceholder": "Du er offline. Opret forbindelse igen for at spørge AI."
+    "offlinePlaceholder": "Du er offline. Opret forbindelse igen for at spørge AI.",
+    "greeting": "Hej! Spørg mig om vejret hvor som helst, nu eller de næste to uger. For eksempel: “Regner det i Tokyo på lørdag?” eller “Hvor varmt bliver det i Delhi i morgen?”",
+    "briefingLabel": "Dagens overblik"
   },
   "notifications": {
     "title": "Notifikationscenter",

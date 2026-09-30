@@ -652,7 +652,9 @@
     "helpful": "Hasznos",
     "notHelpful": "Nem hasznos",
     "stop": "Leállítás",
-    "offlinePlaceholder": "Nincs internetkapcsolat. Csatlakozz újra, hogy kérdezhesd az MI-t."
+    "offlinePlaceholder": "Nincs internetkapcsolat. Csatlakozz újra, hogy kérdezhesd az MI-t.",
+    "greeting": "Szia! Kérdezz az időjárásról bárhol, most vagy a következő két hétben. Például: „Esni fog Tokióban szombaton?” vagy „Mennyire lesz meleg holnap Delhiben?”",
+    "briefingLabel": "Mai összefoglaló"
   },
   "notifications": {
     "title": "Értesítési központ",

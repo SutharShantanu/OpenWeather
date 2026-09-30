@@ -14,6 +14,7 @@ import {
   X,
   Check,
   Square,
+  ChevronDown,
 } from "lucide-react"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Shimmer } from "@/components/ui/shimmer"
@@ -31,7 +32,7 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
-  InputGroupInput,
+  InputGroupTextarea,
 } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -57,7 +58,23 @@ import {
   MessageScrollerItem,
   MessageScrollerProvider,
   MessageScrollerViewport,
+  useMessageScroller,
 } from "@/components/ui/message-scroller"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+} from "@/components/ui/empty"
 import {
   CurrentWeather,
   DailyForecastItem,
@@ -104,7 +121,8 @@ export function AiAdvisorDialog({
   const prefs = useDisplayPreferences()
   const [question, setQuestion] = useState("")
   const [replyTo, setReplyTo] = useState<AdvisorAnswer | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [briefingOpen, setBriefingOpen] = useState(false)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   /** Rule-based answer, used when the AI advisor is unavailable. */
   const fallbackAnswer = useCallback(
@@ -252,6 +270,7 @@ export function AiAdvisorDialog({
   const isLeft = buttonPosition === "bottom-left"
   const panelId = useId()
   const titleId = useId()
+  const briefingId = useId()
   const fabRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -328,322 +347,249 @@ export function AiAdvisorDialog({
             exit={reduceMotion ? { opacity: 0 } : PANEL_HIDDEN}
             transition={reduceMotion ? { duration: 0.15 } : PANEL_SPRING}
             style={{ transformOrigin: isLeft ? "bottom left" : "bottom right" }}
-            className={`fixed z-45 flex w-[min(28rem,calc(100vw-2rem))] flex-col bg-popover font-mono text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none ${buttonPosition === "hidden" ? "bottom-4" : "bottom-20"} ${isLeft ? "left-4" : "right-4"}`}
+            className={`fixed z-45 w-[min(28rem,calc(100vw-2rem))] overflow-hidden bg-popover font-mono text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none ${buttonPosition === "hidden" ? "bottom-4" : "bottom-20"} ${isLeft ? "left-4" : "right-4"}`}
           >
-            {/* Header */}
-            <div className="flex items-start gap-3 border-b border-border p-3">
-              <div className="flex size-8 shrink-0 items-center justify-center border border-primary/30 bg-primary/10 text-primary">
-                <Sparkles className="size-3.5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2
-                  id={titleId}
-                  className="font-heading text-sm font-semibold tracking-tight text-foreground"
-                >
-                  {ai.dialogTitle}
-                </h2>
-                <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-                  {ai.dialogDesc(current.cityName)}
-                </p>
-              </div>
-              <ActionButton
-                label={t.settingsDialog.assistant.close}
-                onClick={() => onOpenChange(false)}
-              >
-                <X />
-              </ActionButton>
-            </div>
-
-            {/* Body */}
-            <div
-              data-lenis-prevent
-              className="max-h-[min(40rem,calc(100dvh-11rem))] space-y-3 overflow-y-auto p-3"
-            >
-              {/* Source of the analysis: live Gemini briefing or the local fallback */}
-              <div
-                role="status"
-                aria-live="polite"
-                className="flex items-start justify-between gap-2 text-mini"
-              >
-                {briefingStatus === "loading" ? (
-                  <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <Spinner className="size-3" />
-                    {ai.analyzing}
-                  </span>
-                ) : briefingStatus === "fallback" ? (
-                  <span className="text-muted-foreground">
-                    {ai.fallbackNotice}
-                  </span>
-                ) : (
-                  <span className="text-foreground">{briefing?.summary}</span>
-                )}
-                <Badge
-                  variant="outline"
-                  className={`shrink-0 font-mono text-nano uppercase ${briefingStatus === "ready" ? "border-primary/30 text-primary" : ""}`}
-                >
-                  {briefingStatus === "ready" ? ai.liveBadge : ai.basicBadge}
-                </Badge>
-              </div>
-
-              {/* Next 12h: compact alerts, or one quiet line when stable */}
-              <section className="space-y-1.5">
-                <h3 className="font-mono text-nano font-bold tracking-wider text-muted-foreground uppercase">
-                  {ai.shortRangeDisturbances}
-                </h3>
-                {shortRangeAlerts.length > 0 ? (
-                  shortRangeAlerts.map((alert, idx) => (
-                    <Alert
-                      key={`${alert.title}-${idx}`}
-                      variant="destructive"
-                      className="gap-y-0.5 px-2.5 py-2"
+            {/* Card layout (per shadcn's chat example): the provider wraps the whole
+                card so the composer can drive the scroller (jump to message). */}
+            <MessageScrollerProvider autoScroll defaultScrollPosition="end">
+              <Card className="h-[min(38rem,calc(100dvh-8rem))] gap-0 py-0 ring-0">
+                <CardHeader className="gap-1 border-b border-border py-3">
+                  <CardTitle
+                    id={titleId}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <Sparkles className="size-3.5 text-primary" />
+                    {ai.dialogTitle}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-1 text-xs">
+                    {ai.dialogDesc(current.cityName)}
+                  </CardDescription>
+                  <CardAction>
+                    <ActionButton
+                      label={t.settingsDialog.assistant.close}
+                      onClick={() => onOpenChange(false)}
                     >
-                      <AlertCircle />
-                      <AlertTitle className="flex items-center justify-between gap-2 text-xs">
-                        <span className="truncate">{alert.title}</span>
-                        <Badge
-                          variant="destructive"
-                          className="shrink-0 font-mono text-nano"
-                        >
-                          {alert.timing}
-                        </Badge>
-                      </AlertTitle>
-                      <AlertDescription className="text-mini">
-                        <p className="line-clamp-2 text-foreground">
-                          {alert.detail}
-                        </p>
-                        <p className="line-clamp-2">
-                          <span className="font-semibold text-foreground">
-                            {ai.guidanceLabel}
-                          </span>{" "}
-                          {alert.action}
-                        </p>
-                      </AlertDescription>
-                    </Alert>
-                  ))
-                ) : (
-                  <p className="text-mini text-muted-foreground">
-                    {ai.stabilityHigh}
-                  </p>
-                )}
-              </section>
+                      <X />
+                    </ActionButton>
+                  </CardAction>
+                </CardHeader>
 
-              {/* Tomorrow / weekend: two compact items side by side */}
-              <section className="space-y-1.5">
-                <h3 className="font-mono text-nano font-bold tracking-wider text-muted-foreground uppercase">
-                  {ai.plannedShiftsTitle}
-                </h3>
-                <ItemGroup className="grid grid-cols-2 gap-1.5">
-                  {outlook.map((shift, idx) => (
-                    <Item
-                      key={idx}
-                      variant="outline"
-                      size="xs"
-                      className="items-start"
-                    >
-                      <ItemContent className="min-w-0 gap-1">
-                        <ItemTitle className="flex w-full items-center justify-between gap-1.5">
-                          <span className="truncate">{shift.period}</span>
-                          <Badge
-                            variant="outline"
-                            className="shrink-0 border-primary/30 font-mono text-nano text-primary"
-                          >
-                            {shift.temperatureShift}
-                          </Badge>
-                        </ItemTitle>
-                        <ItemDescription className="line-clamp-2 text-mini text-foreground">
-                          {shift.summary}
-                        </ItemDescription>
-                        <p className="truncate text-nano text-muted-foreground">
-                          {ai.precipRiskLabel}{" "}
-                          <span className="text-foreground">
-                            {shift.precipitationRisk}
+                {/* Today's briefing: one summary row; details expand with a height animation */}
+                <div className="shrink-0 border-b border-border px-(--card-spacing) py-2">
+                  <Button
+                    variant="ghost"
+                    aria-expanded={briefingOpen}
+                    aria-controls={briefingId}
+                    onClick={() => setBriefingOpen((v) => !v)}
+                    className="h-auto w-full items-start justify-start gap-2 px-1.5 py-1 text-start font-normal whitespace-normal"
+                  >
+                    <span className="min-w-0 flex-1 space-y-0.5">
+                      <span className="block font-mono text-nano font-bold tracking-wider text-muted-foreground uppercase">
+                        {ai.briefingLabel}
+                      </span>
+                      <span
+                        role="status"
+                        aria-live="polite"
+                        className="line-clamp-2 block text-mini"
+                      >
+                        {briefingStatus === "loading" ? (
+                          <span className="flex items-center gap-1.5 text-muted-foreground">
+                            <Spinner className="size-3" />
+                            {ai.analyzing}
                           </span>
-                        </p>
-                      </ItemContent>
-                    </Item>
-                  ))}
-                </ItemGroup>
-              </section>
-
-              {/* Quick Questions Chips */}
-              <div className="space-y-2 border-t border-border pt-2">
-                <div className="font-mono text-tiny font-bold tracking-wider text-muted-foreground uppercase">
-                  {ai.quickConsultationTitle}
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    ai.quickQuestionUmbrella,
-                    ai.quickQuestionWear,
-                    ai.quickQuestionExercise,
-                    ai.quickQuestionTomorrow,
-                  ].map((q, idx) => {
-                    const asked = askedQuestions.has(q.trim().toLowerCase())
-                    return (
-                      <Button
-                        key={idx}
-                        variant="accent"
-                        size="xs"
-                        disabled={asked || isAsking || !online}
-                        onClick={() => answerQuery(q)}
-                        className="font-mono text-mini rounded-full"
-                      >
-                        {asked && (
-                          <Check className="text-primary" aria-hidden />
+                        ) : briefingStatus === "fallback" ? (
+                          <span className="text-muted-foreground">
+                            {ai.fallbackNotice}
+                          </span>
+                        ) : (
+                          briefing?.summary
                         )}
-                        {q}
-                      </Button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Conversation: questions on the end side, AI answers with an avatar.
-          Actions appear on hover/focus (always on touch screens). */}
-              {answers.length > 0 && (
-                <MessageScrollerProvider autoScroll defaultScrollPosition="end">
-                  <MessageScroller className="h-80 border border-border bg-muted/10">
-                    <MessageScrollerViewport>
-                      <MessageScrollerContent
-                        aria-busy={answers.some(
-                          (a) => a.status === "streaming"
-                        )}
-                        className="gap-3 p-3"
+                      </span>
+                    </span>
+                    {shortRangeAlerts.length > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="shrink-0 gap-1 font-mono text-nano"
                       >
-                        {[...answers].reverse().map((item) => {
-                          const repliedTo = item.replyToId
-                            ? byId.get(item.replyToId)
-                            : undefined
-                          return (
-                            <React.Fragment key={item.id}>
-                              <MessageScrollerItem
-                                messageId={`${item.id}-q`}
-                                scrollAnchor
-                              >
-                                <Message align="end">
-                                  <MessageContent>
-                                    {repliedTo && (
-                                      <MessageHeader className="gap-1 font-normal">
-                                        <Reply className="size-3 shrink-0 -scale-x-100 rtl:scale-x-100" />
-                                        <span className="truncate">
-                                          {ai.replyingTo}:{" "}
-                                          {snippet(repliedTo.answer)}
-                                        </span>
-                                      </MessageHeader>
-                                    )}
-                                    <Bubble>
-                                      <BubbleContent>
-                                        {item.question}
-                                      </BubbleContent>
-                                    </Bubble>
-                                    <MessageFooter className={HOVER_ACTIONS}>
-                                      <WithTooltip label={ai.copy}>
-                                        <CopyButton
-                                          value={item.question}
-                                          variant="ghost"
-                                          size="icon-xs"
-                                          title=""
-                                          aria-label={ai.copy}
-                                          copyLabel={ai.copy}
-                                          copiedLabel={ai.copied}
-                                        />
-                                      </WithTooltip>
-                                    </MessageFooter>
-                                  </MessageContent>
-                                </Message>
-                              </MessageScrollerItem>
+                        <AlertCircle className="size-3" />
+                        {shortRangeAlerts.length}
+                      </Badge>
+                    )}
+                    <Badge
+                      variant="outline"
+                      className={`shrink-0 font-mono text-nano uppercase ${briefingStatus === "ready" ? "border-primary/30 text-primary" : ""}`}
+                    >
+                      {briefingStatus === "ready"
+                        ? ai.liveBadge
+                        : ai.basicBadge}
+                    </Badge>
+                    <ChevronDown
+                      className={`mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform duration-200 motion-reduce:transition-none ${briefingOpen ? "rotate-180" : ""}`}
+                    />
+                  </Button>
+                  <AnimatePresence initial={false}>
+                    {briefingOpen && (
+                      <motion.div
+                        id={briefingId}
+                        key="briefing-details"
+                        initial={reduceMotion ? { opacity: 0 } : COLLAPSED}
+                        animate={EXPANDED}
+                        exit={reduceMotion ? { opacity: 0 } : COLLAPSED}
+                        transition={
+                          reduceMotion ? { duration: 0.15 } : HEIGHT_SPRING
+                        }
+                        style={{ transformOrigin: "top" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="max-h-56 space-y-3 overflow-y-auto pt-2">
+                          {/* Next 12h: compact alerts, or one quiet line when stable */}
+                          <section className="space-y-1.5">
+                            <h3 className="font-mono text-nano font-bold tracking-wider text-muted-foreground uppercase">
+                              {ai.shortRangeDisturbances}
+                            </h3>
+                            {shortRangeAlerts.length > 0 ? (
+                              shortRangeAlerts.map((alert, idx) => (
+                                <Alert
+                                  key={`${alert.title}-${idx}`}
+                                  variant="destructive"
+                                  className="gap-y-0.5 px-2.5 py-2"
+                                >
+                                  <AlertCircle />
+                                  <AlertTitle className="flex items-center justify-between gap-2 text-xs">
+                                    <span className="truncate">
+                                      {alert.title}
+                                    </span>
+                                    <Badge
+                                      variant="destructive"
+                                      className="shrink-0 font-mono text-nano"
+                                    >
+                                      {alert.timing}
+                                    </Badge>
+                                  </AlertTitle>
+                                  <AlertDescription className="text-mini">
+                                    <p className="line-clamp-2 text-foreground">
+                                      {alert.detail}
+                                    </p>
+                                    <p className="line-clamp-2">
+                                      <span className="font-semibold text-foreground">
+                                        {ai.guidanceLabel}
+                                      </span>{" "}
+                                      {alert.action}
+                                    </p>
+                                  </AlertDescription>
+                                </Alert>
+                              ))
+                            ) : (
+                              <p className="text-mini text-muted-foreground">
+                                {ai.stabilityHigh}
+                              </p>
+                            )}
+                          </section>
 
-                              <MessageScrollerItem messageId={`${item.id}-a`}>
-                                <Message>
-                                  <MessageAvatar className="size-8 rounded-full bg-primary/10 text-primary">
-                                    <Bot className="size-5" />
-                                  </MessageAvatar>
-                                  <MessageContent>
-                                    {/* Before the first words arrive: typing status in a bubble */}
-                                    {!item.answer &&
-                                      item.status === "streaming" && (
-                                        <Bubble variant="muted">
-                                          <BubbleContent
-                                            role="status"
-                                            className="flex items-center gap-1.5 text-muted-foreground"
-                                          >
-                                            <TypingStatus label={ai.typing} />
-                                          </BubbleContent>
-                                        </Bubble>
-                                      )}
-                                    {item.answer && (
-                                      <Bubble variant="muted">
-                                        <BubbleContent className="leading-relaxed whitespace-pre-line">
-                                          <StreamingText
-                                            text={item.answer}
-                                            streaming={
-                                              item.status === "streaming"
-                                            }
-                                          />
-                                        </BubbleContent>
-                                        {item.reaction && (
-                                          <BubbleReactions
-                                            align="start"
-                                            className="rounded-full"
-                                          >
-                                            <span
-                                              role="img"
-                                              aria-label={
-                                                item.reaction === "up"
-                                                  ? ai.helpful
-                                                  : ai.notHelpful
-                                              }
-                                              className="text-xs"
-                                            >
-                                              {item.reaction === "up"
-                                                ? "👍"
-                                                : "👎"}
-                                            </span>
-                                          </BubbleReactions>
-                                        )}
-                                      </Bubble>
-                                    )}
-                                    {item.answer &&
-                                      item.status === "streaming" && (
-                                        <MessageFooter
-                                          role="status"
-                                          className="gap-1.5 font-normal"
-                                        >
-                                          <TypingStatus label={ai.typing} />
-                                        </MessageFooter>
-                                      )}
-                                    {item.status !== "streaming" && (
-                                      <MessageFooter
-                                        className={`gap-0.5 ${HOVER_ACTIONS}`}
+                          {/* Tomorrow / weekend: two compact items side by side */}
+                          <section className="space-y-1.5">
+                            <h3 className="font-mono text-nano font-bold tracking-wider text-muted-foreground uppercase">
+                              {ai.plannedShiftsTitle}
+                            </h3>
+                            <ItemGroup className="grid grid-cols-2 gap-1.5">
+                              {outlook.map((shift, idx) => (
+                                <Item
+                                  key={idx}
+                                  variant="outline"
+                                  size="xs"
+                                  className="items-start"
+                                >
+                                  <ItemContent className="min-w-0 gap-1">
+                                    <ItemTitle className="flex w-full items-center justify-between gap-1.5">
+                                      <span className="truncate">
+                                        {shift.period}
+                                      </span>
+                                      <Badge
+                                        variant="outline"
+                                        className="shrink-0 border-primary/30 font-mono text-nano text-primary"
                                       >
-                                        <ActionButton
-                                          label={ai.helpful}
-                                          aria-pressed={item.reaction === "up"}
-                                          onClick={() => react(item.id, "up")}
-                                          className={
-                                            item.reaction === "up"
-                                              ? "text-primary"
-                                              : ""
-                                          }
-                                        >
-                                          <ThumbsUp />
-                                        </ActionButton>
-                                        <ActionButton
-                                          label={ai.notHelpful}
-                                          aria-pressed={
-                                            item.reaction === "down"
-                                          }
-                                          onClick={() => react(item.id, "down")}
-                                          className={
-                                            item.reaction === "down"
-                                              ? "text-destructive"
-                                              : ""
-                                          }
-                                        >
-                                          <ThumbsDown />
-                                        </ActionButton>
+                                        {shift.temperatureShift}
+                                      </Badge>
+                                    </ItemTitle>
+                                    <ItemDescription className="line-clamp-2 text-mini text-foreground">
+                                      {shift.summary}
+                                    </ItemDescription>
+                                    <p className="truncate text-nano text-muted-foreground">
+                                      {ai.precipRiskLabel}{" "}
+                                      <span className="text-foreground">
+                                        {shift.precipitationRisk}
+                                      </span>
+                                    </p>
+                                  </ItemContent>
+                                </Item>
+                              ))}
+                            </ItemGroup>
+                          </section>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <CardContent
+                  data-lenis-prevent
+                  className="min-h-0 flex-1 overflow-hidden p-0"
+                >
+                  {answers.length === 0 ? (
+                    <Empty className="h-full border-0">
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <Bot />
+                        </EmptyMedia>
+                        <EmptyDescription>{ai.greeting}</EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
+                  ) : (
+                    // Conversation: questions on the end side, AI answers with an
+                    // avatar; actions appear on hover/focus (always on touch).
+                    <MessageScroller>
+                      <MessageScrollerViewport>
+                        <MessageScrollerContent
+                          aria-busy={answers.some(
+                            (a) => a.status === "streaming"
+                          )}
+                          className="gap-3 p-3"
+                        >
+                          {[...answers].reverse().map((item) => {
+                            const repliedTo = item.replyToId
+                              ? byId.get(item.replyToId)
+                              : undefined
+                            return (
+                              <React.Fragment key={item.id}>
+                                <MessageScrollerItem
+                                  messageId={`${item.id}-q`}
+                                  scrollAnchor
+                                >
+                                  <Message align="end">
+                                    <MessageContent>
+                                      {repliedTo && (
+                                        <MessageHeader className="font-normal">
+                                          <JumpToMessage
+                                            messageId={`${repliedTo.id}-a`}
+                                            className="h-auto max-w-full gap-1 px-1.5 py-0.5 font-normal text-muted-foreground"
+                                          >
+                                            <Reply className="size-3 shrink-0 -scale-x-100 rtl:scale-x-100" />
+                                            <span className="truncate">
+                                              {ai.replyingTo}:{" "}
+                                              {snippet(repliedTo.answer)}
+                                            </span>
+                                          </JumpToMessage>
+                                        </MessageHeader>
+                                      )}
+                                      <Bubble>
+                                        <BubbleContent>
+                                          {item.question}
+                                        </BubbleContent>
+                                      </Bubble>
+                                      <MessageFooter className={HOVER_ACTIONS}>
                                         <WithTooltip label={ai.copy}>
                                           <CopyButton
-                                            value={item.answer}
+                                            value={item.question}
                                             variant="ghost"
                                             size="icon-xs"
                                             title=""
@@ -652,119 +598,267 @@ export function AiAdvisorDialog({
                                             copiedLabel={ai.copied}
                                           />
                                         </WithTooltip>
-                                        {item.status === "done" && (
-                                          <ActionButton
-                                            label={ai.reply}
-                                            onClick={() => startReply(item)}
-                                          >
-                                            <Reply />
-                                          </ActionButton>
-                                        )}
-                                        {item.status === "fallback" && (
-                                          <Badge
-                                            variant="outline"
-                                            className="ms-1 font-mono text-nano uppercase"
-                                          >
-                                            {ai.basicBadge}
-                                          </Badge>
-                                        )}
                                       </MessageFooter>
-                                    )}
-                                  </MessageContent>
-                                </Message>
-                              </MessageScrollerItem>
-                            </React.Fragment>
-                          )
-                        })}
-                      </MessageScrollerContent>
-                    </MessageScrollerViewport>
-                    <MessageScrollerButton />
-                  </MessageScroller>
-                </MessageScrollerProvider>
-              )}
+                                    </MessageContent>
+                                  </Message>
+                                </MessageScrollerItem>
 
-              {/* Reply target shown above the composer */}
-              {replyTo && (
-                <div className="flex items-center gap-2 border-s-2 border-primary bg-muted/30 px-2.5 py-1.5 text-mini">
-                  <Reply className="size-3 shrink-0 -scale-x-100 text-primary rtl:scale-x-100" />
-                  <span className="min-w-0 flex-1 truncate text-muted-foreground">
-                    <span className="font-semibold text-foreground">
-                      {ai.replyingTo}:
-                    </span>{" "}
-                    {snippet(replyTo.answer)}
-                  </span>
-                  <ActionButton
-                    label={ai.cancelReply}
-                    onClick={() => setReplyTo(null)}
-                  >
-                    <X />
-                  </ActionButton>
-                </div>
-              )}
+                                <MessageScrollerItem messageId={`${item.id}-a`}>
+                                  <Message>
+                                    <MessageAvatar className="size-8 rounded-full bg-primary/10 text-primary">
+                                      <Bot className="size-5" />
+                                    </MessageAvatar>
+                                    <MessageContent>
+                                      {/* Before the first words arrive: typing status in a bubble */}
+                                      {!item.answer &&
+                                        item.status === "streaming" && (
+                                          <Bubble variant="muted">
+                                            <BubbleContent
+                                              role="status"
+                                              className="flex items-center gap-1.5 text-muted-foreground"
+                                            >
+                                              <TypingStatus label={ai.typing} />
+                                            </BubbleContent>
+                                          </Bubble>
+                                        )}
+                                      {item.answer && (
+                                        <Bubble variant="muted">
+                                          <BubbleContent className="leading-relaxed whitespace-pre-line">
+                                            <StreamingText
+                                              text={item.answer}
+                                              streaming={
+                                                item.status === "streaming"
+                                              }
+                                            />
+                                          </BubbleContent>
+                                          {item.reaction && (
+                                            <BubbleReactions
+                                              align="start"
+                                              className="rounded-full"
+                                            >
+                                              <span
+                                                role="img"
+                                                aria-label={
+                                                  item.reaction === "up"
+                                                    ? ai.helpful
+                                                    : ai.notHelpful
+                                                }
+                                                className="text-xs"
+                                              >
+                                                {item.reaction === "up"
+                                                  ? "👍"
+                                                  : "👎"}
+                                              </span>
+                                            </BubbleReactions>
+                                          )}
+                                        </Bubble>
+                                      )}
+                                      {item.answer &&
+                                        item.status === "streaming" && (
+                                          <MessageFooter
+                                            role="status"
+                                            className="gap-1.5 font-normal"
+                                          >
+                                            <TypingStatus label={ai.typing} />
+                                          </MessageFooter>
+                                        )}
+                                      {item.status !== "streaming" && (
+                                        <MessageFooter
+                                          className={`gap-0.5 ${HOVER_ACTIONS}`}
+                                        >
+                                          <ActionButton
+                                            label={ai.helpful}
+                                            aria-pressed={
+                                              item.reaction === "up"
+                                            }
+                                            onClick={() => react(item.id, "up")}
+                                            className={
+                                              item.reaction === "up"
+                                                ? "text-primary"
+                                                : ""
+                                            }
+                                          >
+                                            <ThumbsUp />
+                                          </ActionButton>
+                                          <ActionButton
+                                            label={ai.notHelpful}
+                                            aria-pressed={
+                                              item.reaction === "down"
+                                            }
+                                            onClick={() =>
+                                              react(item.id, "down")
+                                            }
+                                            className={
+                                              item.reaction === "down"
+                                                ? "text-destructive"
+                                                : ""
+                                            }
+                                          >
+                                            <ThumbsDown />
+                                          </ActionButton>
+                                          <WithTooltip label={ai.copy}>
+                                            <CopyButton
+                                              value={item.answer}
+                                              variant="ghost"
+                                              size="icon-xs"
+                                              title=""
+                                              aria-label={ai.copy}
+                                              copyLabel={ai.copy}
+                                              copiedLabel={ai.copied}
+                                            />
+                                          </WithTooltip>
+                                          {item.status === "done" && (
+                                            <ActionButton
+                                              label={ai.reply}
+                                              onClick={() => startReply(item)}
+                                            >
+                                              <Reply />
+                                            </ActionButton>
+                                          )}
+                                          {item.status === "fallback" && (
+                                            <Badge
+                                              variant="outline"
+                                              className="ms-1 font-mono text-nano uppercase"
+                                            >
+                                              {ai.basicBadge}
+                                            </Badge>
+                                          )}
+                                        </MessageFooter>
+                                      )}
+                                    </MessageContent>
+                                  </Message>
+                                </MessageScrollerItem>
+                              </React.Fragment>
+                            )
+                          })}
+                        </MessageScrollerContent>
+                      </MessageScrollerViewport>
+                      <MessageScrollerButton />
+                    </MessageScroller>
+                  )}
+                </CardContent>
 
-              <form onSubmit={handleSubmit} className="pt-1">
-                {/* States: offline = whole group disabled; asking = spinner + Stop;
-            empty = Ask disabled; counter near the length limit. */}
-                <InputGroup data-disabled={!online} aria-busy={isAsking}>
-                  <InputGroupAddon>
-                    {isAsking ? (
-                      <Spinner className="text-primary" />
-                    ) : (
-                      <Sparkles className="text-primary" aria-hidden />
-                    )}
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    ref={inputRef}
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape" && replyTo) {
-                        e.preventDefault()
-                        setReplyTo(null)
-                      }
-                    }}
-                    disabled={!online}
-                    placeholder={
-                      online ? ai.chatPlaceholder : ai.offlinePlaceholder
-                    }
-                    aria-label={ai.chatPlaceholder}
-                    maxLength={MAX_QUESTION_LENGTH}
-                    className="font-mono text-xs"
-                  />
-                  <InputGroupAddon align="inline-end">
-                    {question.length > MAX_QUESTION_LENGTH * 0.8 && (
-                      <span
-                        aria-live="polite"
-                        className={`font-mono text-nano tabular-nums ${question.length >= MAX_QUESTION_LENGTH ? "text-destructive" : ""}`}
+                <CardFooter className="shrink-0 flex-col gap-2 border-t border-border py-3">
+                  {/* Quick questions: one scrollable row */}
+                  <div className="flex w-full [scrollbar-width:none] gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+                    {[
+                      ai.quickQuestionUmbrella,
+                      ai.quickQuestionWear,
+                      ai.quickQuestionExercise,
+                      ai.quickQuestionTomorrow,
+                    ].map((q, idx) => {
+                      const asked = askedQuestions.has(q.trim().toLowerCase())
+                      return (
+                        <Button
+                          key={idx}
+                          variant="accent"
+                          size="xs"
+                          disabled={asked || isAsking || !online}
+                          onClick={() => answerQuery(q)}
+                          className="rounded-full font-mono text-mini"
+                        >
+                          {asked && (
+                            <Check className="text-primary" aria-hidden />
+                          )}
+                          {q}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                  {/* Reply target: click to jump to the original answer */}
+                  {replyTo && (
+                    <div className="flex w-full items-center gap-1 border-s-2 border-primary bg-muted/30 ps-1.5 text-mini">
+                      <Reply className="size-3 shrink-0 -scale-x-100 text-primary rtl:scale-x-100" />
+                      <JumpToMessage
+                        messageId={`${replyTo.id}-a`}
+                        className="h-auto min-w-0 flex-1 justify-start px-1 py-1 text-mini font-normal text-muted-foreground"
                       >
-                        {question.length}/{MAX_QUESTION_LENGTH}
-                      </span>
-                    )}
-                    {isAsking ? (
-                      <InputGroupButton
-                        type="button"
-                        variant="outline"
-                        onClick={stop}
-                        className="font-mono"
+                        <span className="truncate">
+                          <span className="font-semibold text-foreground">
+                            {ai.replyingTo}:
+                          </span>{" "}
+                          {snippet(replyTo.answer)}
+                        </span>
+                      </JumpToMessage>
+                      <ActionButton
+                        label={ai.cancelReply}
+                        onClick={() => setReplyTo(null)}
                       >
-                        <Square className="fill-current" />
-                        <span>{ai.stop}</span>
-                      </InputGroupButton>
-                    ) : (
-                      <InputGroupButton
-                        type="submit"
-                        variant="default"
-                        disabled={!online || !question.trim()}
-                        className="font-mono"
-                      >
-                        <Send />
-                        <span>{ai.askButton}</span>
-                      </InputGroupButton>
-                    )}
-                  </InputGroupAddon>
-                </InputGroup>
-              </form>
-            </div>
+                        <X />
+                      </ActionButton>
+                    </div>
+                  )}
+                  <form onSubmit={handleSubmit} className="w-full">
+                    {/* States: offline = disabled; asking = spinner + Stop; empty = Ask
+                        disabled; counter near the limit. Enter sends, Shift+Enter = newline. */}
+                    <InputGroup data-disabled={!online} aria-busy={isAsking}>
+                      <InputGroupTextarea
+                        ref={inputRef}
+                        rows={2}
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (
+                            e.key === "Enter" &&
+                            !e.shiftKey &&
+                            !e.nativeEvent.isComposing
+                          ) {
+                            e.preventDefault()
+                            e.currentTarget.form?.requestSubmit()
+                          } else if (e.key === "Escape" && replyTo) {
+                            e.preventDefault()
+                            setReplyTo(null)
+                          }
+                        }}
+                        disabled={!online}
+                        placeholder={
+                          online ? ai.chatPlaceholder : ai.offlinePlaceholder
+                        }
+                        aria-label={ai.chatPlaceholder}
+                        maxLength={MAX_QUESTION_LENGTH}
+                        className="max-h-32 min-h-14 font-mono text-xs"
+                      />
+                      <InputGroupAddon align="block-end" className="gap-2 pt-1">
+                        {isAsking ? (
+                          <Spinner className="text-primary" />
+                        ) : (
+                          <Sparkles className="text-primary" aria-hidden />
+                        )}
+                        {question.length > MAX_QUESTION_LENGTH * 0.8 && (
+                          <span
+                            aria-live="polite"
+                            className={`font-mono text-nano tabular-nums ${question.length >= MAX_QUESTION_LENGTH ? "text-destructive" : ""}`}
+                          >
+                            {question.length}/{MAX_QUESTION_LENGTH}
+                          </span>
+                        )}
+                        {isAsking ? (
+                          <InputGroupButton
+                            type="button"
+                            variant="outline"
+                            onClick={stop}
+                            className="ms-auto font-mono"
+                          >
+                            <Square className="fill-current" />
+                            <span>{ai.stop}</span>
+                          </InputGroupButton>
+                        ) : (
+                          <InputGroupButton
+                            type="submit"
+                            variant="default"
+                            disabled={!online || !question.trim()}
+                            className="ms-auto font-mono"
+                          >
+                            <Send />
+                            <span>{ai.askButton}</span>
+                          </InputGroupButton>
+                        )}
+                      </InputGroupAddon>
+                    </InputGroup>
+                  </form>
+                </CardFooter>
+              </Card>
+            </MessageScrollerProvider>
           </motion.div>
         )}
       </AnimatePresence>
@@ -774,8 +868,24 @@ export function AiAdvisorDialog({
 
 // Panel grows out of the button's corner: spring on scale/opacity with a
 // slight rise and blur. Reduced motion falls back to a short fade.
-const PANEL_HIDDEN = { opacity: 0, scale: 0.9, y: 16, filter: "blur(4px)" }
-const PANEL_SHOWN = { opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }
+const PANEL_HIDDEN = {
+  opacity: 0,
+  scale: 0.9,
+  y: 16,
+  height: 0,
+  filter: "blur(4px)",
+}
+const PANEL_SHOWN = {
+  opacity: 1,
+  scale: 1,
+  y: 0,
+  height: "auto",
+  filter: "blur(0px)",
+}
+// Briefing details: height 0 -> auto with scale/opacity.
+const COLLAPSED = { height: 0, opacity: 0, scale: 0.97 }
+const EXPANDED = { height: "auto", opacity: 1, scale: 1 }
+const HEIGHT_SPRING = { type: "spring", stiffness: 420, damping: 36 } as const
 const PANEL_SPRING = {
   type: "spring",
   stiffness: 380,
@@ -794,6 +904,46 @@ const MAX_QUESTION_LENGTH = 500
 /** Hover/focus reveal for message actions; always visible without a hover-capable pointer. */
 const HOVER_ACTIONS =
   "opacity-0 transition-opacity group-hover/message:opacity-100 group-focus-within/message:opacity-100 [@media(hover:none)]:opacity-100"
+
+/**
+ * Smooth-scrolls the chat to a message and briefly highlights its bubble.
+ * Must render inside MessageScrollerProvider.
+ */
+function JumpToMessage({
+  messageId,
+  className,
+  children,
+}: {
+  messageId: string
+  className?: string
+  children: React.ReactNode
+}) {
+  const { scrollToMessage } = useMessageScroller()
+  const reduceMotion = useReducedMotion()
+  return (
+    <Button
+      variant="ghost"
+      size="xs"
+      className={className}
+      onClick={() => {
+        scrollToMessage(messageId, {
+          align: "center",
+          behavior: reduceMotion ? "auto" : "smooth",
+        })
+        const bubble = document.querySelector<HTMLElement>(
+          `[data-message-id="${CSS.escape(messageId)}"] [data-slot="bubble-content"]`
+        )
+        if (!bubble) return
+        bubble.classList.add(...JUMP_HIGHLIGHT)
+        setTimeout(() => bubble.classList.remove(...JUMP_HIGHLIGHT), 1600)
+      }}
+    >
+      {children}
+    </Button>
+  )
+}
+
+const JUMP_HIGHLIGHT = ["ring-2", "ring-primary"]
 
 /** Wraps a control with a tooltip showing `label`. */
 function WithTooltip({

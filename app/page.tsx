@@ -133,9 +133,8 @@ export default function WeatherDashboardPage() {
     onUnitRestore,
   })
 
-  // Lock background scroll while the (modal) settings dialog is open; the AI
-  // advisor panel is non-modal so the page stays scrollable.
-  useScrollLock(showSettings)
+  // Lock background scroll while settings or the AI advisor panel is open
+  useScrollLock(showSettings || showAiAdvisor)
 
   // GPS Locate with URL update. If location request is denied, cascades to network location.
   const handleLocate = useCallback(async () => {

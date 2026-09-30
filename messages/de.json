@@ -652,7 +652,9 @@
     "helpful": "Hilfreich",
     "notHelpful": "Nicht hilfreich",
     "stop": "Stopp",
-    "offlinePlaceholder": "Du bist offline. Verbinde dich erneut, um die KI zu fragen."
+    "offlinePlaceholder": "Du bist offline. Verbinde dich erneut, um die KI zu fragen.",
+    "greeting": "Hi! Frag mich nach dem Wetter an jedem Ort, jetzt oder in den nächsten zwei Wochen. Zum Beispiel: „Regnet es am Samstag in Tokio?“ oder „Wie heiß wird es morgen in Delhi?“",
+    "briefingLabel": "Heutige Übersicht"
   },
   "notifications": {
     "title": "Benachrichtigungscenter",

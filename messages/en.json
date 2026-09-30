@@ -652,7 +652,9 @@
     "helpful": "Helpful",
     "notHelpful": "Not helpful",
     "stop": "Stop",
-    "offlinePlaceholder": "You're offline. Reconnect to ask the AI."
+    "offlinePlaceholder": "You're offline. Reconnect to ask the AI.",
+    "greeting": "Hi! Ask me about the weather anywhere, now or in the next two weeks. For example: “Will it rain in Tokyo on Saturday?” or “How hot will Delhi get tomorrow?”",
+    "briefingLabel": "Today's briefing"
   },
   "notifications": {
     "title": "Notification Center",

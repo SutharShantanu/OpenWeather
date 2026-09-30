@@ -652,7 +652,9 @@
     "helpful": "Membantu",
     "notHelpful": "Tidak membantu",
     "stop": "Henti",
-    "offlinePlaceholder": "Anda di luar talian. Sambung semula untuk bertanya kepada AI."
+    "offlinePlaceholder": "Anda di luar talian. Sambung semula untuk bertanya kepada AI.",
+    "greeting": "Hai! Tanya saya tentang cuaca di mana-mana, sekarang atau dua minggu akan datang. Contohnya: “Adakah Tokyo hujan pada hari Sabtu?” atau “Sepanas mana Delhi esok?”",
+    "briefingLabel": "Ringkasan hari ini"
   },
   "notifications": {
     "title": "Pusat Pemberitahuan",

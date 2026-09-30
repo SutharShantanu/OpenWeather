@@ -652,7 +652,9 @@
     "helpful": "Útil",
     "notHelpful": "No útil",
     "stop": "Detener",
-    "offlinePlaceholder": "Estás sin conexión. Vuelve a conectarte para preguntar a la IA."
+    "offlinePlaceholder": "Estás sin conexión. Vuelve a conectarte para preguntar a la IA.",
+    "greeting": "¡Hola! Pregúntame por el tiempo en cualquier lugar, ahora o en las próximas dos semanas. Por ejemplo: «¿Lloverá en Tokio el sábado?» o «¿Cuánto calor hará mañana en Delhi?»",
+    "briefingLabel": "Resumen de hoy"
   },
   "notifications": {
     "title": "Centro de notificaciones",

@@ -652,7 +652,9 @@
     "helpful": "Hjälpsamt",
     "notHelpful": "Inte hjälpsamt",
     "stop": "Stoppa",
-    "offlinePlaceholder": "Du är offline. Anslut igen för att fråga AI:n."
+    "offlinePlaceholder": "Du är offline. Anslut igen för att fråga AI:n.",
+    "greeting": "Hej! Fråga mig om vädret var som helst, nu eller de kommande två veckorna. Till exempel: ”Regnar det i Tokyo på lördag?” eller ”Hur varmt blir det i Delhi i morgon?”",
+    "briefingLabel": "Dagens översikt"
   },
   "notifications": {
     "title": "Notiscenter",

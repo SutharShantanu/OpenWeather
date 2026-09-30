@@ -652,7 +652,9 @@
     "helpful": "役に立った",
     "notHelpful": "役に立たなかった",
     "stop": "停止",
-    "offlinePlaceholder": "オフラインです。AIに質問するには再接続してください。"
+    "offlinePlaceholder": "オフラインです。AIに質問するには再接続してください。",
+    "greeting": "こんにちは！どこの天気でも、今から2週間先まで聞いてください。例：「土曜日の東京は雨？」「明日のデリーはどれくらい暑い？」",
+    "briefingLabel": "今日の概要"
   },
   "notifications": {
     "title": "通知センター",

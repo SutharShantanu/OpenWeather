@@ -652,7 +652,9 @@
     "helpful": "Util",
     "notHelpful": "Nu este util",
     "stop": "Oprește",
-    "offlinePlaceholder": "Ești offline. Reconectează-te pentru a întreba AI."
+    "offlinePlaceholder": "Ești offline. Reconectează-te pentru a întreba AI.",
+    "greeting": "Salut! Întreabă-mă despre vreme oriunde, acum sau în următoarele două săptămâni. De exemplu: „Plouă sâmbătă la Tokyo?” sau „Cât de cald va fi mâine în Delhi?”",
+    "briefingLabel": "Rezumatul zilei"
   },
   "notifications": {
     "title": "Centru de notificări",

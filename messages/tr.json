@@ -652,7 +652,9 @@
     "helpful": "Faydalı",
     "notHelpful": "Faydalı değil",
     "stop": "Durdur",
-    "offlinePlaceholder": "Çevrimdışısınız. YZ'ye sormak için yeniden bağlanın."
+    "offlinePlaceholder": "Çevrimdışısınız. YZ'ye sormak için yeniden bağlanın.",
+    "greeting": "Merhaba! Her yerin havasını, şimdi ya da önümüzdeki iki hafta için sorabilirsin. Örneğin: “Cumartesi Tokyo'da yağmur yağacak mı?” veya “Yarın Delhi ne kadar sıcak olacak?”",
+    "briefingLabel": "Bugünün özeti"
   },
   "notifications": {
     "title": "Bildirim Merkezi",

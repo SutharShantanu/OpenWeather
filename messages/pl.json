@@ -652,7 +652,9 @@
     "helpful": "Pomocne",
     "notHelpful": "Niepomocne",
     "stop": "Zatrzymaj",
-    "offlinePlaceholder": "Jesteś offline. Połącz się ponownie, aby zapytać AI."
+    "offlinePlaceholder": "Jesteś offline. Połącz się ponownie, aby zapytać AI.",
+    "greeting": "Cześć! Zapytaj mnie o pogodę w dowolnym miejscu, teraz lub w ciągu najbliższych dwóch tygodni. Na przykład: „Czy w sobotę będzie padać w Tokio?” albo „Jak gorąco będzie jutro w Delhi?”",
+    "briefingLabel": "Dzisiejsze podsumowanie"
   },
   "notifications": {
     "title": "Centrum powiadomień",

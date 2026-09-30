@@ -652,7 +652,9 @@
     "helpful": "Užitečné",
     "notHelpful": "Neužitečné",
     "stop": "Zastavit",
-    "offlinePlaceholder": "Jste offline. Pro dotaz na AI se znovu připojte."
+    "offlinePlaceholder": "Jste offline. Pro dotaz na AI se znovu připojte.",
+    "greeting": "Ahoj! Zeptej se mě na počasí kdekoli, teď nebo v příštích dvou týdnech. Například: „Bude v sobotu pršet v Tokiu?“ nebo „Jak teplo bude zítra v Dillí?“",
+    "briefingLabel": "Dnešní přehled"
   },
   "notifications": {
     "title": "Centrum oznámení",
