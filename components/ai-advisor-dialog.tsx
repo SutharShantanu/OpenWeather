@@ -417,9 +417,8 @@ export function AiAdvisorDialog({
                             <Bot className="size-5" />
                           </MessageAvatar>
                           <MessageContent>
-                            {item.status === "streaming" && !item.answer ? (
-                              <TypingIndicator label={ai.typing} />
-                            ) : (
+                            {/* Before the first words arrive only the typing line shows */}
+                            {item.answer && (
                               <Bubble variant="muted">
                                 <BubbleContent className="leading-relaxed whitespace-pre-line">
                                   <StreamingText
@@ -452,8 +451,9 @@ export function AiAdvisorDialog({
                                 role="status"
                                 className="gap-1.5 font-normal"
                               >
-                                <Spinner className="size-3" />
-                                {ai.typing}
+                                {/* "AI is typing" + animated dots (label's own ellipsis dropped) */}
+                                <span>{ai.typing.replace(/[.…]+$/, "")}</span>
+                                <TypingDots />
                               </MessageFooter>
                             )}
                             {item.status !== "streaming" && (
@@ -606,21 +606,7 @@ function ActionButton({
   )
 }
 
-/** Three pulsing dots shown until the first words of an answer arrive. */
-function TypingIndicator({ label }: { label: string }) {
-  return (
-    <Bubble variant="muted">
-      <BubbleContent
-        role="status"
-        aria-label={label}
-        className="flex h-7 items-center"
-      >
-        <TypingDots />
-      </BubbleContent>
-    </Bubble>
-  )
-}
-
+/** Three bouncing dots (pulse with reduced motion) for the typing status. */
 function TypingDots({ className = "" }: { className?: string }) {
   return (
     <span aria-hidden className={`inline-flex items-center gap-1 ${className}`}>
@@ -638,7 +624,6 @@ function TypingDots({ className = "" }: { className?: string }) {
 /**
  * Reveals streamed text progressively. Gemini sends whole sentences at a time,
  * so this types them out, catching up faster the further behind it is.
- * Typing dots trail the text until the answer is complete and fully shown.
  */
 export function StreamingText({
   text,
@@ -664,12 +649,5 @@ export function StreamingText({
     return () => cancelAnimationFrame(frame)
   }, [shown, text.length, reduceMotion])
 
-  const visible = reduceMotion ? text : text.slice(0, shown)
-  const typing = streaming || visible.length < text.length
-  return (
-    <>
-      {visible}
-      {typing && <TypingDots className="ms-1.5 align-middle" />}
-    </>
-  )
+  return <>{reduceMotion ? text : text.slice(0, shown)}</>
 }
