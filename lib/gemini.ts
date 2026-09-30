@@ -25,22 +25,44 @@ export function isGeminiConfigured() {
   return Boolean(process.env.GEMINI_API_KEY)
 }
 
+/** A content part as Gemini sends/expects it (text, function call or response). */
+export interface GeminiPart {
+  text?: string
+  functionCall?: { name: string; args?: Record<string, unknown> }
+  functionResponse?: { name: string; response: Record<string, unknown> }
+  /** Opaque; must be sent back unchanged with the part it came with. */
+  thoughtSignature?: string
+}
+
+export type GeminiMessage =
+  | { role: "user" | "model"; text: string }
+  | { role: "user" | "model"; parts: GeminiPart[] }
+
+export interface GeminiFunctionDeclaration {
+  name: string
+  description: string
+  parameters: Record<string, unknown>
+}
+
 export interface GeminiRequest {
   system: string
   /** Earlier turns first, the new user message last. */
-  messages: { role: "user" | "model"; text: string }[]
+  messages: GeminiMessage[]
   /** Gemini responseSchema; when set the reply is JSON. */
   schema?: Record<string, unknown>
+  /** Functions the model may call (function calling). */
+  tools?: GeminiFunctionDeclaration[]
   signal?: AbortSignal
 }
 
-function body({ system, messages, schema }: GeminiRequest) {
+function body({ system, messages, schema, tools }: GeminiRequest) {
   return JSON.stringify({
     systemInstruction: { parts: [{ text: system }] },
     contents: messages.map((m) => ({
       role: m.role,
-      parts: [{ text: m.text }],
+      parts: "parts" in m ? m.parts : [{ text: m.text }],
     })),
+    ...(tools?.length && { tools: [{ functionDeclarations: tools }] }),
     generationConfig: {
       temperature: 0.4,
       maxOutputTokens: 1024,
@@ -92,16 +114,19 @@ export async function geminiGenerate(req: GeminiRequest): Promise<string> {
   return text
 }
 
-/** Streams reply text chunks as they are generated (server-sent events from Gemini). */
+/**
+ * Streams the reply as it is generated (server-sent events from Gemini), one
+ * content part at a time: text chunks, and function calls when `tools` are set.
+ */
 export async function geminiStream(
   req: GeminiRequest
-): Promise<ReadableStream<string>> {
+): Promise<ReadableStream<GeminiPart>> {
   const res = await request("streamGenerateContent?alt=sse", req, 60_000)
   const reader = res.body!.pipeThrough(new TextDecoderStream()).getReader()
   let buffer = ""
 
-  return new ReadableStream<string>({
-    // Keep reading until text is emitted or the upstream ends: a pull that
+  return new ReadableStream<GeminiPart>({
+    // Keep reading until a part is emitted or the upstream ends: a pull that
     // returns without enqueueing is not called again, which would stall the stream.
     async pull(controller) {
       for (;;) {
@@ -115,13 +140,12 @@ export async function geminiStream(
           const line = event.split("\n").find((l) => l.startsWith("data:"))
           if (!line) continue
           try {
-            const parts =
+            const parts: GeminiPart[] =
               JSON.parse(line.slice(5))?.candidates?.[0]?.content?.parts ?? []
-            const text = parts
-              .map((p: { text?: string }) => p.text ?? "")
-              .join("")
-            if (text) {
-              controller.enqueue(text)
+            for (const part of parts) {
+              if (!part.text && !part.functionCall && !part.thoughtSignature)
+                continue
+              controller.enqueue(part)
               emitted = true
             }
           } catch {

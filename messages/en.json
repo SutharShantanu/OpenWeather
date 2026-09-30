@@ -580,7 +580,7 @@
     "outdoorActivity": "Outdoor Activity",
     "tomorrowShift": "Tomorrow Shift",
     "dialogTitle": "AI Synoptic Weather Intelligence",
-    "dialogDesc": "Predictive pattern analytics for sudden shifts, lifestyle planning & advisory for {cityName}",
+    "dialogDesc": "Predictive pattern analytics for sudden shifts & advisory for {cityName}",
     "shortRangeDisturbances": "Short-Range Sudden Disturbances (Next 6-12h)",
     "guidanceLabel": "Guidance:",
     "stabilityHigh": "Atmospheric stability is high. No sudden cold fronts, squalls, or rapid precipitation onset detected.",

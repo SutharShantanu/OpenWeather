@@ -481,11 +481,11 @@ export function AiAdvisorDialog({
                     return (
                       <Button
                         key={idx}
-                        variant="outline"
+                        variant="accent"
                         size="xs"
                         disabled={asked || isAsking || !online}
                         onClick={() => answerQuery(q)}
-                        className="h-6 font-mono text-mini"
+                        className="font-mono text-mini rounded-full"
                       >
                         {asked && (
                           <Check className="text-primary" aria-hidden />

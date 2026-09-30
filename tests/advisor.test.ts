@@ -224,6 +224,60 @@ describe("/api/advisor", () => {
     expect(await res.text()).toBe("Stay dry.")
   })
 
+  it("runs get_weather when Gemini asks and streams the final answer", async () => {
+    const sse = (parts: object[]) =>
+      new Response(`data: ${JSON.stringify({ candidates: [{ content: { parts } }] })}\r\n\r\n`)
+    const geminiBodies: Record<string, unknown>[] = []
+    let geminiCalls = 0
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.includes("generativelanguage")) {
+        geminiBodies.push(JSON.parse(String(init?.body)))
+        geminiCalls++
+        return geminiCalls === 1
+          ? sse([
+              {
+                functionCall: { name: "get_weather", args: { location: "Tokyo, Japan", start_date: "2026-10-03" } },
+                thoughtSignature: "sig-123",
+              },
+            ])
+          : sse([{ text: "Tokyo on Saturday: dry, high 72 °F." }])
+      }
+      if (url.includes("/search?")) {
+        return Response.json({ results: [{ name: "Tokyo", country: "Japan", latitude: 35.7, longitude: 139.7 }] })
+      }
+      if (url.includes("/forecast?")) {
+        expect(url).toContain("start_date=2026-10-03")
+        expect(url).toContain("temperature_unit=celsius")
+        return Response.json({
+          timezone: "Asia/Tokyo",
+          daily: { time: ["2026-10-03"], weather_code: [3], temperature_2m_max: [22.4], temperature_2m_min: [17] },
+          hourly: { time: [] },
+        })
+      }
+      throw new Error(`unexpected fetch ${url}`)
+    })
+    vi.stubGlobal("fetch", fetchMock)
+
+    const res = await post({ mode: "ask", lang: "en", snapshot: snapshot(), question: "Tokyo on Saturday?" })
+    expect(await res.text()).toBe("Tokyo on Saturday: dry, high 72 °F.")
+    expect(geminiCalls).toBe(2)
+
+    const first = geminiBodies[0] as { tools: { functionDeclarations: { name: string }[] }[] }
+    expect(first.tools[0].functionDeclarations[0].name).toBe("get_weather")
+    // Second request echoes the model's function call (with signature) and the tool result.
+    const contents = (geminiBodies[1] as { contents: { role: string; parts: Record<string, unknown>[] }[] }).contents
+    const modelTurn = contents.at(-2)!
+    const toolTurn = contents.at(-1)!
+    expect(modelTurn.role).toBe("model")
+    expect(modelTurn.parts[0]).toMatchObject({ thoughtSignature: "sig-123", functionCall: { name: "get_weather" } })
+    expect(toolTurn.parts[0]).toMatchObject({
+      functionResponse: {
+        name: "get_weather",
+        response: { location: { name: "Tokyo" }, daily: [{ date: "2026-10-03", high: 22.4, condition: "Overcast" }] },
+      },
+    })
+  })
+
   it("sends follow-up history to Gemini and does not cache it", async () => {
     const fetchMock = vi
       .fn()
