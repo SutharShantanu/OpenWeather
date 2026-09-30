@@ -34,6 +34,14 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemTitle,
+} from "@/components/ui/item"
 import { Bubble, BubbleContent, BubbleReactions } from "@/components/ui/bubble"
 import {
   Message,
@@ -349,7 +357,7 @@ export function AiAdvisorDialog({
             {/* Body */}
             <div
               data-lenis-prevent
-              className="max-h-[min(40rem,calc(100dvh-11rem))] space-y-4 overflow-y-auto p-3"
+              className="max-h-[min(40rem,calc(100dvh-11rem))] space-y-3 overflow-y-auto p-3"
             >
               {/* Source of the analysis: live Gemini briefing or the local fallback */}
               <div
@@ -377,80 +385,85 @@ export function AiAdvisorDialog({
                 </Badge>
               </div>
 
-              {/* Sudden Shifts Section */}
-              <div className="space-y-2">
-                <div className="font-mono text-tiny font-bold tracking-wider text-muted-foreground uppercase">
+              {/* Next 12h: compact alerts, or one quiet line when stable */}
+              <section className="space-y-1.5">
+                <h3 className="font-mono text-nano font-bold tracking-wider text-muted-foreground uppercase">
                   {ai.shortRangeDisturbances}
-                </div>
+                </h3>
                 {shortRangeAlerts.length > 0 ? (
                   shortRangeAlerts.map((alert, idx) => (
-                    <div
+                    <Alert
                       key={`${alert.title}-${idx}`}
-                      className="space-y-1 border border-destructive/30 bg-destructive/10 p-3"
+                      variant="destructive"
+                      className="gap-y-0.5 px-2.5 py-2"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 font-bold text-destructive">
-                          <AlertCircle className="size-3.5" />
-                          <span>{alert.title}</span>
-                        </span>
+                      <AlertCircle />
+                      <AlertTitle className="flex items-center justify-between gap-2 text-xs">
+                        <span className="truncate">{alert.title}</span>
                         <Badge
                           variant="destructive"
-                          className="font-mono text-micro"
+                          className="shrink-0 font-mono text-nano"
                         >
                           {alert.timing}
                         </Badge>
-                      </div>
-                      <p className="text-foreground">{alert.detail}</p>
-                      <p className="text-mini text-muted-foreground">
-                        <span className="font-semibold text-foreground">
-                          {ai.guidanceLabel}
-                        </span>{" "}
-                        {alert.action}
-                      </p>
-                    </div>
+                      </AlertTitle>
+                      <AlertDescription className="text-mini">
+                        <p className="line-clamp-2 text-foreground">
+                          {alert.detail}
+                        </p>
+                        <p className="line-clamp-2">
+                          <span className="font-semibold text-foreground">
+                            {ai.guidanceLabel}
+                          </span>{" "}
+                          {alert.action}
+                        </p>
+                      </AlertDescription>
+                    </Alert>
                   ))
                 ) : (
-                  <div className="border border-border bg-muted/20 p-3 text-muted-foreground">
+                  <p className="text-mini text-muted-foreground">
                     {ai.stabilityHigh}
-                  </div>
+                  </p>
                 )}
-              </div>
+              </section>
 
-              {/* Planned Shifts Section */}
-              <div className="space-y-2">
-                <div className="font-mono text-tiny font-bold tracking-wider text-muted-foreground uppercase">
+              {/* Tomorrow / weekend: two compact items side by side */}
+              <section className="space-y-1.5">
+                <h3 className="font-mono text-nano font-bold tracking-wider text-muted-foreground uppercase">
                   {ai.plannedShiftsTitle}
-                </div>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                </h3>
+                <ItemGroup className="grid grid-cols-2 gap-1.5">
                   {outlook.map((shift, idx) => (
-                    <div
+                    <Item
                       key={idx}
-                      className="space-y-1.5 border border-border bg-muted/20 p-3"
+                      variant="outline"
+                      size="xs"
+                      className="items-start"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-foreground">
-                          {shift.period}
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className="border-primary/30 font-mono text-micro text-primary"
-                        >
-                          {shift.temperatureShift}
-                        </Badge>
-                      </div>
-                      <p className="text-mini text-foreground">
-                        {shift.summary}
-                      </p>
-                      <div className="text-tiny text-muted-foreground">
-                        {ai.precipRiskLabel}{" "}
-                        <span className="text-foreground">
-                          {shift.precipitationRisk}
-                        </span>
-                      </div>
-                    </div>
+                      <ItemContent className="min-w-0 gap-1">
+                        <ItemTitle className="flex w-full items-center justify-between gap-1.5">
+                          <span className="truncate">{shift.period}</span>
+                          <Badge
+                            variant="outline"
+                            className="shrink-0 border-primary/30 font-mono text-nano text-primary"
+                          >
+                            {shift.temperatureShift}
+                          </Badge>
+                        </ItemTitle>
+                        <ItemDescription className="line-clamp-2 text-mini text-foreground">
+                          {shift.summary}
+                        </ItemDescription>
+                        <p className="truncate text-nano text-muted-foreground">
+                          {ai.precipRiskLabel}{" "}
+                          <span className="text-foreground">
+                            {shift.precipitationRisk}
+                          </span>
+                        </p>
+                      </ItemContent>
+                    </Item>
                   ))}
-                </div>
-              </div>
+                </ItemGroup>
+              </section>
 
               {/* Quick Questions Chips */}
               <div className="space-y-2 border-t border-border pt-2">
