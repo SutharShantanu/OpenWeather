@@ -14,6 +14,7 @@ import {
   Check,
 } from "lucide-react"
 import { CopyButton } from "@/components/ui/copy-button"
+import { Shimmer } from "@/components/ui/shimmer"
 import {
   Tooltip,
   TooltipContent,
@@ -618,7 +619,7 @@ function ActionButton({
 function TypingStatus({ label }: { label: string }) {
   return (
     <>
-      <span>{label.replace(/[.…]+$/, "")}</span>
+      <Shimmer>{label.replace(/[.…]+$/, "")}</Shimmer>
       <TypingDots />
     </>
   )
