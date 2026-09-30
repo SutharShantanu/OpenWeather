@@ -633,7 +633,9 @@
     "copy": "Kopiëren",
     "copied": "Gekopieerd",
     "helpful": "Nuttig",
-    "notHelpful": "Niet nuttig"
+    "notHelpful": "Niet nuttig",
+    "stop": "Stoppen",
+    "offlinePlaceholder": "Je bent offline. Maak opnieuw verbinding om de AI iets te vragen."
   },
   "notifications": {
     "title": "Meldingencentrum",

@@ -633,7 +633,9 @@
     "copy": "Sao chép",
     "copied": "Đã sao chép",
     "helpful": "Hữu ích",
-    "notHelpful": "Không hữu ích"
+    "notHelpful": "Không hữu ích",
+    "stop": "Dừng",
+    "offlinePlaceholder": "Bạn đang ngoại tuyến. Kết nối lại để hỏi AI."
   },
   "notifications": {
     "title": "Trung tâm thông báo",

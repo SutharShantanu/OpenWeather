@@ -633,7 +633,9 @@
     "copy": "Kopiuj",
     "copied": "Skopiowano",
     "helpful": "Pomocne",
-    "notHelpful": "Niepomocne"
+    "notHelpful": "Niepomocne",
+    "stop": "Zatrzymaj",
+    "offlinePlaceholder": "Jesteś offline. Połącz się ponownie, aby zapytać AI."
   },
   "notifications": {
     "title": "Centrum powiadomień",

@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { useOnlineStatus } from "@/hooks/use-online-status"
 import {
   Sparkles,
   AlertCircle,
@@ -12,6 +13,7 @@ import {
   ThumbsDown,
   X,
   Check,
+  Square,
 } from "lucide-react"
 import { CopyButton } from "@/components/ui/copy-button"
 import { Shimmer } from "@/components/ui/shimmer"
@@ -182,16 +184,18 @@ export function AiAdvisorDialog({
     [ai, current, daily, hourly, prefs, t, translateCondition, unit]
   )
 
-  const { briefing, briefingStatus, answers, ask, react } = useAiAdvisor({
-    enabled: open,
-    current,
-    hourly,
-    daily,
-    alerts,
-    unit,
-    language,
-    fallbackAnswer,
-  })
+  const online = useOnlineStatus()
+  const { briefing, briefingStatus, answers, ask, react, stop, isAsking } =
+    useAiAdvisor({
+      enabled: open,
+      current,
+      hourly,
+      daily,
+      alerts,
+      unit,
+      language,
+      fallbackAnswer,
+    })
 
   // Gemini briefing when available; the local rule-based analysis otherwise.
   const ruleBased: AiWeatherAnalysis | null =
@@ -222,7 +226,7 @@ export function AiAdvisorDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (question.trim()) {
+    if (question.trim() && !isAsking && online) {
       answerQuery(question.trim())
     }
   }
@@ -350,7 +354,7 @@ export function AiAdvisorDialog({
                 key={idx}
                 variant="outline"
                 size="xs"
-                disabled={asked}
+                disabled={asked || isAsking || !online}
                 onClick={() => answerQuery(q)}
                 className="h-6 font-mono text-mini"
               >
@@ -550,35 +554,71 @@ export function AiAdvisorDialog({
       )}
 
       <form onSubmit={handleSubmit} className="pt-1">
-        <InputGroup>
+        {/* States: offline = whole group disabled; asking = spinner + Stop;
+            empty = Ask disabled; counter near the length limit. */}
+        <InputGroup data-disabled={!online} aria-busy={isAsking}>
           <InputGroupAddon>
-            <Sparkles className="text-primary" aria-hidden />
+            {isAsking ? (
+              <Spinner className="text-primary" />
+            ) : (
+              <Sparkles className="text-primary" aria-hidden />
+            )}
           </InputGroupAddon>
           <InputGroupInput
             ref={inputRef}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder={ai.chatPlaceholder}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" && replyTo) {
+                e.preventDefault()
+                setReplyTo(null)
+              }
+            }}
+            disabled={!online}
+            placeholder={online ? ai.chatPlaceholder : ai.offlinePlaceholder}
             aria-label={ai.chatPlaceholder}
-            maxLength={500}
+            maxLength={MAX_QUESTION_LENGTH}
             className="font-mono text-xs"
           />
           <InputGroupAddon align="inline-end">
-            <InputGroupButton
-              type="submit"
-              variant="default"
-              disabled={!question.trim()}
-              className="font-mono"
-            >
-              <Send />
-              <span>{ai.askButton}</span>
-            </InputGroupButton>
+            {question.length > MAX_QUESTION_LENGTH * 0.8 && (
+              <span
+                aria-live="polite"
+                className={`font-mono text-nano tabular-nums ${question.length >= MAX_QUESTION_LENGTH ? "text-destructive" : ""}`}
+              >
+                {question.length}/{MAX_QUESTION_LENGTH}
+              </span>
+            )}
+            {isAsking ? (
+              <InputGroupButton
+                type="button"
+                variant="outline"
+                onClick={stop}
+                className="font-mono"
+              >
+                <Square className="fill-current" />
+                <span>{ai.stop}</span>
+              </InputGroupButton>
+            ) : (
+              <InputGroupButton
+                type="submit"
+                variant="default"
+                disabled={!online || !question.trim()}
+                className="font-mono"
+              >
+                <Send />
+                <span>{ai.askButton}</span>
+              </InputGroupButton>
+            )}
           </InputGroupAddon>
         </InputGroup>
       </form>
     </UniversalDialog>
   )
 }
+
+/** Matches the server's limit in /api/advisor. */
+const MAX_QUESTION_LENGTH = 500
 
 /** Hover/focus reveal for message actions; always visible without a hover-capable pointer. */
 const HOVER_ACTIONS =

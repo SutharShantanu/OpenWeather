@@ -633,7 +633,9 @@
     "copy": "Kopyala",
     "copied": "Kopyalandı",
     "helpful": "Faydalı",
-    "notHelpful": "Faydalı değil"
+    "notHelpful": "Faydalı değil",
+    "stop": "Durdur",
+    "offlinePlaceholder": "Çevrimdışısınız. YZ'ye sormak için yeniden bağlanın."
   },
   "notifications": {
     "title": "Bildirim Merkezi",

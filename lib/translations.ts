@@ -546,6 +546,8 @@ export interface Translations {
     copied: string;
     helpful: string;
     notHelpful: string;
+    stop: string;
+    offlinePlaceholder: string;
     bannerTitle: string;
     liveInsights: string;
     bannerDesc: string;

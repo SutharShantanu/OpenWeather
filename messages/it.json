@@ -633,7 +633,9 @@
     "copy": "Copia",
     "copied": "Copiato",
     "helpful": "Utile",
-    "notHelpful": "Non utile"
+    "notHelpful": "Non utile",
+    "stop": "Interrompi",
+    "offlinePlaceholder": "Sei offline. Riconnettiti per fare domande all'IA."
   },
   "notifications": {
     "title": "Centro notifiche",

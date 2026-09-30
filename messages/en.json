@@ -633,7 +633,9 @@
     "copy": "Copy",
     "copied": "Copied",
     "helpful": "Helpful",
-    "notHelpful": "Not helpful"
+    "notHelpful": "Not helpful",
+    "stop": "Stop",
+    "offlinePlaceholder": "You're offline. Reconnect to ask the AI."
   },
   "notifications": {
     "title": "Notification Center",

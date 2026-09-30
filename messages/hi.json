@@ -633,7 +633,9 @@
     "copy": "कॉपी करें",
     "copied": "कॉपी हो गया",
     "helpful": "उपयोगी",
-    "notHelpful": "उपयोगी नहीं"
+    "notHelpful": "उपयोगी नहीं",
+    "stop": "रोकें",
+    "offlinePlaceholder": "आप ऑफ़लाइन हैं। एआई से पूछने के लिए फिर से कनेक्ट करें।"
   },
   "notifications": {
     "title": "अधिसूचना केंद्र",

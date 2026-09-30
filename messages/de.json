@@ -633,7 +633,9 @@
     "copy": "Kopieren",
     "copied": "Kopiert",
     "helpful": "Hilfreich",
-    "notHelpful": "Nicht hilfreich"
+    "notHelpful": "Nicht hilfreich",
+    "stop": "Stopp",
+    "offlinePlaceholder": "Du bist offline. Verbinde dich erneut, um die KI zu fragen."
   },
   "notifications": {
     "title": "Benachrichtigungscenter",

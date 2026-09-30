@@ -633,7 +633,9 @@
     "copy": "העתק",
     "copied": "הועתק",
     "helpful": "מועיל",
-    "notHelpful": "לא מועיל"
+    "notHelpful": "לא מועיל",
+    "stop": "עצור",
+    "offlinePlaceholder": "אין חיבור לאינטרנט. התחבר מחדש כדי לשאול את הבינה המלאכותית."
   },
   "notifications": {
     "title": "מרכז ההתראות",

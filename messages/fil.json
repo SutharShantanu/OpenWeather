@@ -633,7 +633,9 @@
     "copy": "Kopyahin",
     "copied": "Nakopya",
     "helpful": "Nakatulong",
-    "notHelpful": "Hindi nakatulong"
+    "notHelpful": "Hindi nakatulong",
+    "stop": "Ihinto",
+    "offlinePlaceholder": "Offline ka. Kumonekta ulit para magtanong sa AI."
   },
   "notifications": {
     "title": "Sentro ng Abiso",

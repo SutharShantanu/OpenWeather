@@ -112,6 +112,50 @@ describe("useAiAdvisor", () => {
     expect(result.current.answers[0].reaction).toBeUndefined()
   })
 
+  it("stop() keeps the partial answer, or drops the turn if nothing arrived", async () => {
+    // A stream that sends one chunk, then waits until aborted.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.startsWith("/api/climate")) return Response.json({}, { status: 503 })
+        const body = JSON.parse(String(init?.body))
+        if (body.mode === "briefing") return Response.json({ summary: "", alerts: [], outlook: [] })
+        const signal = init!.signal!
+        const stream = new ReadableStream<Uint8Array>({
+          start(controller) {
+            if (body.question === "partial") controller.enqueue(new TextEncoder().encode("Carry an"))
+            signal.addEventListener("abort", () => controller.error(new DOMException("aborted", "AbortError")))
+          },
+        })
+        if (signal.aborted) throw new DOMException("aborted", "AbortError")
+        return new Response(stream)
+      })
+    )
+    const { result } = setup()
+
+    let pending: Promise<void>
+    act(() => {
+      pending = result.current.ask("partial")
+    })
+    await waitFor(() => expect(result.current.answers[0]?.answer).toBe("Carry an"))
+    expect(result.current.isAsking).toBe(true)
+    await act(async () => {
+      result.current.stop()
+      await pending
+    })
+    expect(result.current.answers[0]).toMatchObject({ answer: "Carry an", status: "done" })
+    expect(result.current.isAsking).toBe(false)
+
+    act(() => {
+      pending = result.current.ask("empty")
+    })
+    await act(async () => {
+      result.current.stop()
+      await pending
+    })
+    expect(result.current.answers.map((a) => a.question)).toEqual(["partial"])
+  })
+
   it("falls back to the rule-based answer when the AI fails", async () => {
     vi.stubGlobal(
       "fetch",

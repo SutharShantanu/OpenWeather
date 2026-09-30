@@ -633,7 +633,9 @@
     "copy": "কপি",
     "copied": "কপি হয়েছে",
     "helpful": "সহায়ক",
-    "notHelpful": "সহায়ক নয়"
+    "notHelpful": "সহায়ক নয়",
+    "stop": "থামান",
+    "offlinePlaceholder": "আপনি অফলাইনে আছেন। এআই-কে জিজ্ঞাসা করতে আবার সংযোগ করুন।"
   },
   "notifications": {
     "title": "বিজ্ঞপ্তি কেন্দ্র",

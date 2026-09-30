@@ -633,7 +633,9 @@
     "copy": "Másolás",
     "copied": "Másolva",
     "helpful": "Hasznos",
-    "notHelpful": "Nem hasznos"
+    "notHelpful": "Nem hasznos",
+    "stop": "Leállítás",
+    "offlinePlaceholder": "Nincs internetkapcsolat. Csatlakozz újra, hogy kérdezhesd az MI-t."
   },
   "notifications": {
     "title": "Értesítési központ",

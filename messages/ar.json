@@ -633,7 +633,9 @@
     "copy": "نسخ",
     "copied": "تم النسخ",
     "helpful": "مفيد",
-    "notHelpful": "غير مفيد"
+    "notHelpful": "غير مفيد",
+    "stop": "إيقاف",
+    "offlinePlaceholder": "أنت غير متصل. أعد الاتصال لسؤال الذكاء الاصطناعي."
   },
   "notifications": {
     "title": "مركز الإشعارات",

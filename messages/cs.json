@@ -633,7 +633,9 @@
     "copy": "Kopírovat",
     "copied": "Zkopírováno",
     "helpful": "Užitečné",
-    "notHelpful": "Neužitečné"
+    "notHelpful": "Neužitečné",
+    "stop": "Zastavit",
+    "offlinePlaceholder": "Jste offline. Pro dotaz na AI se znovu připojte."
   },
   "notifications": {
     "title": "Centrum oznámení",

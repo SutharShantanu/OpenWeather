@@ -633,7 +633,9 @@
     "copy": "Copier",
     "copied": "Copié",
     "helpful": "Utile",
-    "notHelpful": "Pas utile"
+    "notHelpful": "Pas utile",
+    "stop": "Arrêter",
+    "offlinePlaceholder": "Vous êtes hors ligne. Reconnectez-vous pour interroger l'IA."
   },
   "notifications": {
     "title": "Centre de notifications",

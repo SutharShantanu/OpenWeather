@@ -633,7 +633,9 @@
     "copy": "コピー",
     "copied": "コピーしました",
     "helpful": "役に立った",
-    "notHelpful": "役に立たなかった"
+    "notHelpful": "役に立たなかった",
+    "stop": "停止",
+    "offlinePlaceholder": "オフラインです。AIに質問するには再接続してください。"
   },
   "notifications": {
     "title": "通知センター",

@@ -633,7 +633,9 @@
     "copy": "Kopioi",
     "copied": "Kopioitu",
     "helpful": "Hyödyllinen",
-    "notHelpful": "Ei hyödyllinen"
+    "notHelpful": "Ei hyödyllinen",
+    "stop": "Pysäytä",
+    "offlinePlaceholder": "Olet offline-tilassa. Muodosta yhteys kysyäksesi tekoälyltä."
   },
   "notifications": {
     "title": "Ilmoituskeskus",

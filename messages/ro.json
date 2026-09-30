@@ -633,7 +633,9 @@
     "copy": "Copiază",
     "copied": "Copiat",
     "helpful": "Util",
-    "notHelpful": "Nu este util"
+    "notHelpful": "Nu este util",
+    "stop": "Oprește",
+    "offlinePlaceholder": "Ești offline. Reconectează-te pentru a întreba AI."
   },
   "notifications": {
     "title": "Centru de notificări",

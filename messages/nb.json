@@ -633,7 +633,9 @@
     "copy": "Kopier",
     "copied": "Kopiert",
     "helpful": "Nyttig",
-    "notHelpful": "Ikke nyttig"
+    "notHelpful": "Ikke nyttig",
+    "stop": "Stopp",
+    "offlinePlaceholder": "Du er frakoblet. Koble til igjen for å spørre KI-en."
   },
   "notifications": {
     "title": "Varslingssenter",

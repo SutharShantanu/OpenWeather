@@ -633,7 +633,9 @@
     "copy": "Kopiera",
     "copied": "Kopierat",
     "helpful": "Hjälpsamt",
-    "notHelpful": "Inte hjälpsamt"
+    "notHelpful": "Inte hjälpsamt",
+    "stop": "Stoppa",
+    "offlinePlaceholder": "Du är offline. Anslut igen för att fråga AI:n."
   },
   "notifications": {
     "title": "Notiscenter",

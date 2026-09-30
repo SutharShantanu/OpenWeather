@@ -633,7 +633,9 @@
     "copy": "Salin",
     "copied": "Disalin",
     "helpful": "Membantu",
-    "notHelpful": "Tidak membantu"
+    "notHelpful": "Tidak membantu",
+    "stop": "Henti",
+    "offlinePlaceholder": "Anda di luar talian. Sambung semula untuk bertanya kepada AI."
   },
   "notifications": {
     "title": "Pusat Pemberitahuan",

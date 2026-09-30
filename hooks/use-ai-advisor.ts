@@ -144,6 +144,8 @@ export function useAiAdvisor({
   }, [answers])
   const nextId = useRef(0)
   const controllers = useRef(new Set<AbortController>())
+  // Aborts started by stop() (vs. unmount) keep the partial answer.
+  const stoppedByUser = useRef(new WeakSet<AbortController>())
   useEffect(() => {
     const active = controllers.current
     return () => active.forEach((c) => c.abort())
@@ -205,7 +207,13 @@ export function useAiAdvisor({
         if (!answer.trim()) throw new Error("Empty answer")
         update({ status: "done" })
       } catch (err) {
-        if ((err as Error).name === "AbortError") return
+        if ((err as Error).name === "AbortError") {
+          if (!stoppedByUser.current.has(controller)) return // unmounted
+          // Stopped: keep what was written so far; drop the turn if nothing was.
+          if (answer.trim()) update({ answer, status: "done" })
+          else setAnswers((prev) => prev.filter((a) => a.id !== id))
+          return
+        }
         update({ answer: fallbackAnswer(question), status: "fallback" })
       } finally {
         controllers.current.delete(controller)
@@ -215,6 +223,14 @@ export function useAiAdvisor({
   )
 
   /** Toggles a reaction on an answer (choosing the same one again clears it). */
+  /** Stops any answer that is still being generated. */
+  const stop = useCallback(() => {
+    controllers.current.forEach((c) => {
+      stoppedByUser.current.add(c)
+      c.abort()
+    })
+  }, [])
+
   const react = useCallback((id: number, reaction: AdvisorReaction) => {
     setAnswers((prev) =>
       prev.map((a) =>
@@ -231,5 +247,7 @@ export function useAiAdvisor({
     answers: answers.filter((a) => a.locationKey === locationKey),
     ask,
     react,
+    stop,
+    isAsking: answers.some((a) => a.status === "streaming"),
   }
 }
