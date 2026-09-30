@@ -526,6 +526,14 @@
         "positionText": "{current} / {total}",
         "noAudio": "音声が読み込まれていません"
       }
+    },
+    "assistant": {
+      "title": "AIアシスタントボタン",
+      "desc": "フローティングのAIアドバイザーボタンを画面のどこに表示するか。",
+      "bottomRight": "右下",
+      "bottomLeft": "左下",
+      "hidden": "非表示",
+      "close": "閉じる"
     }
   },
   "header": {

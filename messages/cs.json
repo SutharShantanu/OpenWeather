@@ -526,6 +526,14 @@
         "positionText": "{current} z {total}",
         "noAudio": "Není načten žádný zvuk"
       }
+    },
+    "assistant": {
+      "title": "Tlačítko AI asistenta",
+      "desc": "Kde se na obrazovce zobrazí plovoucí tlačítko AI poradce.",
+      "bottomRight": "Vpravo dole",
+      "bottomLeft": "Vlevo dole",
+      "hidden": "Skryté",
+      "close": "Zavřít"
     }
   },
   "header": {

@@ -133,8 +133,9 @@ export default function WeatherDashboardPage() {
     onUnitRestore,
   })
 
-  // Lock background scroll completely when modal dialogs are open
-  useScrollLock(showSettings || showAiAdvisor)
+  // Lock background scroll while the (modal) settings dialog is open; the AI
+  // advisor panel is non-modal so the page stays scrollable.
+  useScrollLock(showSettings)
 
   // GPS Locate with URL update. If location request is denied, cascades to network location.
   const handleLocate = useCallback(async () => {
@@ -359,7 +360,7 @@ export default function WeatherDashboardPage() {
             )}
           </main>
 
-          {/* AI Synoptic Advisor Interactive Dialog */}
+          {/* Global AI advisor: floating bot button + chat panel */}
           {weather && (
             <AiAdvisorDialog
               open={showAiAdvisor}
@@ -375,6 +376,7 @@ export default function WeatherDashboardPage() {
               daily={weather.daily}
               alerts={weather.alerts}
               unit={unit}
+              buttonPosition={settings.aiButtonPosition}
             />
           )}
 

@@ -131,4 +131,5 @@ export const DEFAULT_EXTENDED_SETTINGS: ExtendedSettings = {
   googleTtsVolumeGain: CONFIG.settings.defaultTtsVolume,
   ttsVoice: DEFAULT_TTS_VOICE,
   speechDeliveryStyle: "meteorological",
+  aiButtonPosition: "bottom-right",
 }

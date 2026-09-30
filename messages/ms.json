@@ -526,6 +526,14 @@
         "positionText": "{current} daripada {total}",
         "noAudio": "Tiada audio dimuatkan"
       }
+    },
+    "assistant": {
+      "title": "Butang pembantu AI",
+      "desc": "Tempat butang penasihat AI terapung dipaparkan pada skrin.",
+      "bottomRight": "Kanan bawah",
+      "bottomLeft": "Kiri bawah",
+      "hidden": "Tersembunyi",
+      "close": "Tutup"
     }
   },
   "header": {

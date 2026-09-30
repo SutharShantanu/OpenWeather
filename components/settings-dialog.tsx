@@ -136,7 +136,11 @@ export function SettingsDialog({
     settings: ExtendedSettings
     pinnedCities: string[]
     theme?: string
-  } | null>(open ? { settings: { ...settings }, pinnedCities: [...pinnedCities], theme } : null)
+  } | null>(
+    open
+      ? { settings: { ...settings }, pinnedCities: [...pinnedCities], theme }
+      : null
+  )
 
   if (open !== lastOpen) {
     setLastOpen(open)
@@ -155,50 +159,52 @@ export function SettingsDialog({
 
   const isLocationsChanged = Boolean(
     initial &&
-      (pinnedCities.length !== initial.pinnedCities.length ||
-        pinnedCities.some((c, i) => c !== initial.pinnedCities[i]))
+    (pinnedCities.length !== initial.pinnedCities.length ||
+      pinnedCities.some((c, i) => c !== initial.pinnedCities[i]))
   )
 
   const isSourceChanged = Boolean(
     initial &&
-      (settings.weatherSource !== initial.settings.weatherSource ||
-        settings.forecastStation !== initial.settings.forecastStation)
+    (settings.weatherSource !== initial.settings.weatherSource ||
+      settings.forecastStation !== initial.settings.forecastStation)
   )
 
   const isApiChanged = Boolean(
     initial &&
-      ((settings.customApiKey ?? "") !== (initial.settings.customApiKey ?? "") ||
-        (settings.customCartoApiKey ?? "") !== (initial.settings.customCartoApiKey ?? ""))
+    ((settings.customApiKey ?? "") !== (initial.settings.customApiKey ?? "") ||
+      (settings.customCartoApiKey ?? "") !==
+        (initial.settings.customCartoApiKey ?? ""))
   )
 
   const isUnitsChanged = Boolean(
     initial &&
-      (settings.tempUnit !== initial.settings.tempUnit ||
-        settings.windUnit !== initial.settings.windUnit ||
-        settings.pressureUnit !== initial.settings.pressureUnit ||
-        settings.precipUnit !== initial.settings.precipUnit)
+    (settings.tempUnit !== initial.settings.tempUnit ||
+      settings.windUnit !== initial.settings.windUnit ||
+      settings.pressureUnit !== initial.settings.pressureUnit ||
+      settings.precipUnit !== initial.settings.precipUnit)
   )
 
   const isRegionalChanged = Boolean(
     initial &&
-      (settings.language !== initial.settings.language ||
-        settings.timeFormat !== initial.settings.timeFormat ||
-        settings.dateFormat !== initial.settings.dateFormat ||
-        settings.coordinateFormat !== initial.settings.coordinateFormat)
+    (settings.language !== initial.settings.language ||
+      settings.timeFormat !== initial.settings.timeFormat ||
+      settings.dateFormat !== initial.settings.dateFormat ||
+      settings.coordinateFormat !== initial.settings.coordinateFormat)
   )
 
   const isSpeechChanged = Boolean(
     initial &&
-      (settings.ttsVoice !== initial.settings.ttsVoice ||
-        settings.speechRate !== initial.settings.speechRate ||
-        settings.autoSpeakOnLoad !== initial.settings.autoSpeakOnLoad ||
-        settings.googleTtsPitch !== initial.settings.googleTtsPitch ||
-        settings.googleTtsVolumeGain !== initial.settings.googleTtsVolumeGain ||
-        settings.speechDeliveryStyle !== initial.settings.speechDeliveryStyle)
+    (settings.ttsVoice !== initial.settings.ttsVoice ||
+      settings.speechRate !== initial.settings.speechRate ||
+      settings.autoSpeakOnLoad !== initial.settings.autoSpeakOnLoad ||
+      settings.googleTtsPitch !== initial.settings.googleTtsPitch ||
+      settings.googleTtsVolumeGain !== initial.settings.googleTtsVolumeGain ||
+      settings.speechDeliveryStyle !== initial.settings.speechDeliveryStyle)
   )
 
   const isAppearanceChanged = Boolean(
-    initial?.theme && theme && theme !== initial.theme
+    (initial?.theme && theme && theme !== initial.theme) ||
+    (initial && settings.aiButtonPosition !== initial.settings.aiButtonPosition)
   )
 
   const renderTabDot = (changed: boolean) =>
@@ -226,7 +232,10 @@ export function SettingsDialog({
     const el = tabsListRef.current
     if (!el) return
     const sign = getComputedStyle(el).direction === "rtl" ? -1 : 1
-    el.scrollBy({ left: sign * direction * el.clientWidth * 0.6, behavior: "smooth" })
+    el.scrollBy({
+      left: sign * direction * el.clientWidth * 0.6,
+      behavior: "smooth",
+    })
   }
 
   const handleConfirmReset = () => {
@@ -336,7 +345,12 @@ export function SettingsDialog({
       icon: Palette,
       description: t.settingsDialog.tabDescriptions.appearance,
       badge: renderTabDot(isAppearanceChanged),
-      content: <AppearanceTabContent />,
+      content: (
+        <AppearanceTabContent
+          settings={settings}
+          onUpdateSettings={onUpdateSettings}
+        />
+      ),
     },
   ]
 
@@ -353,7 +367,10 @@ export function SettingsDialog({
       scrollable={false}
       footer={
         <>
-          <Popover open={isResetConfirmOpen} onOpenChange={setIsResetConfirmOpen}>
+          <Popover
+            open={isResetConfirmOpen}
+            onOpenChange={setIsResetConfirmOpen}
+          >
             <PopoverTrigger asChild>
               <Button
                 variant="accent"
@@ -363,7 +380,11 @@ export function SettingsDialog({
                 <span>{t.common.reset}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" side="top" className="w-72 space-y-3 p-3">
+            <PopoverContent
+              align="end"
+              side="top"
+              className="w-72 space-y-3 p-3"
+            >
               <div className="space-y-1">
                 <p className="font-heading text-xs font-semibold text-foreground">
                   {t.settingsDialog.resetConfirmTitle}
@@ -414,7 +435,7 @@ export function SettingsDialog({
         <div className="relative hidden w-full shrink-0 border-b border-border bg-muted/20 sm:flex">
           <TabsList
             ref={tabsListRef}
-            className="w-full shrink-0 flex-nowrap justify-start gap-1 overflow-x-auto overflow-y-hidden touch-pan-x scroll-smooth p-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="w-full shrink-0 touch-pan-x [scrollbar-width:none] flex-nowrap justify-start gap-1 overflow-x-auto overflow-y-hidden scroll-smooth p-1.5 [&::-webkit-scrollbar]:hidden"
             onWheel={(e) => {
               if (
                 Math.abs(e.deltaY) > Math.abs(e.deltaX) &&
@@ -439,7 +460,7 @@ export function SettingsDialog({
               type="button"
               aria-label={t.settingsDialog.scrollTabsLeft}
               onClick={() => scrollTabs(-1)}
-              className="absolute inset-y-0 start-0 flex w-8 items-center justify-start bg-linear-to-r rtl:bg-linear-to-l from-background via-background/90 to-transparent ps-1 text-muted-foreground hover:text-foreground"
+              className="absolute inset-y-0 start-0 flex w-8 items-center justify-start bg-linear-to-r from-background via-background/90 to-transparent ps-1 text-muted-foreground hover:text-foreground rtl:bg-linear-to-l"
             >
               <ChevronLeft className="size-4 rtl:rotate-180" />
             </button>
@@ -449,7 +470,7 @@ export function SettingsDialog({
               type="button"
               aria-label={t.settingsDialog.scrollTabsRight}
               onClick={() => scrollTabs(1)}
-              className="absolute inset-y-0 end-0 flex w-8 items-center justify-end bg-linear-to-l rtl:bg-linear-to-r from-background via-background/90 to-transparent pe-1 text-muted-foreground hover:text-foreground"
+              className="absolute inset-y-0 end-0 flex w-8 items-center justify-end bg-linear-to-l from-background via-background/90 to-transparent pe-1 text-muted-foreground hover:text-foreground rtl:bg-linear-to-r"
             >
               <ChevronRight className="size-4 rtl:rotate-180" />
             </button>
@@ -458,7 +479,10 @@ export function SettingsDialog({
 
         {/* MOBILE SECTION PICKER (< sm) */}
         <div className="flex w-full shrink-0 items-center border-b border-border bg-muted/30 px-3 py-2 sm:hidden">
-          <Select value={currentTab} onValueChange={(value) => onActiveTabChange?.(value)}>
+          <Select
+            value={currentTab}
+            onValueChange={(value) => onActiveTabChange?.(value)}
+          >
             <SelectTrigger
               aria-label={t.settingsDialog.sectionPicker}
               className="h-9 w-full min-w-0 border-border/80 bg-background/90 font-sans text-xs shadow-2xs"

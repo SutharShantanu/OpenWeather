@@ -526,6 +526,14 @@
         "positionText": "{current} / {total}",
         "noAudio": "Chưa tải âm thanh"
       }
+    },
+    "assistant": {
+      "title": "Nút trợ lý AI",
+      "desc": "Vị trí nút trợ lý AI nổi trên màn hình.",
+      "bottomRight": "Dưới cùng bên phải",
+      "bottomLeft": "Dưới cùng bên trái",
+      "hidden": "Ẩn",
+      "close": "Đóng"
     }
   },
   "header": {

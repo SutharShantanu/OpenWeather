@@ -526,6 +526,14 @@
         "positionText": "{current} av {total}",
         "noAudio": "Inget ljud inläst"
       }
+    },
+    "assistant": {
+      "title": "AI-assistentknapp",
+      "desc": "Var den flytande AI-rådgivarknappen visas på skärmen.",
+      "bottomRight": "Nere till höger",
+      "bottomLeft": "Nere till vänster",
+      "hidden": "Dold",
+      "close": "Stäng"
     }
   },
   "header": {

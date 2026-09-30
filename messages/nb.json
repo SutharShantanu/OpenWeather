@@ -526,6 +526,14 @@
         "positionText": "{current} av {total}",
         "noAudio": "Ingen lyd lastet"
       }
+    },
+    "assistant": {
+      "title": "KI-assistentknapp",
+      "desc": "Hvor den flytende KI-rådgiverknappen vises på skjermen.",
+      "bottomRight": "Nederst til høyre",
+      "bottomLeft": "Nederst til venstre",
+      "hidden": "Skjult",
+      "close": "Lukk"
     }
   },
   "header": {

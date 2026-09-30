@@ -526,6 +526,14 @@
         "positionText": "{total} 중 {current}",
         "noAudio": "불러온 오디오 없음"
       }
+    },
+    "assistant": {
+      "title": "AI 어시스턴트 버튼",
+      "desc": "플로팅 AI 어드바이저 버튼이 화면에 표시되는 위치입니다.",
+      "bottomRight": "오른쪽 아래",
+      "bottomLeft": "왼쪽 아래",
+      "hidden": "숨김",
+      "close": "닫기"
     }
   },
   "header": {

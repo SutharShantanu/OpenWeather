@@ -526,6 +526,14 @@
         "positionText": "{current} di {total}",
         "noAudio": "Nessun audio caricato"
       }
+    },
+    "assistant": {
+      "title": "Pulsante dell'assistente IA",
+      "desc": "Dove appare sullo schermo il pulsante mobile del consulente IA.",
+      "bottomRight": "In basso a destra",
+      "bottomLeft": "In basso a sinistra",
+      "hidden": "Nascosto",
+      "close": "Chiudi"
     }
   },
   "header": {

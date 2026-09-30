@@ -526,6 +526,14 @@
         "positionText": "{current} din {total}",
         "noAudio": "Niciun audio încărcat"
       }
+    },
+    "assistant": {
+      "title": "Butonul asistentului AI",
+      "desc": "Unde apare pe ecran butonul plutitor al consilierului AI.",
+      "bottomRight": "Dreapta jos",
+      "bottomLeft": "Stânga jos",
+      "hidden": "Ascuns",
+      "close": "Închide"
     }
   },
   "header": {

@@ -63,7 +63,11 @@ export interface ExtendedSettings {
   googleTtsVolumeGain: number
   ttsVoice: string
   speechDeliveryStyle?: SpeechDeliveryStyle
+  /** Floating AI advisor button placement. */
+  aiButtonPosition?: AiButtonPosition
 }
+
+export type AiButtonPosition = "bottom-right" | "bottom-left" | "hidden"
 
 export interface TabBaseProps {
   settings: ExtendedSettings

@@ -526,6 +526,14 @@
         "positionText": "{current} sur {total}",
         "noAudio": "Aucun audio chargé"
       }
+    },
+    "assistant": {
+      "title": "Bouton de l'assistant IA",
+      "desc": "Emplacement du bouton flottant du conseiller IA à l'écran.",
+      "bottomRight": "En bas à droite",
+      "bottomLeft": "En bas à gauche",
+      "hidden": "Masqué",
+      "close": "Fermer"
     }
   },
   "header": {

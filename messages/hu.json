@@ -526,6 +526,14 @@
         "positionText": "{current} / {total}",
         "noAudio": "Nincs betöltött hang"
       }
+    },
+    "assistant": {
+      "title": "MI-asszisztens gomb",
+      "desc": "Hol jelenjen meg a képernyőn a lebegő MI-tanácsadó gomb.",
+      "bottomRight": "Jobbra lent",
+      "bottomLeft": "Balra lent",
+      "hidden": "Rejtett",
+      "close": "Bezárás"
     }
   },
   "header": {

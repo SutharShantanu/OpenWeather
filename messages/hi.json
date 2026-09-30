@@ -526,6 +526,14 @@
         "positionText": "{total} में से {current}",
         "noAudio": "कोई ऑडियो लोड नहीं है"
       }
+    },
+    "assistant": {
+      "title": "एआई सहायक बटन",
+      "desc": "स्क्रीन पर तैरता हुआ एआई सलाहकार बटन कहाँ दिखे।",
+      "bottomRight": "नीचे दाएँ",
+      "bottomLeft": "नीचे बाएँ",
+      "hidden": "छिपा हुआ",
+      "close": "बंद करें"
     }
   },
   "header": {

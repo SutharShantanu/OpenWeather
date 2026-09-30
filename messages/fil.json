@@ -526,6 +526,14 @@
         "positionText": "{current} sa {total}",
         "noAudio": "Walang na-load na audio"
       }
+    },
+    "assistant": {
+      "title": "Button ng AI assistant",
+      "desc": "Kung saan lalabas sa screen ang lumulutang na button ng AI advisor.",
+      "bottomRight": "Kanang ibaba",
+      "bottomLeft": "Kaliwang ibaba",
+      "hidden": "Nakatago",
+      "close": "Isara"
     }
   },
   "header": {

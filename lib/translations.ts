@@ -211,6 +211,14 @@ export interface Translations {
     };
   };
   settingsDialog: {
+    assistant: {
+      title: string;
+      desc: string;
+      bottomRight: string;
+      bottomLeft: string;
+      hidden: string;
+      close: string;
+    };
     title: string;
     subtitle: string;
     tabSource: string;

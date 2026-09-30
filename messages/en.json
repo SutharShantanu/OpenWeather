@@ -526,6 +526,14 @@
         "positionText": "{current} of {total}",
         "noAudio": "No audio loaded"
       }
+    },
+    "assistant": {
+      "title": "AI assistant button",
+      "desc": "Where the floating AI advisor button appears on the screen.",
+      "bottomRight": "Bottom right",
+      "bottomLeft": "Bottom left",
+      "hidden": "Hidden",
+      "close": "Close"
     }
   },
   "header": {

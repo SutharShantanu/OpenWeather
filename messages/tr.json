@@ -526,6 +526,14 @@
         "positionText": "{current} / {total}",
         "noAudio": "Yüklü ses yok"
       }
+    },
+    "assistant": {
+      "title": "YZ asistanı düğmesi",
+      "desc": "Yüzen YZ danışmanı düğmesinin ekranda görüneceği yer.",
+      "bottomRight": "Sağ alt",
+      "bottomLeft": "Sol alt",
+      "hidden": "Gizli",
+      "close": "Kapat"
     }
   },
   "header": {

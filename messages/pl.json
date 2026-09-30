@@ -526,6 +526,14 @@
         "positionText": "{current} z {total}",
         "noAudio": "Nie wczytano dźwięku"
       }
+    },
+    "assistant": {
+      "title": "Przycisk asystenta AI",
+      "desc": "Gdzie na ekranie pojawia się pływający przycisk doradcy AI.",
+      "bottomRight": "Na dole po prawej",
+      "bottomLeft": "Na dole po lewej",
+      "hidden": "Ukryty",
+      "close": "Zamknij"
     }
   },
   "header": {

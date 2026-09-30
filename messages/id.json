@@ -526,6 +526,14 @@
         "positionText": "{current} dari {total}",
         "noAudio": "Tidak ada audio dimuat"
       }
+    },
+    "assistant": {
+      "title": "Tombol asisten AI",
+      "desc": "Posisi tombol penasihat AI mengambang di layar.",
+      "bottomRight": "Kanan bawah",
+      "bottomLeft": "Kiri bawah",
+      "hidden": "Tersembunyi",
+      "close": "Tutup"
     }
   },
   "header": {

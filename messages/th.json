@@ -526,6 +526,14 @@
         "positionText": "{current} จาก {total}",
         "noAudio": "ไม่ได้โหลดเสียง"
       }
+    },
+    "assistant": {
+      "title": "ปุ่มผู้ช่วย AI",
+      "desc": "ตำแหน่งที่ปุ่มที่ปรึกษา AI แบบลอยจะแสดงบนหน้าจอ",
+      "bottomRight": "ขวาล่าง",
+      "bottomLeft": "ซ้ายล่าง",
+      "hidden": "ซ่อน",
+      "close": "ปิด"
     }
   },
   "header": {

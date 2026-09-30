@@ -526,6 +526,14 @@
         "positionText": "{current} van {total}",
         "noAudio": "Geen audio geladen"
       }
+    },
+    "assistant": {
+      "title": "AI-assistentknop",
+      "desc": "Waar de zwevende AI-adviseurknop op het scherm verschijnt.",
+      "bottomRight": "Rechtsonder",
+      "bottomLeft": "Linksonder",
+      "hidden": "Verborgen",
+      "close": "Sluiten"
     }
   },
   "header": {

@@ -526,6 +526,14 @@
         "positionText": "{current} מתוך {total}",
         "noAudio": "לא נטען אודיו"
       }
+    },
+    "assistant": {
+      "title": "כפתור עוזר הבינה המלאכותית",
+      "desc": "היכן יופיע על המסך הכפתור הצף של יועץ הבינה המלאכותית.",
+      "bottomRight": "למטה מימין",
+      "bottomLeft": "למטה משמאל",
+      "hidden": "מוסתר",
+      "close": "סגור"
     }
   },
   "header": {

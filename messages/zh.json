@@ -526,6 +526,14 @@
         "positionText": "第 {current} 秒 / 共 {total} 秒",
         "noAudio": "未加载音频"
       }
+    },
+    "assistant": {
+      "title": "AI 助手按钮",
+      "desc": "浮动 AI 顾问按钮在屏幕上显示的位置。",
+      "bottomRight": "右下角",
+      "bottomLeft": "左下角",
+      "hidden": "隐藏",
+      "close": "关闭"
     }
   },
   "header": {

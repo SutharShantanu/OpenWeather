@@ -526,6 +526,14 @@
         "positionText": "{current} af {total}",
         "noAudio": "Ingen lyd indlæst"
       }
+    },
+    "assistant": {
+      "title": "AI-assistentknap",
+      "desc": "Hvor den flydende AI-rådgiverknap vises på skærmen.",
+      "bottomRight": "Nederst til højre",
+      "bottomLeft": "Nederst til venstre",
+      "hidden": "Skjult",
+      "close": "Luk"
     }
   },
   "header": {

@@ -526,6 +526,14 @@
         "positionText": "{current} من {total}",
         "noAudio": "لم يتم تحميل صوت"
       }
+    },
+    "assistant": {
+      "title": "زر المساعد الذكي",
+      "desc": "مكان ظهور زر مستشار الذكاء الاصطناعي العائم على الشاشة.",
+      "bottomRight": "أسفل اليمين",
+      "bottomLeft": "أسفل اليسار",
+      "hidden": "مخفي",
+      "close": "إغلاق"
     }
   },
   "header": {

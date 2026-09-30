@@ -526,6 +526,14 @@
         "positionText": "{current} von {total}",
         "noAudio": "Kein Audio geladen"
       }
+    },
+    "assistant": {
+      "title": "KI-Assistent-Schaltfläche",
+      "desc": "Wo die schwebende KI-Berater-Schaltfläche auf dem Bildschirm erscheint.",
+      "bottomRight": "Unten rechts",
+      "bottomLeft": "Unten links",
+      "hidden": "Ausgeblendet",
+      "close": "Schließen"
     }
   },
   "header": {

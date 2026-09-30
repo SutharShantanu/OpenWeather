@@ -526,6 +526,14 @@
         "positionText": "{current} / {total}",
         "noAudio": "Ääntä ei ole ladattu"
       }
+    },
+    "assistant": {
+      "title": "Tekoälyavustajan painike",
+      "desc": "Missä kelluva tekoälyneuvojan painike näkyy näytöllä.",
+      "bottomRight": "Alhaalla oikealla",
+      "bottomLeft": "Alhaalla vasemmalla",
+      "hidden": "Piilotettu",
+      "close": "Sulje"
     }
   },
   "header": {
