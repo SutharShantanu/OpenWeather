@@ -347,12 +347,13 @@ export function AiAdvisorDialog({
             exit={reduceMotion ? { opacity: 0 } : PANEL_HIDDEN}
             transition={reduceMotion ? { duration: 0.15 } : PANEL_SPRING}
             style={{ transformOrigin: isLeft ? "bottom left" : "bottom right" }}
-            className={`fixed z-45 w-[min(28rem,calc(100vw-2rem))] overflow-hidden bg-popover font-mono text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none ${buttonPosition === "hidden" ? "bottom-4" : "bottom-20"} ${isLeft ? "left-4" : "right-4"}`}
+            className={`fixed z-45 overflow-hidden bg-popover font-mono text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none ${buttonPosition === "hidden" ? "bottom-4" : "bottom-20"} ${isLeft ? "left-4" : "right-4"}`}
           >
             {/* Card layout (per shadcn's chat example): the provider wraps the whole
                 card so the composer can drive the scroller (jump to message). */}
             <MessageScrollerProvider autoScroll defaultScrollPosition="end">
-              <Card className="h-[min(38rem,calc(100dvh-8rem))] gap-0 py-0 ring-0">
+              {/* Fixed size here so content never reflows while the panel animates width/height */}
+              <Card className="h-[min(38rem,calc(100dvh-8rem))] w-[min(28rem,calc(100vw-2rem))] gap-0 py-0 ring-0">
                 <CardHeader className="gap-1 border-b border-border py-3">
                   <CardTitle
                     id={titleId}
@@ -866,12 +867,13 @@ export function AiAdvisorDialog({
   )
 }
 
-// Panel grows out of the button's corner: spring on scale/opacity with a
-// slight rise and blur. Reduced motion falls back to a short fade.
+// Panel grows out of the button's corner: width/height 0 -> auto plus a spring
+// on scale/opacity with a slight rise and blur. Reduced motion falls back to a short fade.
 const PANEL_HIDDEN = {
   opacity: 0,
   scale: 0.9,
   y: 16,
+  width: 0,
   height: 0,
   filter: "blur(4px)",
 }
@@ -879,6 +881,7 @@ const PANEL_SHOWN = {
   opacity: 1,
   scale: 1,
   y: 0,
+  width: "auto",
   height: "auto",
   filter: "blur(0px)",
 }

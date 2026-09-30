@@ -98,7 +98,10 @@ export async function runWeatherTool(
   try {
     // 1. Place -> coordinates (first match; "City, Country" narrows by country name)
     const [name, ...rest] = location.split(",").map((p) => p.trim())
-    const geoRes = await fetchWithRetry(`${CONFIG.api.openMeteoGeoBaseUrl}/search?name=${encodeURIComponent(name)}&count=5&language=en&format=json`, 5000)
+    const geoRes = await fetchWithRetry(
+      `${CONFIG.api.openMeteoGeoBaseUrl}/search?name=${encodeURIComponent(name)}&count=5&language=en&format=json`,
+      5000
+    )
     const results: Record<string, unknown>[] = geoRes.ok
       ? ((await geoRes.json()).results ?? [])
       : []
