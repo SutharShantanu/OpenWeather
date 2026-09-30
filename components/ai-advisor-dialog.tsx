@@ -260,9 +260,15 @@ export function AiAdvisorDialog({
             <Button
               size="icon"
               aria-label={t.header.aiAdvisor}
-              className={`fixed bottom-4 z-45 size-12 rounded-full shadow-lg ${buttonPosition === "bottom-left" ? "left-4" : "right-4"}`}
+              className={`fixed bottom-4 z-45 size-12 rounded-full shadow-lg ${FAB_MOTION} ${buttonPosition === "bottom-left" ? "left-4" : "right-4"}`}
             >
-              <Bot className="size-6" />
+              {/* Bot and close icons cross-fade/rotate as the panel opens */}
+              <Bot
+                className={`absolute size-6 ${ICON_SWAP} ${open ? "scale-50 rotate-90 opacity-0" : "scale-100 rotate-0 opacity-100"}`}
+              />
+              <X
+                className={`absolute size-6 ${ICON_SWAP} ${open ? "scale-100 rotate-0 opacity-100" : "scale-50 -rotate-90 opacity-0"}`}
+              />
             </Button>
           </PopoverTrigger>
         </WithTooltip>
@@ -275,7 +281,7 @@ export function AiAdvisorDialog({
         collisionPadding={16}
         onInteractOutside={(e) => e.preventDefault()}
         aria-label={ai.dialogTitle}
-        className="z-45 w-[min(28rem,calc(100vw-2rem))] gap-0 p-0 font-mono"
+        className={`z-45 w-[min(28rem,calc(100vw-2rem))] gap-0 p-0 font-mono ${PANEL_MOTION}`}
       >
         {/* Header */}
         <div className="flex items-start gap-3 border-b border-border p-3">
@@ -691,6 +697,19 @@ export function AiAdvisorDialog({
     </Popover>
   )
 }
+
+// Panel grows from the button's corner (Radix sets transform-origin) with
+// scale + fade + a slight rise and blur; `!` wins over PopoverContent's
+// default 100 ms zoom-95. tw-animate utilities; off under reduced motion.
+const PANEL_MOTION =
+  "ease-[cubic-bezier(0.16,1,0.3,1)]! data-open:duration-300! data-open:zoom-in-90! data-open:blur-in-xs data-[side=top]:slide-in-from-bottom-4! data-closed:duration-200! data-closed:zoom-out-90! data-closed:blur-out-xs motion-reduce:animate-none!"
+
+/** Floating button: pops in on mount, lifts on hover, presses on click. */
+const FAB_MOTION =
+  "animate-in fade-in-0 zoom-in-75 duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] transition-transform hover:scale-105 active:scale-95 motion-reduce:animate-none motion-reduce:transition-none"
+
+const ICON_SWAP =
+  "transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none"
 
 /** Matches the server's limit in /api/advisor. */
 const MAX_QUESTION_LENGTH = 500
