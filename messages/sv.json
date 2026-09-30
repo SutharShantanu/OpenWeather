@@ -534,6 +534,15 @@
       "bottomLeft": "Nere till vänster",
       "hidden": "Dold",
       "close": "Stäng"
+    },
+    "nav": {
+      "groupPreferences": "Inställningar",
+      "groupWeatherData": "Väderdata",
+      "groupVoice": "Röst och ljud",
+      "groupAdvanced": "Avancerat",
+      "searchPlaceholder": "Sök i inställningar…",
+      "searchResults": "Sökresultat",
+      "noResults": "Inga matchande inställningar"
     }
   },
   "header": {

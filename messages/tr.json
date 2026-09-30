@@ -534,6 +534,15 @@
       "bottomLeft": "Sol alt",
       "hidden": "Gizli",
       "close": "Kapat"
+    },
+    "nav": {
+      "groupPreferences": "Tercihler",
+      "groupWeatherData": "Hava durumu verileri",
+      "groupVoice": "Ses",
+      "groupAdvanced": "Gelişmiş",
+      "searchPlaceholder": "Ayarlarda ara…",
+      "searchResults": "Arama sonuçları",
+      "noResults": "Eşleşen ayar yok"
     }
   },
   "header": {

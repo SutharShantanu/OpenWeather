@@ -534,6 +534,15 @@
       "bottomLeft": "Alhaalla vasemmalla",
       "hidden": "Piilotettu",
       "close": "Sulje"
+    },
+    "nav": {
+      "groupPreferences": "Asetukset",
+      "groupWeatherData": "Säätiedot",
+      "groupVoice": "Ääni ja puhe",
+      "groupAdvanced": "Lisäasetukset",
+      "searchPlaceholder": "Hae asetuksista…",
+      "searchResults": "Hakutulokset",
+      "noResults": "Ei vastaavia asetuksia"
     }
   },
   "header": {

@@ -534,6 +534,15 @@
       "bottomLeft": "Κάτω αριστερά",
       "hidden": "Κρυφό",
       "close": "Κλείσιμο"
+    },
+    "nav": {
+      "groupPreferences": "Προτιμήσεις",
+      "groupWeatherData": "Δεδομένα καιρού",
+      "groupVoice": "Φωνή και ήχος",
+      "groupAdvanced": "Για προχωρημένους",
+      "searchPlaceholder": "Αναζήτηση ρυθμίσεων…",
+      "searchResults": "Αποτελέσματα αναζήτησης",
+      "noResults": "Δεν βρέθηκαν ρυθμίσεις"
     }
   },
   "header": {

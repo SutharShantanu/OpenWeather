@@ -534,6 +534,15 @@
       "bottomLeft": "नीचे बाएँ",
       "hidden": "छिपा हुआ",
       "close": "बंद करें"
+    },
+    "nav": {
+      "groupPreferences": "प्राथमिकताएँ",
+      "groupWeatherData": "मौसम डेटा",
+      "groupVoice": "आवाज़ और ऑडियो",
+      "groupAdvanced": "उन्नत",
+      "searchPlaceholder": "सेटिंग्स खोजें…",
+      "searchResults": "खोज परिणाम",
+      "noResults": "कोई मेल खाती सेटिंग नहीं"
     }
   },
   "header": {

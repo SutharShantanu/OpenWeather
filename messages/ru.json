@@ -534,6 +534,15 @@
       "bottomLeft": "Слева внизу",
       "hidden": "Скрыта",
       "close": "Закрыть"
+    },
+    "nav": {
+      "groupPreferences": "Предпочтения",
+      "groupWeatherData": "Погодные данные",
+      "groupVoice": "Голос и звук",
+      "groupAdvanced": "Дополнительно",
+      "searchPlaceholder": "Поиск по настройкам…",
+      "searchResults": "Результаты поиска",
+      "noResults": "Нет подходящих настроек"
     }
   },
   "header": {

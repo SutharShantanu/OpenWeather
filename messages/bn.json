@@ -534,6 +534,15 @@
       "bottomLeft": "নিচে বামে",
       "hidden": "লুকানো",
       "close": "বন্ধ করুন"
+    },
+    "nav": {
+      "groupPreferences": "পছন্দসমূহ",
+      "groupWeatherData": "আবহাওয়ার ডেটা",
+      "groupVoice": "ভয়েস ও অডিও",
+      "groupAdvanced": "উন্নত",
+      "searchPlaceholder": "সেটিংস খুঁজুন…",
+      "searchResults": "অনুসন্ধানের ফলাফল",
+      "noResults": "মিলে যাওয়া কোনো সেটিং নেই"
     }
   },
   "header": {

@@ -534,6 +534,15 @@
       "bottomLeft": "Balra lent",
       "hidden": "Rejtett",
       "close": "Bezárás"
+    },
+    "nav": {
+      "groupPreferences": "Beállítások",
+      "groupWeatherData": "Időjárási adatok",
+      "groupVoice": "Hang",
+      "groupAdvanced": "Speciális",
+      "searchPlaceholder": "Keresés a beállításokban…",
+      "searchResults": "Találatok",
+      "noResults": "Nincs egyező beállítás"
     }
   },
   "header": {

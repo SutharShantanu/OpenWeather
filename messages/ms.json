@@ -534,6 +534,15 @@
       "bottomLeft": "Kiri bawah",
       "hidden": "Tersembunyi",
       "close": "Tutup"
+    },
+    "nav": {
+      "groupPreferences": "Keutamaan",
+      "groupWeatherData": "Data cuaca",
+      "groupVoice": "Suara & audio",
+      "groupAdvanced": "Lanjutan",
+      "searchPlaceholder": "Cari tetapan…",
+      "searchResults": "Hasil carian",
+      "noResults": "Tiada tetapan yang sepadan"
     }
   },
   "header": {

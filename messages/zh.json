@@ -534,6 +534,15 @@
       "bottomLeft": "左下角",
       "hidden": "隐藏",
       "close": "关闭"
+    },
+    "nav": {
+      "groupPreferences": "偏好设置",
+      "groupWeatherData": "天气数据",
+      "groupVoice": "语音与音频",
+      "groupAdvanced": "高级",
+      "searchPlaceholder": "搜索设置…",
+      "searchResults": "搜索结果",
+      "noResults": "没有匹配的设置"
     }
   },
   "header": {

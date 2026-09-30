@@ -534,6 +534,15 @@
       "bottomLeft": "أسفل اليسار",
       "hidden": "مخفي",
       "close": "إغلاق"
+    },
+    "nav": {
+      "groupPreferences": "التفضيلات",
+      "groupWeatherData": "بيانات الطقس",
+      "groupVoice": "الصوت",
+      "groupAdvanced": "متقدم",
+      "searchPlaceholder": "ابحث في الإعدادات…",
+      "searchResults": "نتائج البحث",
+      "noResults": "لا توجد إعدادات مطابقة"
     }
   },
   "header": {

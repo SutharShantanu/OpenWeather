@@ -534,6 +534,15 @@
       "bottomLeft": "Dưới cùng bên trái",
       "hidden": "Ẩn",
       "close": "Đóng"
+    },
+    "nav": {
+      "groupPreferences": "Tùy chọn",
+      "groupWeatherData": "Dữ liệu thời tiết",
+      "groupVoice": "Giọng nói & âm thanh",
+      "groupAdvanced": "Nâng cao",
+      "searchPlaceholder": "Tìm trong cài đặt…",
+      "searchResults": "Kết quả tìm kiếm",
+      "noResults": "Không có cài đặt phù hợp"
     }
   },
   "header": {

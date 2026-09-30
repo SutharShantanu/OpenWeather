@@ -69,7 +69,10 @@ export function AudioToneVisualizer({
       }
       const position = getPosition?.()
       if (position && position.duration > 0) {
-        const pct = Math.min(100, Math.max(0, (position.currentTime / position.duration) * 100))
+        const pct = Math.min(
+          100,
+          Math.max(0, (position.currentTime / position.duration) * 100)
+        )
         if (progressRef.current) progressRef.current.style.width = `${pct}%`
         if (timeRef.current) {
           timeRef.current.textContent = `${formatAudioTime(position.currentTime)} / ${formatAudioTime(position.duration)}`
@@ -94,10 +97,12 @@ export function AudioToneVisualizer({
   const numBars = NUM_BARS
   const hasDuration = duration > 0
   const progressPercent =
-    duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0
+    duration > 0
+      ? Math.min(100, Math.max(0, (currentTime / duration) * 100))
+      : 0
 
   return (
-    <Card className="gap-2 rounded-none border border-primary/20 bg-background/50 p-2.5 py-2.5 w-full shadow-none ring-0">
+    <Card className="w-full gap-2 rounded-none border border-primary/20 bg-background/50 p-2.5 py-2.5 shadow-none ring-0">
       {/* Telemetry Header */}
       <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-nano text-muted-foreground">
         <div className="flex items-center gap-1.5">
@@ -105,27 +110,28 @@ export function AudioToneVisualizer({
             className={cn(
               "size-1.5 rounded-full transition-colors",
               status === "playing"
-                ? "bg-primary animate-ping"
+                ? "animate-ping bg-primary"
                 : status === "paused"
-                ? "bg-amber-500"
-                : status === "loading"
-                ? "bg-primary animate-pulse"
-                : "bg-muted-foreground/50"
+                  ? "bg-amber-500"
+                  : status === "loading"
+                    ? "animate-pulse bg-primary"
+                    : "bg-muted-foreground/50"
             )}
           />
-          <span className="font-semibold uppercase tracking-wider text-foreground/80">
+          <span className="font-semibold tracking-wider text-foreground/80 uppercase">
             {status === "playing"
               ? text.live
               : status === "paused"
-              ? text.paused
-              : status === "loading"
-              ? text.synthesizing
-              : text.idle}
+                ? text.paused
+                : status === "loading"
+                  ? text.synthesizing
+                  : text.idle}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <span>
-            {text.tone}: <strong className="text-foreground">{toneLabel}</strong>
+            {text.tone}:{" "}
+            <strong className="text-foreground">{toneLabel}</strong>
           </span>
           {pitch !== undefined && (
             <>
@@ -140,7 +146,8 @@ export function AudioToneVisualizer({
           )}
           <span>•</span>
           <span>
-            {text.rate}: <strong className="text-foreground">{speed.toFixed(2)}x</strong>
+            {text.rate}:{" "}
+            <strong className="text-foreground">{speed.toFixed(2)}x</strong>
           </span>
         </div>
       </div>
@@ -168,10 +175,10 @@ export function AudioToneVisualizer({
                 status === "playing"
                   ? "bg-primary shadow-2xs shadow-primary/30"
                   : status === "paused"
-                  ? "bg-amber-500/50"
-                  : status === "loading"
-                  ? "bg-primary/50"
-                  : "bg-muted-foreground/30"
+                    ? "bg-amber-500/50"
+                    : status === "loading"
+                      ? "bg-primary/50"
+                      : "bg-muted-foreground/30"
               )}
               // While live, heights come from the analyser (paused keeps the last real frame)
               style={showLive ? undefined : { height: `${height}%` }}
@@ -191,7 +198,10 @@ export function AudioToneVisualizer({
           aria-valuemax={Math.max(1, Math.round(duration))}
           aria-valuetext={
             hasDuration
-              ? text.positionText(formatAudioTime(currentTime), formatAudioTime(duration))
+              ? text.positionText(
+                  formatAudioTime(currentTime),
+                  formatAudioTime(duration)
+                )
               : text.noAudio
           }
           aria-disabled={!hasDuration}
@@ -219,28 +229,31 @@ export function AudioToneVisualizer({
               onSeek(target)
             }
           }}
-          className="group relative h-2.5 flex-1 cursor-pointer aria-disabled:cursor-default overflow-hidden rounded-full bg-border/70 hover:bg-border transition-colors select-none"
+          className="group relative h-2.5 flex-1 cursor-pointer overflow-hidden rounded-full bg-border/70 transition-colors select-none hover:bg-border aria-disabled:cursor-default"
         >
           <div
             ref={progressRef}
             className={cn(
-              "h-full relative",
+              "relative h-full",
               status === "playing"
                 ? "bg-primary shadow-xs"
                 : status === "paused"
-                ? "bg-amber-500"
-                : status === "loading"
-                ? "bg-primary/60 animate-pulse"
-                : "bg-muted-foreground/40"
+                  ? "bg-amber-500"
+                  : status === "loading"
+                    ? "animate-pulse bg-primary/60"
+                    : "bg-muted-foreground/40"
             )}
             style={{ width: `${progressPercent}%` }}
           >
-            <div className="absolute end-0 top-1/2 -translate-y-1/2 size-2.5 rounded-full bg-foreground shadow-xs opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute end-0 top-1/2 size-2.5 -translate-y-1/2 rounded-full bg-foreground opacity-0 shadow-xs transition-opacity group-hover:opacity-100" />
           </div>
         </div>
 
         {/* Formatted Elapsed Time / Total Duration */}
-        <span ref={timeRef} className="font-mono text-nano text-muted-foreground shrink-0 tabular-nums">
+        <span
+          ref={timeRef}
+          className="shrink-0 font-mono text-nano text-muted-foreground tabular-nums"
+        >
           {formatAudioTime(currentTime)} / {formatAudioTime(duration || 0)}
         </span>
       </div>

@@ -534,6 +534,15 @@
       "bottomLeft": "Abajo a la izquierda",
       "hidden": "Oculto",
       "close": "Cerrar"
+    },
+    "nav": {
+      "groupPreferences": "Preferencias",
+      "groupWeatherData": "Datos meteorológicos",
+      "groupVoice": "Voz y audio",
+      "groupAdvanced": "Avanzado",
+      "searchPlaceholder": "Buscar ajustes…",
+      "searchResults": "Resultados de búsqueda",
+      "noResults": "No hay ajustes coincidentes"
     }
   },
   "header": {

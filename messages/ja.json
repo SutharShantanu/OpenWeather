@@ -534,6 +534,15 @@
       "bottomLeft": "左下",
       "hidden": "非表示",
       "close": "閉じる"
+    },
+    "nav": {
+      "groupPreferences": "環境設定",
+      "groupWeatherData": "気象データ",
+      "groupVoice": "音声とオーディオ",
+      "groupAdvanced": "詳細設定",
+      "searchPlaceholder": "設定を検索…",
+      "searchResults": "検索結果",
+      "noResults": "一致する設定はありません"
     }
   },
   "header": {

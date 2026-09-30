@@ -12,8 +12,8 @@ import {
   Globe,
   Volume2,
   Palette,
-  ChevronLeft,
-  ChevronRight,
+  Search,
+  X,
 } from "lucide-react"
 import { Tabs, TabsList } from "@/components/ui/tabs"
 import { Dot } from "@/components/ui/dot"
@@ -27,10 +27,20 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { useDebounce } from "@/hooks/use-debounce"
 import { UniversalDialog } from "@/components/universal-dialog"
 import { useTranslation } from "@/components/language-provider"
 
@@ -48,6 +58,9 @@ import {
   RegionalTabContent,
   SpeechTabContent,
   AppearanceTabContent,
+  SettingsSearchResults,
+  searchSettings,
+  type SettingsSearchEntry,
 } from "./settings/components"
 
 export interface SettingsDialogProps {
@@ -76,37 +89,24 @@ const TAB_ALIASES: Record<string, string> = {
   theme: "appearance",
 }
 
-/** Tracks whether a horizontally scrollable element has hidden content on either side. */
-function useHorizontalOverflow(ref: React.RefObject<HTMLElement | null>) {
-  const [overflow, setOverflow] = React.useState({ left: false, right: false })
+type SettingsGroup = "preferences" | "data" | "voice" | "advanced"
 
-  const update = React.useCallback(() => {
-    const el = ref.current
-    if (!el) return
-    // left/right mean start/end: in RTL scrollLeft runs from 0 to negative.
-    const pos = Math.abs(el.scrollLeft)
-    const left = pos > 1
-    const right = pos + el.clientWidth < el.scrollWidth - 1
-    setOverflow((prev) =>
-      prev.left === left && prev.right === right ? prev : { left, right }
-    )
-  }, [ref])
+/** Sidebar order: groups, and the pages inside each. */
+const GROUP_ORDER: SettingsGroup[] = [
+  "preferences",
+  "data",
+  "voice",
+  "advanced",
+]
 
-  React.useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    update()
-    const observer = new ResizeObserver(update)
-    observer.observe(el)
-    el.addEventListener("scroll", update, { passive: true })
-    return () => {
-      observer.disconnect()
-      el.removeEventListener("scroll", update)
-    }
-  }, [ref, update])
-
-  return overflow
-}
+/** How long a search result's section stays highlighted after jumping to it. */
+const HIGHLIGHT_MS = 1600
+const HIGHLIGHT_CLASSES = [
+  "ring-2",
+  "ring-primary",
+  "ring-offset-2",
+  "ring-offset-background",
+]
 
 export function SettingsDialog({
   open,
@@ -210,34 +210,6 @@ export function SettingsDialog({
   const renderTabDot = (changed: boolean) =>
     changed ? <Dot variant="primary" size="sm" pulse /> : null
 
-  const tabsListRef = React.useRef<HTMLDivElement>(null)
-  const tabsOverflow = useHorizontalOverflow(tabsListRef)
-
-  React.useEffect(() => {
-    if (!open) return
-    const timer = setTimeout(() => {
-      const activeEl = tabsListRef.current?.querySelector(
-        '[data-state="active"]'
-      ) as HTMLElement | null
-      activeEl?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "nearest",
-      })
-    }, 50)
-    return () => clearTimeout(timer)
-  }, [currentTab, open])
-
-  const scrollTabs = (direction: -1 | 1) => {
-    const el = tabsListRef.current
-    if (!el) return
-    const sign = getComputedStyle(el).direction === "rtl" ? -1 : 1
-    el.scrollBy({
-      left: sign * direction * el.clientWidth * 0.6,
-      behavior: "smooth",
-    })
-  }
-
   const handleConfirmReset = () => {
     onResetSettings()
     setIsResetConfirmOpen(false)
@@ -246,6 +218,7 @@ export function SettingsDialog({
   // Reusable Tab Configurations
   const tabs: {
     id: string
+    group: SettingsGroup
     label: string
     icon: React.ElementType
     description: string
@@ -254,6 +227,7 @@ export function SettingsDialog({
   }[] = [
     {
       id: "locations",
+      group: "data",
       label: t.settingsDialog.tabLocations,
       icon: MapPin,
       description: t.settingsDialog.tabDescriptions.locations,
@@ -272,6 +246,7 @@ export function SettingsDialog({
     },
     {
       id: "source",
+      group: "data",
       label: t.settingsDialog.tabSource,
       icon: Server,
       description: t.settingsDialog.tabDescriptions.source,
@@ -286,6 +261,7 @@ export function SettingsDialog({
     },
     {
       id: "api",
+      group: "advanced",
       label: t.settingsDialog.tabApi,
       icon: KeyRound,
       description: t.settingsDialog.tabDescriptions.api,
@@ -300,6 +276,7 @@ export function SettingsDialog({
     },
     {
       id: "units",
+      group: "preferences",
       label: t.settingsDialog.tabUnits,
       icon: Compass,
       description: t.settingsDialog.tabDescriptions.units,
@@ -314,6 +291,7 @@ export function SettingsDialog({
     },
     {
       id: "localization",
+      group: "preferences",
       label: t.settingsDialog.tabRegional,
       icon: Globe,
       description: t.settingsDialog.tabDescriptions.localization,
@@ -328,6 +306,7 @@ export function SettingsDialog({
     },
     {
       id: "speech",
+      group: "voice",
       label: t.settingsDialog.tabSpeech,
       icon: Volume2,
       description: t.settingsDialog.tabDescriptions.speech,
@@ -341,6 +320,7 @@ export function SettingsDialog({
     },
     {
       id: "appearance",
+      group: "preferences",
       label: t.settingsDialog.tabTheme,
       icon: Palette,
       description: t.settingsDialog.tabDescriptions.appearance,
@@ -357,6 +337,206 @@ export function SettingsDialog({
   const activeTabObj = tabs.find((tab) => tab.id === currentTab) || tabs[0]
   const ActiveIcon = activeTabObj.icon
 
+  const nav = t.settingsDialog.nav
+  const groupLabels: Record<SettingsGroup, string> = {
+    preferences: nav.groupPreferences,
+    data: nav.groupWeatherData,
+    voice: nav.groupVoice,
+    advanced: nav.groupAdvanced,
+  }
+  const groupedTabs = GROUP_ORDER.map((group) => ({
+    group,
+    label: groupLabels[group],
+    tabs: tabs.filter((tab) => tab.group === group),
+  }))
+
+  // ---- Settings search -------------------------------------------------
+  // Every card title is searchable, plus English keywords for synonyms and
+  // unit names that don't appear in the (translated) titles.
+  const sd = t.settingsDialog
+  const tabById = new Map(tabs.map((tab) => [tab.id, tab]))
+  const entry = (
+    tab: string,
+    title: string,
+    keywords?: string
+  ): SettingsSearchEntry => ({
+    tab,
+    title,
+    keywords,
+    tabLabel: `${groupLabels[tabById.get(tab)!.group]} › ${tabById.get(tab)!.label}`,
+    icon: tabById.get(tab)!.icon,
+  })
+  const searchEntries: SettingsSearchEntry[] = [
+    entry(
+      "appearance",
+      sd.theme.headerTitle,
+      "theme dark light mode system color"
+    ),
+    entry(
+      "appearance",
+      sd.assistant.title,
+      "ai bot assistant advisor floating button position hide"
+    ),
+    entry(
+      "localization",
+      sd.regional.langTitle,
+      "language locale translation rtl"
+    ),
+    entry("localization", sd.regional.timeTitle, "time clock 12h 24h am pm"),
+    entry("localization", sd.regional.dateTitle, "date format day month year"),
+    entry(
+      "localization",
+      sd.regional.coordTitle,
+      "coordinates latitude longitude dms decimal"
+    ),
+    entry("units", sd.units.headerTitle, "units metric imperial presets"),
+    entry("units", sd.units.tempTitle, "temperature celsius fahrenheit"),
+    entry("units", sd.units.windTitle, "wind speed kmh mph knots ms beaufort"),
+    entry("units", sd.units.pressureTitle, "pressure hpa inhg mmhg barometer"),
+    entry("units", sd.units.precipTitle, "precipitation rain mm inches"),
+    entry(
+      "source",
+      sd.source.providerTitle,
+      "provider source open-meteo openweathermap simulation"
+    ),
+    entry(
+      "source",
+      sd.source.nwpTitle,
+      "model station ecmwf gfs icon forecast nwp"
+    ),
+    entry(
+      "locations",
+      sd.locations.addTitle,
+      "add search city station favorite pin nearby"
+    ),
+    entry(
+      "locations",
+      sd.locations.savedTitle,
+      "saved pinned favorites stations remove"
+    ),
+    entry("speech", sd.speech.engineTitle, "tts text to speech engine edge"),
+    entry("speech", sd.speech.personaTitle, "voice persona male female accent"),
+    entry("speech", sd.speech.velocityTitle, "speed rate fast slow"),
+    entry("speech", sd.speech.pitchTitle, "pitch tone"),
+    entry("speech", sd.speech.volumeTitle, "volume loudness gain db"),
+    entry("speech", sd.speech.autoBriefingTitle, "auto speak briefing on load"),
+    entry(
+      "speech",
+      sd.speech.deliveryTitle,
+      "delivery style tone casual formal"
+    ),
+    entry("api", sd.apiKeys.owmTitle, "openweathermap owm api key token"),
+    entry(
+      "api",
+      sd.apiKeys.cartoTitle,
+      "carto map tiles basemap api key token"
+    ),
+  ]
+
+  const [query, setQuery] = React.useState("")
+  const debouncedQuery = useDebounce(query, 200)
+  const isSearching = debouncedQuery.trim().length > 0
+  const searchResults = isSearching
+    ? searchSettings(searchEntries, debouncedQuery)
+    : []
+
+  // Clear the search whenever the dialog closes.
+  if (!open && query) setQuery("")
+
+  const panelsRef = React.useRef<HTMLDivElement>(null)
+  const [pendingSection, setPendingSection] = React.useState<string | null>(
+    null
+  )
+
+  const openSearchResult = (result: SettingsSearchEntry) => {
+    setQuery("")
+    onActiveTabChange?.(result.tab)
+    setPendingSection(result.title)
+  }
+
+  // After switching pages, scroll the matching card into view and flash it.
+  React.useEffect(() => {
+    if (!pendingSection) return
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const frame = requestAnimationFrame(() => {
+      const titles = panelsRef.current?.querySelectorAll<HTMLElement>(
+        '[role="tabpanel"][data-state="active"] [data-slot="card-title"]'
+      )
+      const title = Array.from(titles ?? []).find((el) =>
+        el.textContent
+          ?.trim()
+          .toLowerCase()
+          .includes(pendingSection.toLowerCase())
+      )
+      const card = title?.closest<HTMLElement>('[data-slot="card"]')
+      setPendingSection(null)
+      if (!card) return
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+      card.scrollIntoView({
+        block: "start",
+        behavior: reduceMotion ? "auto" : "smooth",
+      })
+      card.classList.add(...HIGHLIGHT_CLASSES)
+      timer = setTimeout(
+        () => card.classList.remove(...HIGHLIGHT_CLASSES),
+        HIGHLIGHT_MS
+      )
+    })
+    return () => {
+      cancelAnimationFrame(frame)
+      if (timer) clearTimeout(timer)
+    }
+  }, [pendingSection, currentTab])
+
+  const searchBox = (
+    <InputGroup>
+      <InputGroupAddon>
+        <Search />
+      </InputGroupAddon>
+      <InputGroupInput
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && searchResults[0]) {
+            e.preventDefault()
+            openSearchResult(searchResults[0])
+          } else if (e.key === "Escape" && query) {
+            // Clear the search instead of closing the dialog.
+            e.preventDefault()
+            e.stopPropagation()
+            setQuery("")
+          }
+        }}
+        placeholder={nav.searchPlaceholder}
+        aria-label={nav.searchPlaceholder}
+        className="text-xs"
+      />
+      {query && (
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton
+            size="icon-xs"
+            aria-label={t.common.clear}
+            onClick={() => setQuery("")}
+          >
+            <X />
+          </InputGroupButton>
+        </InputGroupAddon>
+      )}
+    </InputGroup>
+  )
+
+  const searchResultsList = (
+    <SettingsSearchResults
+      results={searchResults}
+      label={nav.searchResults}
+      emptyLabel={nav.noResults}
+      onSelect={openSearchResult}
+    />
+  )
+
   return (
     <UniversalDialog
       open={open}
@@ -365,6 +545,8 @@ export function SettingsDialog({
       title={t.settingsDialog.title}
       description={t.settingsDialog.subtitle}
       scrollable={false}
+      size="4xl"
+      contentClassName="sm:h-[min(46rem,88dvh)]"
       footer={
         <>
           <Popover
@@ -425,109 +607,128 @@ export function SettingsDialog({
         </>
       }
     >
-      {/* REUSABLE TABS SYSTEM */}
+      {/* Vertical, grouped navigation with search (sidebar on sm+, header on mobile) */}
       <Tabs
         value={currentTab}
         onValueChange={onActiveTabChange}
-        className="flex min-h-0 w-full flex-1 flex-col gap-0 overflow-hidden"
+        orientation="vertical"
+        className="flex min-h-0 w-full flex-1 flex-col gap-0 overflow-hidden sm:flex-row"
       >
-        {/* DESKTOP TABS LIST (>= sm) */}
-        <div className="relative hidden w-full shrink-0 border-b border-border bg-muted/20 sm:flex">
-          <TabsList
-            ref={tabsListRef}
-            className="w-full shrink-0 touch-pan-x [scrollbar-width:none] flex-nowrap justify-start gap-1 overflow-x-auto overflow-y-hidden scroll-smooth p-1.5 [&::-webkit-scrollbar]:hidden"
-            onWheel={(e) => {
-              if (
-                Math.abs(e.deltaY) > Math.abs(e.deltaX) &&
-                e.currentTarget.scrollWidth > e.currentTarget.clientWidth
-              ) {
-                e.currentTarget.scrollLeft += e.deltaY
-              }
-            }}
-          >
-            {tabs.map((tab) => (
-              <SettingsTabTrigger
-                key={tab.id}
-                value={tab.id}
-                label={tab.label}
-                badge={tab.badge}
-              />
-            ))}
-          </TabsList>
+        <aside className="hidden w-60 shrink-0 flex-col gap-2 border-e border-border bg-muted/20 p-2.5 sm:flex">
+          {searchBox}
+          <ScrollArea className="min-h-0 flex-1">
+            {isSearching ? (
+              searchResultsList
+            ) : (
+              <nav className="space-y-3 pb-2">
+                {groupedTabs.map(({ group, label, tabs: groupTabs }) => (
+                  <div key={group} className="space-y-1">
+                    <p
+                      id={`settings-group-${group}`}
+                      className="px-2 font-mono text-nano font-semibold tracking-wider text-muted-foreground uppercase"
+                    >
+                      {label}
+                    </p>
+                    <TabsList
+                      variant="line"
+                      aria-labelledby={`settings-group-${group}`}
+                      className="w-full"
+                    >
+                      {groupTabs.map((tab) => {
+                        const Icon = tab.icon
+                        return (
+                          <SettingsTabTrigger
+                            key={tab.id}
+                            value={tab.id}
+                            label={tab.label}
+                            badge={tab.badge}
+                            icon={<Icon />}
+                            className="w-full justify-start px-2 py-1.5 data-active:bg-background"
+                          />
+                        )
+                      })}
+                    </TabsList>
+                  </div>
+                ))}
+              </nav>
+            )}
+          </ScrollArea>
+        </aside>
 
-          {tabsOverflow.left && (
-            <button
-              type="button"
-              aria-label={t.settingsDialog.scrollTabsLeft}
-              onClick={() => scrollTabs(-1)}
-              className="absolute inset-y-0 start-0 flex w-8 items-center justify-start bg-linear-to-r from-background via-background/90 to-transparent ps-1 text-muted-foreground hover:text-foreground rtl:bg-linear-to-l"
+        {/* MOBILE: search + grouped section picker (< sm) */}
+        <div className="flex w-full shrink-0 flex-col gap-2 border-b border-border bg-muted/30 px-3 py-2 sm:hidden">
+          {searchBox}
+          {!isSearching && (
+            <Select
+              value={currentTab}
+              onValueChange={(value) => onActiveTabChange?.(value)}
             >
-              <ChevronLeft className="size-4 rtl:rotate-180" />
-            </button>
-          )}
-          {tabsOverflow.right && (
-            <button
-              type="button"
-              aria-label={t.settingsDialog.scrollTabsRight}
-              onClick={() => scrollTabs(1)}
-              className="absolute inset-y-0 end-0 flex w-8 items-center justify-end bg-linear-to-l from-background via-background/90 to-transparent pe-1 text-muted-foreground hover:text-foreground rtl:bg-linear-to-r"
-            >
-              <ChevronRight className="size-4 rtl:rotate-180" />
-            </button>
-          )}
-        </div>
-
-        {/* MOBILE SECTION PICKER (< sm) */}
-        <div className="flex w-full shrink-0 items-center border-b border-border bg-muted/30 px-3 py-2 sm:hidden">
-          <Select
-            value={currentTab}
-            onValueChange={(value) => onActiveTabChange?.(value)}
-          >
-            <SelectTrigger
-              aria-label={t.settingsDialog.sectionPicker}
-              className="h-9 w-full min-w-0 border-border/80 bg-background/90 font-sans text-xs shadow-2xs"
-            >
-              <SelectValue>
-                <span className="flex min-w-0 items-center gap-2">
-                  <ActiveIcon className="size-3.5 shrink-0 text-primary" />
-                  <span className="truncate font-semibold text-foreground">
-                    {activeTabObj.label}
-                  </span>
-                  {activeTabObj.badge}
-                </span>
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent position="popper" className="max-h-[60vh]">
-              {tabs.map((tab) => {
-                const Icon = tab.icon
-                return (
-                  <SelectItem key={tab.id} value={tab.id} className="py-2.5">
-                    <span className="flex min-w-0 items-start gap-2.5">
-                      <Icon className="mt-0.5 size-4 shrink-0 text-primary" />
-                      <span className="flex min-w-0 flex-col items-start gap-0.5">
-                        <span className="flex items-center gap-2">
-                          <span className="font-heading text-xs font-semibold text-foreground">
-                            {tab.label}
-                          </span>
-                          {tab.badge}
-                        </span>
-                        <span className="line-clamp-1 text-tiny text-muted-foreground">
-                          {tab.description}
-                        </span>
-                      </span>
+              <SelectTrigger
+                aria-label={t.settingsDialog.sectionPicker}
+                className="h-9 w-full min-w-0 border-border/80 bg-background/90 font-sans text-xs shadow-2xs"
+              >
+                <SelectValue>
+                  <span className="flex min-w-0 items-center gap-2">
+                    <ActiveIcon className="size-3.5 shrink-0 text-primary" />
+                    <span className="truncate font-semibold text-foreground">
+                      {activeTabObj.label}
                     </span>
-                  </SelectItem>
-                )
-              })}
-            </SelectContent>
-          </Select>
+                    {activeTabObj.badge}
+                  </span>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent position="popper" className="max-h-[60vh]">
+                {groupedTabs.map(({ group, label, tabs: groupTabs }) => (
+                  <SelectGroup key={group}>
+                    <SelectLabel>{label}</SelectLabel>
+                    {groupTabs.map((tab) => {
+                      const Icon = tab.icon
+                      return (
+                        <SelectItem
+                          key={tab.id}
+                          value={tab.id}
+                          className="py-2.5"
+                        >
+                          <span className="flex min-w-0 items-start gap-2.5">
+                            <Icon className="mt-0.5 size-4 shrink-0 text-primary" />
+                            <span className="flex min-w-0 flex-col items-start gap-0.5">
+                              <span className="flex items-center gap-2">
+                                <span className="font-heading text-xs font-semibold text-foreground">
+                                  {tab.label}
+                                </span>
+                                {tab.badge}
+                              </span>
+                              <span className="line-clamp-1 text-tiny text-muted-foreground">
+                                {tab.description}
+                              </span>
+                            </span>
+                          </span>
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
-        {tabs.map((tab) => (
-          <SettingsTabPanel key={tab.id} value={tab.id}>
-            {tab.content}
-          </SettingsTabPanel>
-        ))}
+        {isSearching && (
+          <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:hidden">
+            {searchResultsList}
+          </div>
+        )}
+
+        <div
+          ref={panelsRef}
+          className={`min-h-0 min-w-0 flex-1 flex-col ${isSearching ? "hidden sm:flex" : "flex"}`}
+        >
+          {tabs.map((tab) => (
+            <SettingsTabPanel key={tab.id} value={tab.id}>
+              {tab.content}
+            </SettingsTabPanel>
+          ))}
+        </div>
       </Tabs>
     </UniversalDialog>
   )

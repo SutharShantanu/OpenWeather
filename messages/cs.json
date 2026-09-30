@@ -534,6 +534,15 @@
       "bottomLeft": "Vlevo dole",
       "hidden": "Skryté",
       "close": "Zavřít"
+    },
+    "nav": {
+      "groupPreferences": "Předvolby",
+      "groupWeatherData": "Data o počasí",
+      "groupVoice": "Hlas a zvuk",
+      "groupAdvanced": "Pokročilé",
+      "searchPlaceholder": "Hledat v nastavení…",
+      "searchResults": "Výsledky hledání",
+      "noResults": "Žádná odpovídající nastavení"
     }
   },
   "header": {

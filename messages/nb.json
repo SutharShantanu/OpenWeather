@@ -534,6 +534,15 @@
       "bottomLeft": "Nederst til venstre",
       "hidden": "Skjult",
       "close": "Lukk"
+    },
+    "nav": {
+      "groupPreferences": "Preferanser",
+      "groupWeatherData": "Værdata",
+      "groupVoice": "Stemme og lyd",
+      "groupAdvanced": "Avansert",
+      "searchPlaceholder": "Søk i innstillinger…",
+      "searchResults": "Søkeresultater",
+      "noResults": "Ingen samsvarende innstillinger"
     }
   },
   "header": {

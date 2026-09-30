@@ -534,6 +534,15 @@
       "bottomLeft": "Kaliwang ibaba",
       "hidden": "Nakatago",
       "close": "Isara"
+    },
+    "nav": {
+      "groupPreferences": "Mga kagustuhan",
+      "groupWeatherData": "Datos ng panahon",
+      "groupVoice": "Boses at audio",
+      "groupAdvanced": "Advanced",
+      "searchPlaceholder": "Maghanap sa settings…",
+      "searchResults": "Mga resulta ng paghahanap",
+      "noResults": "Walang katugmang setting"
     }
   },
   "header": {

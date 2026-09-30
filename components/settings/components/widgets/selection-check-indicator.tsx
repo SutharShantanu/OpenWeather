@@ -3,7 +3,11 @@
 import React from "react"
 import { Check } from "lucide-react"
 
-export function SelectionCheckIndicator({ isSelected }: { isSelected: boolean }) {
+export function SelectionCheckIndicator({
+  isSelected,
+}: {
+  isSelected: boolean
+}) {
   if (isSelected) {
     return (
       <span className="inline-flex size-4.5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-2xs">

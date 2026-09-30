@@ -534,6 +534,15 @@
       "bottomLeft": "Stânga jos",
       "hidden": "Ascuns",
       "close": "Închide"
+    },
+    "nav": {
+      "groupPreferences": "Preferințe",
+      "groupWeatherData": "Date meteo",
+      "groupVoice": "Voce și audio",
+      "groupAdvanced": "Avansat",
+      "searchPlaceholder": "Caută în setări…",
+      "searchResults": "Rezultatele căutării",
+      "noResults": "Nicio setare potrivită"
     }
   },
   "header": {

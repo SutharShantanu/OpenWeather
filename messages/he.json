@@ -534,6 +534,15 @@
       "bottomLeft": "למטה משמאל",
       "hidden": "מוסתר",
       "close": "סגור"
+    },
+    "nav": {
+      "groupPreferences": "העדפות",
+      "groupWeatherData": "נתוני מזג אוויר",
+      "groupVoice": "קול ושמע",
+      "groupAdvanced": "מתקדם",
+      "searchPlaceholder": "חיפוש בהגדרות…",
+      "searchResults": "תוצאות חיפוש",
+      "noResults": "אין הגדרות תואמות"
     }
   },
   "header": {

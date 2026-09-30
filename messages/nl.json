@@ -534,6 +534,15 @@
       "bottomLeft": "Linksonder",
       "hidden": "Verborgen",
       "close": "Sluiten"
+    },
+    "nav": {
+      "groupPreferences": "Voorkeuren",
+      "groupWeatherData": "Weergegevens",
+      "groupVoice": "Spraak en audio",
+      "groupAdvanced": "Geavanceerd",
+      "searchPlaceholder": "Instellingen zoeken…",
+      "searchResults": "Zoekresultaten",
+      "noResults": "Geen overeenkomende instellingen"
     }
   },
   "header": {

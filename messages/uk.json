@@ -534,6 +534,15 @@
       "bottomLeft": "Ліворуч унизу",
       "hidden": "Прихована",
       "close": "Закрити"
+    },
+    "nav": {
+      "groupPreferences": "Уподобання",
+      "groupWeatherData": "Погодні дані",
+      "groupVoice": "Голос і звук",
+      "groupAdvanced": "Додатково",
+      "searchPlaceholder": "Пошук у налаштуваннях…",
+      "searchResults": "Результати пошуку",
+      "noResults": "Немає відповідних налаштувань"
     }
   },
   "header": {

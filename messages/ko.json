@@ -534,6 +534,15 @@
       "bottomLeft": "왼쪽 아래",
       "hidden": "숨김",
       "close": "닫기"
+    },
+    "nav": {
+      "groupPreferences": "환경설정",
+      "groupWeatherData": "날씨 데이터",
+      "groupVoice": "음성 및 오디오",
+      "groupAdvanced": "고급",
+      "searchPlaceholder": "설정 검색…",
+      "searchResults": "검색 결과",
+      "noResults": "일치하는 설정이 없습니다"
     }
   },
   "header": {

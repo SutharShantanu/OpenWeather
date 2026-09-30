@@ -534,6 +534,15 @@
       "bottomLeft": "ซ้ายล่าง",
       "hidden": "ซ่อน",
       "close": "ปิด"
+    },
+    "nav": {
+      "groupPreferences": "การตั้งค่าทั่วไป",
+      "groupWeatherData": "ข้อมูลสภาพอากาศ",
+      "groupVoice": "เสียงและเสียงพูด",
+      "groupAdvanced": "ขั้นสูง",
+      "searchPlaceholder": "ค้นหาการตั้งค่า…",
+      "searchResults": "ผลการค้นหา",
+      "noResults": "ไม่พบการตั้งค่าที่ตรงกัน"
     }
   },
   "header": {

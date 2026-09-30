@@ -211,6 +211,15 @@ export interface Translations {
     };
   };
   settingsDialog: {
+    nav: {
+      groupPreferences: string;
+      groupWeatherData: string;
+      groupVoice: string;
+      groupAdvanced: string;
+      searchPlaceholder: string;
+      searchResults: string;
+      noResults: string;
+    };
     assistant: {
       title: string;
       desc: string;

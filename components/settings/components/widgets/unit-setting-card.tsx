@@ -70,7 +70,10 @@ export function UnitSettingCard<T extends string>({
             if (val) onValueChange(val as T)
           }}
         >
-          <SelectTrigger aria-label={title} className="w-full justify-between border-border bg-background/60 font-mono text-xs">
+          <SelectTrigger
+            aria-label={title}
+            className="w-full justify-between border-border bg-background/60 font-mono text-xs"
+          >
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent position="popper">
