@@ -417,7 +417,17 @@ export function AiAdvisorDialog({
                             <Bot className="size-5" />
                           </MessageAvatar>
                           <MessageContent>
-                            {/* Before the first words arrive only the typing line shows */}
+                            {/* Before the first words arrive: typing status in a bubble */}
+                            {!item.answer && item.status === "streaming" && (
+                              <Bubble variant="muted">
+                                <BubbleContent
+                                  role="status"
+                                  className="flex items-center gap-1.5 text-muted-foreground"
+                                >
+                                  <TypingStatus label={ai.typing} />
+                                </BubbleContent>
+                              </Bubble>
+                            )}
                             {item.answer && (
                               <Bubble variant="muted">
                                 <BubbleContent className="leading-relaxed whitespace-pre-line">
@@ -446,14 +456,12 @@ export function AiAdvisorDialog({
                                 )}
                               </Bubble>
                             )}
-                            {item.status === "streaming" && (
+                            {item.answer && item.status === "streaming" && (
                               <MessageFooter
                                 role="status"
                                 className="gap-1.5 font-normal"
                               >
-                                {/* "AI is typing" + animated dots (label's own ellipsis dropped) */}
-                                <span>{ai.typing.replace(/[.…]+$/, "")}</span>
-                                <TypingDots />
+                                <TypingStatus label={ai.typing} />
                               </MessageFooter>
                             )}
                             {item.status !== "streaming" && (
@@ -603,6 +611,16 @@ function ActionButton({
         {children}
       </Button>
     </WithTooltip>
+  )
+}
+
+/** "AI is typing" + animated dots; the label's own trailing ellipsis is dropped. */
+function TypingStatus({ label }: { label: string }) {
+  return (
+    <>
+      <span>{label.replace(/[.…]+$/, "")}</span>
+      <TypingDots />
+    </>
   )
 }
 
