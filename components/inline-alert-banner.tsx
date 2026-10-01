@@ -116,7 +116,8 @@ export function InlineAlertBanner({
     try {
       const AudioCtx =
         window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext
       if (!AudioCtx) return
       const ctx = new AudioCtx()
       setIsPlaying(true)
@@ -190,8 +191,8 @@ export function InlineAlertBanner({
             <AlertTriangle className="size-4" />
           </div>
 
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <CardTitle className="font-heading text-sm font-semibold tracking-tight">
                 {t.alerts.bulletinTitle}
               </CardTitle>
@@ -276,7 +277,9 @@ export function InlineAlertBanner({
                           <>
                             <span>•</span>
                             <Clock className="size-2.5" />
-                            <span>{t.alerts.expires} {alert.expires}</span>
+                            <span>
+                              {t.alerts.expires} {alert.expires}
+                            </span>
                           </>
                         )}
                       </div>
@@ -306,7 +309,9 @@ export function InlineAlertBanner({
                       <div className="flex-1">
                         <span className="mb-0.5 block text-mini font-semibold">
                           {t.alerts.safetyProtocol}{" "}
-                          {isChecked ? t.alerts.acknowledged : t.alerts.actionRequired}
+                          {isChecked
+                            ? t.alerts.acknowledged
+                            : t.alerts.actionRequired}
                         </span>
                         <span className="text-mini leading-relaxed text-muted-foreground">
                           {alert.instruction}

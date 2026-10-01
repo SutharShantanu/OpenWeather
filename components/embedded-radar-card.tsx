@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect, useRef } from "react";
-import dynamic from "next/dynamic";
+import React, { useState, useEffect, useRef } from "react"
+import dynamic from "next/dynamic"
 import {
   Card,
   CardHeader,
@@ -10,12 +10,12 @@ import {
   CardAction,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useTranslation } from "@/components/language-provider";
-import { useDisplayPreferences } from "@/components/display-preferences-provider";
-import { CONFIG } from "@/lib/config";
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { useTranslation } from "@/components/language-provider"
+import { useDisplayPreferences } from "@/components/display-preferences-provider"
+import { CONFIG } from "@/lib/config"
 import {
   Play,
   Pause,
@@ -23,20 +23,20 @@ import {
   Cloud,
   Maximize2,
   Minimize2,
-} from "lucide-react";
+} from "lucide-react"
 
 interface RadarFrame {
-  time: number;
-  path: string;
+  time: number
+  path: string
 }
 
 interface EmbeddedRadarCardProps {
-  lat: number;
-  lon: number;
-  cityName: string;
-  heightClass?: string;
-  onExpand?: () => void;
-  customCartoApiKey?: string;
+  lat: number
+  lon: number
+  cityName: string
+  heightClass?: string
+  onExpand?: () => void
+  customCartoApiKey?: string
 }
 
 const MapInner = dynamic(
@@ -44,12 +44,12 @@ const MapInner = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-full flex items-center justify-center bg-muted/20 text-xs font-mono text-muted-foreground">
+      <div className="flex h-full w-full items-center justify-center bg-muted/20 font-mono text-xs text-muted-foreground">
         Loading Doppler radar stream…
       </div>
     ),
   }
-);
+)
 
 export function EmbeddedRadarCard({
   lat,
@@ -59,52 +59,54 @@ export function EmbeddedRadarCard({
   onExpand,
   customCartoApiKey,
 }: EmbeddedRadarCardProps) {
-  const { t } = useTranslation();
-  const prefs = useDisplayPreferences();
-  const [radarFrames, setRadarFrames] = useState<RadarFrame[]>([]);
-  const [currentFrameIndex, setCurrentFrameIndex] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [activeLayer, setActiveLayer] = useState<"radar" | "satellite" | "none">("radar");
-  const [mapStyle, setMapStyle] = useState<"dark" | "voyager" | "osm">("dark");
-  const opacity = 0.8;
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(750);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const cardContainerRef = useRef<HTMLDivElement>(null);
-  const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { t } = useTranslation()
+  const prefs = useDisplayPreferences()
+  const [radarFrames, setRadarFrames] = useState<RadarFrame[]>([])
+  const [currentFrameIndex, setCurrentFrameIndex] = useState<number>(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [activeLayer, setActiveLayer] = useState<
+    "radar" | "satellite" | "none"
+  >("radar")
+  const [mapStyle, setMapStyle] = useState<"dark" | "voyager" | "osm">("dark")
+  const opacity = 0.8
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(750)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const cardContainerRef = useRef<HTMLDivElement>(null)
+  const playIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     fetch(`${CONFIG.api.rainViewerApiBaseUrl}/public/weather-maps.json`)
       .then((res) => {
-        if (!res.ok) throw new Error("Radar API failed");
-        return res.json();
+        if (!res.ok) throw new Error("Radar API failed")
+        return res.json()
       })
       .then((data) => {
-        const past = data.radar?.past || [];
-        const nowcast = data.radar?.nowcast || [];
-        const all: RadarFrame[] = [...past, ...nowcast];
-        setRadarFrames(all);
+        const past = data.radar?.past || []
+        const nowcast = data.radar?.nowcast || []
+        const all: RadarFrame[] = [...past, ...nowcast]
+        setRadarFrames(all)
         if (all.length > 0) {
-          const defaultIdx = past.length > 0 ? past.length - 1 : all.length - 1;
-          setCurrentFrameIndex(defaultIdx);
+          const defaultIdx = past.length > 0 ? past.length - 1 : all.length - 1
+          setCurrentFrameIndex(defaultIdx)
         }
       })
       .catch((err) => {
-        console.warn("Could not load RainViewer radar frames", err);
-      });
-  }, []);
+        console.warn("Could not load RainViewer radar frames", err)
+      })
+  }, [])
 
   useEffect(() => {
     if (isPlaying && radarFrames.length > 0) {
       playIntervalRef.current = setInterval(() => {
-        setCurrentFrameIndex((prev) => (prev + 1) % radarFrames.length);
-      }, playbackSpeed);
+        setCurrentFrameIndex((prev) => (prev + 1) % radarFrames.length)
+      }, playbackSpeed)
     } else {
-      if (playIntervalRef.current) clearInterval(playIntervalRef.current);
+      if (playIntervalRef.current) clearInterval(playIntervalRef.current)
     }
     return () => {
-      if (playIntervalRef.current) clearInterval(playIntervalRef.current);
-    };
-  }, [isPlaying, radarFrames.length, playbackSpeed]);
+      if (playIntervalRef.current) clearInterval(playIntervalRef.current)
+    }
+  }, [isPlaying, radarFrames.length, playbackSpeed])
 
   // Keep state in sync when the browser exits fullscreen itself (Esc key).
   useEffect(() => {
@@ -116,52 +118,54 @@ export function EmbeddedRadarCard({
   }, [])
 
   const toggleFullscreen = () => {
-    if (!cardContainerRef.current) return;
+    if (!cardContainerRef.current) return
     if (!isFullscreen) {
       if (cardContainerRef.current.requestFullscreen) {
-        cardContainerRef.current.requestFullscreen().catch(() => {});
+        cardContainerRef.current.requestFullscreen().catch(() => {})
       }
-      setIsFullscreen(true);
+      setIsFullscreen(true)
     } else {
       if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
+        document.exitFullscreen().catch(() => {})
       }
-      setIsFullscreen(false);
+      setIsFullscreen(false)
     }
-  };
+  }
 
-  const currentFrame = radarFrames[currentFrameIndex] || null;
-  const frameTimeStr = currentFrame
-    ? prefs.time(currentFrame.time)
-    : "--:--";
+  const currentFrame = radarFrames[currentFrameIndex] || null
+  const frameTimeStr = currentFrame ? prefs.time(currentFrame.time) : "--:--"
 
   return (
-    <Card ref={cardContainerRef} className={`w-full overflow-hidden ${isFullscreen ? "fixed inset-0 z-50 rounded-none h-dvh" : ""}`}>
-      <CardHeader className="border-b border-border pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+    <Card
+      ref={cardContainerRef}
+      className={`w-full overflow-hidden ${isFullscreen ? "fixed inset-0 z-50 h-dvh rounded-none" : ""}`}
+    >
+      <CardHeader className="flex flex-col justify-between gap-2 border-b border-border pb-3 sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2">
             <CloudRain className="size-3.5 text-primary" />
-            <CardTitle className="text-sm font-heading font-semibold tracking-tight flex items-center gap-2">
-              <span>{t.tabs.radar}</span>
-              <Badge variant="outline" className="text-tiny font-mono">
+            <CardTitle className="flex min-w-0 items-center gap-2 font-heading text-sm font-semibold tracking-tight">
+              <span className="shrink-0">{t.tabs.radar}</span>
+              <Badge
+                variant="outline"
+                className="max-w-32 min-w-0 shrink truncate font-mono text-tiny"
+              >
                 {cityName}
               </Badge>
             </CardTitle>
           </div>
-          <CardDescription className="text-xs">
-            {t.radar.desc}
-          </CardDescription>
+          <CardDescription className="text-xs">{t.radar.desc}</CardDescription>
         </div>
 
         <CardAction className="flex flex-wrap items-center gap-1.5">
           {/* Base Map Style */}
-          <div className="flex items-center border border-border p-0.5 text-xs font-mono">
+          <div className="flex items-center border border-border p-0.5 font-mono text-xs">
             <Button
               variant={mapStyle === "dark" ? "default" : "ghost"}
               aria-pressed={mapStyle === "dark"}
               size="xs"
               onClick={() => setMapStyle("dark")}
-              className="h-6 px-2 text-tiny font-mono"
+              className="h-6 px-2 font-mono text-tiny"
             >
               {t.radar.dark}
             </Button>
@@ -170,7 +174,7 @@ export function EmbeddedRadarCard({
               aria-pressed={mapStyle === "voyager"}
               size="xs"
               onClick={() => setMapStyle("voyager")}
-              className="h-6 px-2 text-tiny font-mono"
+              className="h-6 px-2 font-mono text-tiny"
             >
               {t.radar.light}
             </Button>
@@ -179,20 +183,20 @@ export function EmbeddedRadarCard({
               aria-pressed={mapStyle === "osm"}
               size="xs"
               onClick={() => setMapStyle("osm")}
-              className="h-6 px-2 text-tiny font-mono"
+              className="h-6 px-2 font-mono text-tiny"
             >
               OSM
             </Button>
           </div>
 
           {/* Layer Mode */}
-          <div className="flex items-center border border-border p-0.5 text-xs font-mono">
+          <div className="flex items-center border border-border p-0.5 font-mono text-xs">
             <Button
               variant={activeLayer === "radar" ? "default" : "ghost"}
               aria-pressed={activeLayer === "radar"}
               size="xs"
               onClick={() => setActiveLayer("radar")}
-              className="gap-1 font-mono text-tiny h-6 px-2"
+              className="h-6 gap-1 px-2 font-mono text-tiny"
             >
               <CloudRain className="size-3" />
               <span>{t.radar.radarLayer}</span>
@@ -202,7 +206,7 @@ export function EmbeddedRadarCard({
               aria-pressed={activeLayer === "satellite"}
               size="xs"
               onClick={() => setActiveLayer("satellite")}
-              className="gap-1 font-mono text-tiny h-6 px-2"
+              className="h-6 gap-1 px-2 font-mono text-tiny"
             >
               <Cloud className="size-3" />
               <span>{t.radar.cloudsLayer}</span>
@@ -212,7 +216,7 @@ export function EmbeddedRadarCard({
               aria-pressed={activeLayer === "none"}
               size="xs"
               onClick={() => setActiveLayer("none")}
-              className="font-mono text-tiny h-6 px-2"
+              className="h-6 px-2 font-mono text-tiny"
             >
               {t.radar.clearLayer}
             </Button>
@@ -222,7 +226,9 @@ export function EmbeddedRadarCard({
           <Button
             variant="outline"
             size="xs"
-            onClick={() => setPlaybackSpeed((prev) => (prev === 750 ? 400 : 750))}
+            onClick={() =>
+              setPlaybackSpeed((prev) => (prev === 750 ? 400 : 750))
+            }
             className="h-6 px-2 font-mono text-tiny"
             title={t.radar.playbackSpeed}
           >
@@ -237,7 +243,11 @@ export function EmbeddedRadarCard({
             className="h-6 w-6"
             title={t.radar.toggleFullscreen}
           >
-            {isFullscreen ? <Minimize2 className="size-3" /> : <Maximize2 className="size-3" />}
+            {isFullscreen ? (
+              <Minimize2 className="size-3" />
+            ) : (
+              <Maximize2 className="size-3" />
+            )}
           </Button>
 
           {onExpand && (
@@ -255,7 +265,7 @@ export function EmbeddedRadarCard({
       </CardHeader>
 
       <CardContent
-        className={`p-0 relative isolate overflow-hidden z-0 ${
+        className={`relative isolate z-0 overflow-hidden p-0 ${
           isFullscreen ? "h-[calc(100dvh-110px)]" : heightClass
         } bg-muted/10`}
       >
@@ -271,64 +281,81 @@ export function EmbeddedRadarCard({
         />
 
         {/* Live Legend Overlay on Map */}
-        <div className="absolute top-3 end-3 z-10 bg-background/90 border border-border p-2 text-tiny font-mono shadow-md backdrop-blur-sm hidden sm:block">
-          <div className="font-bold text-foreground mb-1">{t.radar.precipDbz}</div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-2 bg-[#00ffff]" title="Light Drizzle" />
-            <div className="w-4 h-2 bg-[#0000ff]" title="Rain" />
-            <div className="w-4 h-2 bg-[#00ff00]" title="Moderate" />
-            <div className="w-4 h-2 bg-[#ffff00]" title="Heavy" />
-            <div className="w-4 h-2 bg-[#ff0000]" title="Violent / Hail" />
+        <div className="absolute end-3 top-3 z-10 hidden border border-border bg-background/90 p-2 font-mono text-tiny shadow-md backdrop-blur-sm sm:block">
+          <div className="mb-1 font-bold text-foreground">
+            {t.radar.precipDbz}
           </div>
-          <div className="flex justify-between text-nano text-muted-foreground pt-0.5">
+          <div className="flex items-center gap-1">
+            <div className="h-2 w-4 bg-[#00ffff]" title="Light Drizzle" />
+            <div className="h-2 w-4 bg-[#0000ff]" title="Rain" />
+            <div className="h-2 w-4 bg-[#00ff00]" title="Moderate" />
+            <div className="h-2 w-4 bg-[#ffff00]" title="Heavy" />
+            <div className="h-2 w-4 bg-[#ff0000]" title="Violent / Hail" />
+          </div>
+          <div className="flex justify-between pt-0.5 text-nano text-muted-foreground">
             <span>{t.radar.drizzle}</span>
             <span>{t.radar.heavy}</span>
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="border-t border-border p-3 flex flex-col sm:flex-row items-center justify-between gap-3 bg-muted/10">
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+      <CardFooter className="flex flex-col items-center justify-between gap-3 border-t border-border bg-muted/10 p-3 sm:flex-row">
+        <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-start">
           <Button
             variant="outline"
             size="xs"
             onClick={() => setIsPlaying(!isPlaying)}
             disabled={radarFrames.length === 0}
-            className="gap-1.5 font-mono text-xs h-7 px-2.5"
+            className="h-7 gap-1.5 px-2.5 font-mono text-xs"
           >
-            {isPlaying ? <Pause className="size-3" /> : <Play className="size-3" />}
+            {isPlaying ? (
+              <Pause className="size-3" />
+            ) : (
+              <Play className="size-3" />
+            )}
             <span>{isPlaying ? t.radar.pause : t.radar.playLoop}</span>
           </Button>
 
-          <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="text-muted-foreground text-tiny uppercase">{t.radar.frame}</span>
-            <span className="font-semibold text-foreground">{frameTimeStr}</span>
-            <Badge variant="outline" className="text-tiny font-mono px-1.5 py-0 h-4">
+          <div className="flex items-center gap-2 font-mono text-xs">
+            <span className="text-tiny text-muted-foreground uppercase">
+              {t.radar.frame}
+            </span>
+            <span className="font-semibold text-foreground">
+              {frameTimeStr}
+            </span>
+            <Badge
+              variant="outline"
+              className="h-4 px-1.5 py-0 font-mono text-tiny"
+            >
               {currentFrameIndex + 1}/{radarFrames.length}
             </Badge>
           </div>
         </div>
 
         {/* Timeline Scrubber */}
-        <div className="w-full sm:w-72 flex items-center gap-2">
-          <span className="text-tiny font-mono text-muted-foreground shrink-0">-2h</span>
+        <div className="flex w-full items-center gap-2 sm:w-72">
+          <span className="shrink-0 font-mono text-tiny text-muted-foreground">
+            -2h
+          </span>
           <input
             type="range"
             min={0}
             max={Math.max(0, radarFrames.length - 1)}
             value={currentFrameIndex}
             onChange={(e) => {
-              setIsPlaying(false);
-              setCurrentFrameIndex(parseInt(e.target.value, 10));
+              setIsPlaying(false)
+              setCurrentFrameIndex(parseInt(e.target.value, 10))
             }}
             disabled={radarFrames.length === 0}
             aria-label={t.radar.frame}
             aria-valuetext={frameTimeStr}
-            className="w-full accent-primary h-1 bg-muted cursor-pointer"
+            className="h-1 w-full cursor-pointer bg-muted accent-primary"
           />
-          <span className="text-tiny font-mono text-muted-foreground shrink-0">{t.common.now}</span>
+          <span className="shrink-0 font-mono text-tiny text-muted-foreground">
+            {t.common.now}
+          </span>
         </div>
       </CardFooter>
     </Card>
-  );
+  )
 }

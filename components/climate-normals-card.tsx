@@ -326,9 +326,11 @@ export function ClimateNormalsCard({
           </>
         ) : (
           <div className="space-y-3">
-            <div className="flex items-center justify-between px-1 font-mono text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 px-1 font-mono text-xs text-muted-foreground">
               <span>{t.climate.annualCurve}</span>
-              <span className="text-tiny">{t.climate.highsVsLows(unit)}</span>
+              <span className="shrink-0 text-tiny">
+                {t.climate.highsVsLows(unit)}
+              </span>
             </div>
 
             <div className="h-48 w-full [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring [&_.recharts-surface:focus:not(:focus-visible)]:outline-none">

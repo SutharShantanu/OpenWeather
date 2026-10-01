@@ -31,7 +31,7 @@
     "advisorySystem": "Meteorological Advisory System",
     "noActiveAlerts": "Atmospheric conditions nominal across local observation sector.",
     "activeBulletin": "Active Bulletin",
-    "precip": "precip",
+    "precip": "Precip",
     "sourceTooltip": "Click to choose weather data source & forecast station",
     "simulatedSensor": "Simulated Sensor",
     "consoleFooter": "OpenWeather Precision Meteorological Console",

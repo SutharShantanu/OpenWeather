@@ -410,7 +410,7 @@ export default function WeatherDashboardPage() {
           />
 
           {/* Footer */}
-          <footer className="space-y-1 border-t border-border px-4 py-6 text-center font-mono text-xs text-muted-foreground">
+          <footer className="space-y-1 border-t border-border px-4 pt-6 pb-20 text-center font-mono text-xs text-muted-foreground">
             <p>{t.common.consoleFooter}</p>
           </footer>
         </div>

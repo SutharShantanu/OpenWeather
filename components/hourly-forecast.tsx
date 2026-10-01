@@ -52,7 +52,10 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
             <CardTitle className="font-heading text-sm font-semibold tracking-tight">
               {t.forecast.hourlyTitle}
             </CardTitle>
-            <Badge variant="outline" className="font-mono text-tiny">
+            <Badge
+              variant="outline"
+              className="hidden shrink-0 font-mono text-tiny sm:inline-flex"
+            >
               {t.forecast.oneHourPrecision}
             </Badge>
           </div>

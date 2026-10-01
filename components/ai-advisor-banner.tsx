@@ -70,7 +70,7 @@ export function AiAdvisorBanner({
   )
 
   return (
-    <Card className="w-full border-primary/40 bg-gradient-to-r rtl:bg-gradient-to-l from-primary/5 via-background to-background">
+    <Card className="w-full border-primary/40 bg-gradient-to-r from-primary/5 via-background to-background rtl:bg-gradient-to-l">
       <CardHeader className="flex flex-col justify-between gap-2 border-b border-border/60 p-3 sm:flex-row sm:items-center sm:p-4">
         <div className="flex items-center gap-2.5">
           <div className="flex size-8 shrink-0 items-center justify-center border border-primary/30 bg-primary/10 text-primary">
@@ -83,7 +83,7 @@ export function AiAdvisorBanner({
               </CardTitle>
               <Badge
                 variant="outline"
-                className="border-primary/30 font-mono text-tiny text-primary"
+                className="hidden shrink-0 border-primary/30 font-mono text-tiny text-primary sm:inline-flex"
               >
                 {t.aiAdvisor.liveInsights}
               </Badge>
