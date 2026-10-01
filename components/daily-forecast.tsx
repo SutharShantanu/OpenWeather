@@ -48,7 +48,10 @@ export function DailyForecast({ daily, unit }: DailyForecastProps) {
             {t.forecast.dailyDesc}
           </CardDescription>
         </div>
-        <Badge variant="outline" className="font-mono text-tiny">
+        <Badge
+          variant="outline"
+          className="hidden shrink-0 font-mono text-tiny sm:inline-flex"
+        >
           {t.forecast.tenDayOutlook}
         </Badge>
       </CardHeader>

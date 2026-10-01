@@ -97,7 +97,7 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
 
       <CardContent className="pt-4">
         {showChart ? (
-          <div className="h-44 w-full pt-2">
+          <div className="h-44 w-full pt-2 [&_.recharts-surface:focus-visible]:outline-2 [&_.recharts-surface:focus-visible]:outline-ring [&_.recharts-surface:focus:not(:focus-visible)]:outline-none">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={chartData}
