@@ -565,7 +565,9 @@
     "mainMenu": "Menu główne",
     "switchToLight": "Przełącz na tryb jasny",
     "switchToDark": "Przełącz na tryb ciemny",
-    "toggleTheme": "Przełącz motyw"
+    "toggleTheme": "Przełącz motyw",
+    "menuQuickActions": "Szybkie akcje",
+    "menuStationApp": "Stacja i aplikacja"
   },
   "aiAdvisor": {
     "bannerTitle": "Synoptyczna inteligencja i doradztwo AI",

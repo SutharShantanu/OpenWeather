@@ -565,7 +565,9 @@
     "mainMenu": "Menu principal",
     "switchToLight": "Mudar para modo claro",
     "switchToDark": "Mudar para modo escuro",
-    "toggleTheme": "Alternar tema"
+    "toggleTheme": "Alternar tema",
+    "menuQuickActions": "Ações rápidas",
+    "menuStationApp": "Estação e app"
   },
   "aiAdvisor": {
     "bannerTitle": "Inteligência sinótica de IA e recomendações",

@@ -565,7 +565,9 @@
     "mainMenu": "เมนูหลัก",
     "switchToLight": "สลับเป็นโหมดสว่าง",
     "switchToDark": "สลับเป็นโหมดมืด",
-    "toggleTheme": "สลับธีม"
+    "toggleTheme": "สลับธีม",
+    "menuQuickActions": "การทำงานด่วน",
+    "menuStationApp": "สถานีและแอป"
   },
   "aiAdvisor": {
     "bannerTitle": "ปัญญาประดิษฐ์ซินอปติกและคำแนะนำ",

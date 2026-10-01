@@ -565,7 +565,9 @@
     "mainMenu": "Pangunahing menu",
     "switchToLight": "Lumipat sa light mode",
     "switchToDark": "Lumipat sa dark mode",
-    "toggleTheme": "I-toggle ang tema"
+    "toggleTheme": "I-toggle ang tema",
+    "menuQuickActions": "Mabilisang aksyon",
+    "menuStationApp": "Istasyon at app"
   },
   "aiAdvisor": {
     "bannerTitle": "AI Sinoptikong Katalinuhan at Payo",

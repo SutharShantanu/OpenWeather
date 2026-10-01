@@ -565,7 +565,9 @@
     "mainMenu": "প্রধান মেনু",
     "switchToLight": "লাইট মোডে যান",
     "switchToDark": "ডার্ক মোডে যান",
-    "toggleTheme": "থিম পরিবর্তন করুন"
+    "toggleTheme": "থিম পরিবর্তন করুন",
+    "menuQuickActions": "দ্রুত কাজ",
+    "menuStationApp": "স্টেশন ও অ্যাপ"
   },
   "aiAdvisor": {
     "bannerTitle": "AI সিনপটিক বুদ্ধিমত্তা ও পরামর্শ",

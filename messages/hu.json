@@ -565,7 +565,9 @@
     "mainMenu": "Főmenü",
     "switchToLight": "Váltás világos módra",
     "switchToDark": "Váltás sötét módra",
-    "toggleTheme": "Téma váltása"
+    "toggleTheme": "Téma váltása",
+    "menuQuickActions": "Gyors műveletek",
+    "menuStationApp": "Állomás és alkalmazás"
   },
   "aiAdvisor": {
     "bannerTitle": "MI szinoptikus intelligencia és tanácsadás",

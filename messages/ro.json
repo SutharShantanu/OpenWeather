@@ -565,7 +565,9 @@
     "mainMenu": "Meniu principal",
     "switchToLight": "Comută la modul luminos",
     "switchToDark": "Comută la modul întunecat",
-    "toggleTheme": "Comută tema"
+    "toggleTheme": "Comută tema",
+    "menuQuickActions": "Acțiuni rapide",
+    "menuStationApp": "Stație și aplicație"
   },
   "aiAdvisor": {
     "bannerTitle": "Inteligență sinoptică AI și consiliere",

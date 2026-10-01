@@ -55,6 +55,8 @@ interface WeatherHeaderProps {
   unit: "C" | "F"
   settings?: ExtendedSettings
   isLoading?: boolean
+  /** Quick °C/°F switch in the mobile menu. */
+  onUnitChange?: (unit: "C" | "F") => void
 }
 
 export function WeatherHeader({
@@ -73,6 +75,7 @@ export function WeatherHeader({
   unit,
   settings,
   isLoading = false,
+  onUnitChange,
 }: WeatherHeaderProps) {
   const { t } = useTranslation()
   const { setTheme, resolvedTheme } = useTheme()
@@ -107,6 +110,7 @@ export function WeatherHeader({
   const menuItems = [
     onOpenAiAdvisor && {
       id: "ai",
+      group: "actions",
       label: t.header.aiAdvisor,
       description: t.header.aiAdvisorDesc,
       icon: Sparkles,
@@ -114,6 +118,7 @@ export function WeatherHeader({
     },
     {
       id: "source",
+      group: "app",
       label: t.common.source,
       description: t.header.sourceDesc,
       icon: Radio,
@@ -121,6 +126,7 @@ export function WeatherHeader({
     },
     {
       id: "locate",
+      group: "actions",
       label: t.common.locateMe,
       description: t.header.locateDesc,
       icon: LocateFixed,
@@ -129,6 +135,7 @@ export function WeatherHeader({
     },
     onOpenSettings && {
       id: "settings",
+      group: "app",
       label: t.common.settings,
       description: t.settingsDialog.subtitle,
       icon: Settings,
@@ -316,6 +323,9 @@ export function WeatherHeader({
           onOpenChange={setIsMenuOpen}
           items={menuItems}
           mounted={mounted}
+          current={current}
+          unit={unit}
+          onUnitChange={onUnitChange}
         />
       </div>
     </header>

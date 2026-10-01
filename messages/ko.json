@@ -565,7 +565,9 @@
     "mainMenu": "메인 메뉴",
     "switchToLight": "라이트 모드로 전환",
     "switchToDark": "다크 모드로 전환",
-    "toggleTheme": "테마 전환"
+    "toggleTheme": "테마 전환",
+    "menuQuickActions": "빠른 작업",
+    "menuStationApp": "관측소 및 앱"
   },
   "aiAdvisor": {
     "bannerTitle": "AI 기상 분석 및 조언",

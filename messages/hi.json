@@ -565,7 +565,9 @@
     "mainMenu": "मुख्य मेनू",
     "switchToLight": "लाइट मोड पर जाएँ",
     "switchToDark": "डार्क मोड पर जाएँ",
-    "toggleTheme": "थीम बदलें"
+    "toggleTheme": "थीम बदलें",
+    "menuQuickActions": "त्वरित क्रियाएँ",
+    "menuStationApp": "स्टेशन और ऐप"
   },
   "aiAdvisor": {
     "bannerTitle": "एआई सिनॉप्टिक इंटेलिजेंस और परामर्श",

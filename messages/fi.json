@@ -565,7 +565,9 @@
     "mainMenu": "Päävalikko",
     "switchToLight": "Vaihda vaaleaan tilaan",
     "switchToDark": "Vaihda tummaan tilaan",
-    "toggleTheme": "Vaihda teemaa"
+    "toggleTheme": "Vaihda teemaa",
+    "menuQuickActions": "Pikatoiminnot",
+    "menuStationApp": "Asema ja sovellus"
   },
   "aiAdvisor": {
     "bannerTitle": "AI-synoptinen älykkyys ja neuvonta",

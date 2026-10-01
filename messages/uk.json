@@ -565,7 +565,9 @@
     "mainMenu": "Головне меню",
     "switchToLight": "Перейти на світлий режим",
     "switchToDark": "Перейти на темний режим",
-    "toggleTheme": "Перемкнути тему"
+    "toggleTheme": "Перемкнути тему",
+    "menuQuickActions": "Швидкі дії",
+    "menuStationApp": "Станція та застосунок"
   },
   "aiAdvisor": {
     "bannerTitle": "Синоптична ШІ-аналітика й поради",

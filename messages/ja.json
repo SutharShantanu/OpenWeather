@@ -565,7 +565,9 @@
     "mainMenu": "メインメニュー",
     "switchToLight": "ライトモードに切り替え",
     "switchToDark": "ダークモードに切り替え",
-    "toggleTheme": "テーマを切り替え"
+    "toggleTheme": "テーマを切り替え",
+    "menuQuickActions": "クイック操作",
+    "menuStationApp": "観測所とアプリ"
   },
   "aiAdvisor": {
     "bannerTitle": "AI総観インテリジェンスとアドバイス",

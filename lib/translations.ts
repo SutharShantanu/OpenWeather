@@ -529,6 +529,8 @@ export interface Translations {
     };
   };
   header: {
+    menuQuickActions: string;
+    menuStationApp: string;
     home: string;
     currentStationGps: string;
     detecting: string;

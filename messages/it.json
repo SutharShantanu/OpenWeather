@@ -565,7 +565,9 @@
     "mainMenu": "Menu principale",
     "switchToLight": "Passa alla modalità chiara",
     "switchToDark": "Passa alla modalità scura",
-    "toggleTheme": "Cambia tema"
+    "toggleTheme": "Cambia tema",
+    "menuQuickActions": "Azioni rapide",
+    "menuStationApp": "Stazione e app"
   },
   "aiAdvisor": {
     "bannerTitle": "Intelligenza sinottica IA e consigli",

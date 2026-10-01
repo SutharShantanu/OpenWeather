@@ -565,7 +565,9 @@
     "mainMenu": "Menu utama",
     "switchToLight": "Tukar ke mod cerah",
     "switchToDark": "Tukar ke mod gelap",
-    "toggleTheme": "Togol tema"
+    "toggleTheme": "Togol tema",
+    "menuQuickActions": "Tindakan pantas",
+    "menuStationApp": "Stesen & aplikasi"
   },
   "aiAdvisor": {
     "bannerTitle": "Kecerdasan & Nasihat Sinoptik AI",

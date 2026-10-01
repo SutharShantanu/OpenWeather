@@ -565,7 +565,9 @@
     "mainMenu": "Κύριο μενού",
     "switchToLight": "Εναλλαγή σε φωτεινή λειτουργία",
     "switchToDark": "Εναλλαγή σε σκούρα λειτουργία",
-    "toggleTheme": "Εναλλαγή θέματος"
+    "toggleTheme": "Εναλλαγή θέματος",
+    "menuQuickActions": "Γρήγορες ενέργειες",
+    "menuStationApp": "Σταθμός και εφαρμογή"
   },
   "aiAdvisor": {
     "bannerTitle": "Συνοπτική νοημοσύνη και συμβουλές AI",

@@ -565,7 +565,9 @@
     "mainMenu": "Huvudmeny",
     "switchToLight": "Byt till ljust läge",
     "switchToDark": "Byt till mörkt läge",
-    "toggleTheme": "Växla tema"
+    "toggleTheme": "Växla tema",
+    "menuQuickActions": "Snabbåtgärder",
+    "menuStationApp": "Station och app"
   },
   "aiAdvisor": {
     "bannerTitle": "AI-synoptisk intelligens och rådgivning",

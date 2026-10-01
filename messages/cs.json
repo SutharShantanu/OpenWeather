@@ -565,7 +565,9 @@
     "mainMenu": "Hlavní nabídka",
     "switchToLight": "Přepnout na světlý režim",
     "switchToDark": "Přepnout na tmavý režim",
-    "toggleTheme": "Přepnout motiv"
+    "toggleTheme": "Přepnout motiv",
+    "menuQuickActions": "Rychlé akce",
+    "menuStationApp": "Stanice a aplikace"
   },
   "aiAdvisor": {
     "bannerTitle": "AI synoptická inteligence a poradce",

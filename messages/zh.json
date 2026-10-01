@@ -565,7 +565,9 @@
     "mainMenu": "主菜单",
     "switchToLight": "切换为明亮模式",
     "switchToDark": "切换为暗色模式",
-    "toggleTheme": "切换外观主题"
+    "toggleTheme": "切换外观主题",
+    "menuQuickActions": "快捷操作",
+    "menuStationApp": "站点与应用"
   },
   "aiAdvisor": {
     "bannerTitle": "AI 天气形势智能与建议",

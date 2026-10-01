@@ -271,6 +271,7 @@ export default function WeatherDashboardPage() {
             unit={unit}
             settings={settings}
             isLoading={loading}
+            onUnitChange={(tempUnit) => updateSettings({ tempUnit })}
           />
 
           <main className="mx-auto w-full max-w-7xl flex-1 space-y-4 px-4 py-4 sm:px-6 lg:px-8">

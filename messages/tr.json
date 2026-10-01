@@ -565,7 +565,9 @@
     "mainMenu": "Ana menü",
     "switchToLight": "Açık moda geç",
     "switchToDark": "Koyu moda geç",
-    "toggleTheme": "Temayı değiştir"
+    "toggleTheme": "Temayı değiştir",
+    "menuQuickActions": "Hızlı işlemler",
+    "menuStationApp": "İstasyon ve uygulama"
   },
   "aiAdvisor": {
     "bannerTitle": "YZ Sinoptik Zekâ ve Danışmanlık",

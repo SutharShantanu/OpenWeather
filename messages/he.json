@@ -565,7 +565,9 @@
     "mainMenu": "תפריט ראשי",
     "switchToLight": "מעבר למצב בהיר",
     "switchToDark": "מעבר למצב כהה",
-    "toggleTheme": "החלפת ערכת נושא"
+    "toggleTheme": "החלפת ערכת נושא",
+    "menuQuickActions": "פעולות מהירות",
+    "menuStationApp": "תחנה ואפליקציה"
   },
   "aiAdvisor": {
     "bannerTitle": "מודיעין סינופטי מבוסס AI והמלצות",

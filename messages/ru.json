@@ -565,7 +565,9 @@
     "mainMenu": "Главное меню",
     "switchToLight": "Переключить на светлую тему",
     "switchToDark": "Переключить на темную тему",
-    "toggleTheme": "Сменить тему"
+    "toggleTheme": "Сменить тему",
+    "menuQuickActions": "Быстрые действия",
+    "menuStationApp": "Станция и приложение"
   },
   "aiAdvisor": {
     "bannerTitle": "ИИ-синоптика и рекомендации",

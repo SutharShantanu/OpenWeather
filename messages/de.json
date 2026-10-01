@@ -565,7 +565,9 @@
     "mainMenu": "Hauptmenü",
     "switchToLight": "Zum hellen Modus wechseln",
     "switchToDark": "Zum dunklen Modus wechseln",
-    "toggleTheme": "Design wechseln"
+    "toggleTheme": "Design wechseln",
+    "menuQuickActions": "Schnellaktionen",
+    "menuStationApp": "Station & App"
   },
   "aiAdvisor": {
     "bannerTitle": "KI-Synoptik & Empfehlungen",

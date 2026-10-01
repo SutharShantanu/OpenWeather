@@ -565,7 +565,9 @@
     "mainMenu": "Main menu",
     "switchToLight": "Switch to light mode",
     "switchToDark": "Switch to dark mode",
-    "toggleTheme": "Toggle theme"
+    "toggleTheme": "Toggle theme",
+    "menuQuickActions": "Quick actions",
+    "menuStationApp": "Station & app"
   },
   "aiAdvisor": {
     "bannerTitle": "AI Synoptic Intelligence & Advisory",

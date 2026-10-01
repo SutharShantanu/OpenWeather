@@ -565,7 +565,9 @@
     "mainMenu": "القائمة الرئيسية",
     "switchToLight": "التبديل إلى الوضع الفاتح",
     "switchToDark": "التبديل إلى الوضع الداكن",
-    "toggleTheme": "تبديل المظهر"
+    "toggleTheme": "تبديل المظهر",
+    "menuQuickActions": "إجراءات سريعة",
+    "menuStationApp": "المحطة والتطبيق"
   },
   "aiAdvisor": {
     "bannerTitle": "الذكاء السينوبتيكي والإرشاد بالذكاء الاصطناعي",

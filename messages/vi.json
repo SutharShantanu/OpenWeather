@@ -565,7 +565,9 @@
     "mainMenu": "Menu chính",
     "switchToLight": "Chuyển sang chế độ sáng",
     "switchToDark": "Chuyển sang chế độ tối",
-    "toggleTheme": "Đổi giao diện"
+    "toggleTheme": "Đổi giao diện",
+    "menuQuickActions": "Thao tác nhanh",
+    "menuStationApp": "Trạm & ứng dụng"
   },
   "aiAdvisor": {
     "bannerTitle": "Trí tuệ synop AI và tư vấn",
