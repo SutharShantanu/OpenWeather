@@ -567,7 +567,8 @@
     "switchToDark": "מעבר למצב כהה",
     "toggleTheme": "החלפת ערכת נושא",
     "menuQuickActions": "פעולות מהירות",
-    "menuStationApp": "תחנה ואפליקציה"
+    "menuStationApp": "תחנה ואפליקציה",
+    "recentSearches": "חיפושים אחרונים"
   },
   "aiAdvisor": {
     "bannerTitle": "מודיעין סינופטי מבוסס AI והמלצות",

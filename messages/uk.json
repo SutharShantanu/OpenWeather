@@ -567,7 +567,8 @@
     "switchToDark": "Перейти на темний режим",
     "toggleTheme": "Перемкнути тему",
     "menuQuickActions": "Швидкі дії",
-    "menuStationApp": "Станція та застосунок"
+    "menuStationApp": "Станція та застосунок",
+    "recentSearches": "Нещодавні пошуки"
   },
   "aiAdvisor": {
     "bannerTitle": "Синоптична ШІ-аналітика й поради",

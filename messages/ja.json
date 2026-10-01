@@ -567,7 +567,8 @@
     "switchToDark": "ダークモードに切り替え",
     "toggleTheme": "テーマを切り替え",
     "menuQuickActions": "クイック操作",
-    "menuStationApp": "観測所とアプリ"
+    "menuStationApp": "観測所とアプリ",
+    "recentSearches": "最近の検索"
   },
   "aiAdvisor": {
     "bannerTitle": "AI総観インテリジェンスとアドバイス",

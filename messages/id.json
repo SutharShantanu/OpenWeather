@@ -567,7 +567,8 @@
     "switchToDark": "Beralih ke mode gelap",
     "toggleTheme": "Ganti tema",
     "menuQuickActions": "Tindakan cepat",
-    "menuStationApp": "Stasiun & aplikasi"
+    "menuStationApp": "Stasiun & aplikasi",
+    "recentSearches": "Pencarian terbaru"
   },
   "aiAdvisor": {
     "bannerTitle": "Kecerdasan & Saran Sinoptik AI",

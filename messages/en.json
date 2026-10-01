@@ -567,7 +567,8 @@
     "switchToDark": "Switch to dark mode",
     "toggleTheme": "Toggle theme",
     "menuQuickActions": "Quick actions",
-    "menuStationApp": "Station & app"
+    "menuStationApp": "Station & app",
+    "recentSearches": "Recent searches"
   },
   "aiAdvisor": {
     "bannerTitle": "AI Synoptic Intelligence & Advisory",

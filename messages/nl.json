@@ -567,7 +567,8 @@
     "switchToDark": "Overschakelen naar donkere modus",
     "toggleTheme": "Thema wisselen",
     "menuQuickActions": "Snelle acties",
-    "menuStationApp": "Station en app"
+    "menuStationApp": "Station en app",
+    "recentSearches": "Recente zoekopdrachten"
   },
   "aiAdvisor": {
     "bannerTitle": "Synoptische AI-intelligentie en advies",

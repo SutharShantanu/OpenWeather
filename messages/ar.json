@@ -567,7 +567,8 @@
     "switchToDark": "التبديل إلى الوضع الداكن",
     "toggleTheme": "تبديل المظهر",
     "menuQuickActions": "إجراءات سريعة",
-    "menuStationApp": "المحطة والتطبيق"
+    "menuStationApp": "المحطة والتطبيق",
+    "recentSearches": "عمليات البحث الأخيرة"
   },
   "aiAdvisor": {
     "bannerTitle": "الذكاء السينوبتيكي والإرشاد بالذكاء الاصطناعي",

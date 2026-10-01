@@ -3,6 +3,30 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { useGeocodeSearch } from "./use-geocode-search"
 
+const RECENT_KEY = "openweather:recent-searches"
+const RECENT_MAX = 6
+
+function readRecent(): string[] {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]")
+    return Array.isArray(parsed)
+      ? parsed
+          .filter((v): v is string => typeof v === "string")
+          .slice(0, RECENT_MAX)
+      : []
+  } catch {
+    return []
+  }
+}
+
+function writeRecent(list: string[]) {
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(list))
+  } catch {
+    // storage full or blocked: recent searches just won't persist
+  }
+}
+
 interface UseCitySearchOptions {
   language?: string
   onSearch: (city: string) => void
@@ -78,14 +102,35 @@ export function useCitySearch({
     clear: clearResults,
   } = useGeocodeSearch(query, { lang: language })
 
+  // Most recent first, no duplicates (case-insensitive). The dropdown that shows
+  // them only renders on the client, so reading storage up front is safe.
+  const [recentSearches, setRecentSearches] = useState<string[]>(() =>
+    typeof window === "undefined" ? [] : readRecent()
+  )
+  const rememberSearch = useCallback((cityName: string) => {
+    setRecentSearches((prev) => {
+      const next = [
+        cityName,
+        ...prev.filter((c) => c.toLowerCase() !== cityName.toLowerCase()),
+      ].slice(0, RECENT_MAX)
+      writeRecent(next)
+      return next
+    })
+  }, [])
+  const clearRecentSearches = useCallback(() => {
+    setRecentSearches([])
+    writeRecent([])
+  }, [])
+
   const handleSelect = useCallback(
     (cityName: string) => {
+      rememberSearch(cityName)
       onSearch(cityName)
       setQuery("")
       clearResults()
       setIsOpen(false)
     },
-    [onSearch, clearResults]
+    [onSearch, clearResults, rememberSearch]
   )
 
   const handleFormSubmit = useCallback(
@@ -124,5 +169,7 @@ export function useCitySearch({
     handleSelect,
     handleFormSubmit,
     clearSearch,
+    recentSearches,
+    clearRecentSearches,
   }
 }

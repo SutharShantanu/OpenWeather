@@ -1,7 +1,7 @@
 "use client"
 
 import { useId, useRef } from "react"
-import { Search, MapPin, X, ArrowRight } from "lucide-react"
+import { Search, MapPin, X, ArrowRight, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Kbd } from "@/components/ui/kbd"
@@ -60,6 +60,8 @@ export function HeaderSearch({
     handleSelect,
     handleFormSubmit,
     clearSearch,
+    recentSearches,
+    clearRecentSearches,
   } = search
 
   // Freeze the page behind the search dropdown while it's open
@@ -159,7 +161,9 @@ export function HeaderSearch({
             if (searchFormRef.current?.contains(e.target as Node))
               e.preventDefault()
           }}
-          className="w-(--radix-popover-trigger-width) gap-0 p-0"
+          collisionPadding={12}
+          // At least as wide as the field, but roomy on phones where the field is narrow
+          className="w-[max(var(--radix-popover-trigger-width),min(22rem,calc(100vw-1.5rem)))] gap-0 p-0"
         >
           <CommandList
             id={listId}
@@ -179,8 +183,10 @@ export function HeaderSearch({
                       <MapPin className={cn(isLocating && "animate-pulse")} />
                     </IconTile>
                     <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="flex items-center gap-1.5 font-semibold text-foreground">
-                        {t.header.currentStationGps}
+                      <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 font-semibold text-foreground">
+                        <span className="truncate">
+                          {t.header.currentStationGps}
+                        </span>
                         {isLocating ? (
                           <Badge
                             variant="outline"
@@ -207,6 +213,7 @@ export function HeaderSearch({
                       size="xs"
                       variant="default"
                       disabled={isLocating || isLoading}
+                      aria-label={t.header.locateAction}
                       className="shrink-0 gap-1 font-mono text-xs"
                       onClick={(e) => {
                         e.stopPropagation()
@@ -221,14 +228,53 @@ export function HeaderSearch({
                       ) : (
                         <>
                           <MapPin className="size-3" />
-                          <span>{t.header.locateAction}</span>
-                          <ArrowRight className="size-3 rtl:rotate-180" />
+                          <span className="hidden sm:inline">
+                            {t.header.locateAction}
+                          </span>
+                          <ArrowRight className="hidden size-3 sm:block rtl:rotate-180" />
                         </>
                       )}
                     </Button>
                   </CommandItem>
                 </CommandGroup>
                 <CommandSeparator className="mx-0" />
+                {/* Recent searches: rounded-full badges, still keyboard-navigable */}
+                {recentSearches.length > 0 && (
+                  <>
+                    <div className="flex items-center justify-between px-2 pt-1.5">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {t.header.recentSearches}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        onClick={clearRecentSearches}
+                        className="text-tiny text-muted-foreground"
+                      >
+                        {t.common.clear}
+                      </Button>
+                    </div>
+                    <CommandGroup className="px-2 pb-2 [&_[cmdk-group-items]]:flex [&_[cmdk-group-items]]:flex-wrap [&_[cmdk-group-items]]:gap-1.5">
+                      {recentSearches.map((c) => (
+                        <CommandItem
+                          key={c}
+                          value={`recent:${c}`}
+                          onSelect={() => handleSelect(c)}
+                          className="group/recent w-auto bg-transparent p-0 data-[selected=true]:bg-transparent"
+                        >
+                          <Badge
+                            variant="outline"
+                            className="gap-1 rounded-full px-2.5 py-0.5 text-xs group-data-[selected=true]/recent:border-primary group-data-[selected=true]/recent:text-primary"
+                          >
+                            <History className="size-3" />
+                            {c}
+                          </Badge>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                    <CommandSeparator className="mx-0" />
+                  </>
+                )}
                 <CommandGroup heading={t.header.popularHubs}>
                   {CONFIG.location.popularCities.slice(0, 8).map((c) => (
                     <CommandItem

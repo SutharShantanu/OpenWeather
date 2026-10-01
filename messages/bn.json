@@ -567,7 +567,8 @@
     "switchToDark": "ডার্ক মোডে যান",
     "toggleTheme": "থিম পরিবর্তন করুন",
     "menuQuickActions": "দ্রুত কাজ",
-    "menuStationApp": "স্টেশন ও অ্যাপ"
+    "menuStationApp": "স্টেশন ও অ্যাপ",
+    "recentSearches": "সাম্প্রতিক অনুসন্ধান"
   },
   "aiAdvisor": {
     "bannerTitle": "AI সিনপটিক বুদ্ধিমত্তা ও পরামর্শ",

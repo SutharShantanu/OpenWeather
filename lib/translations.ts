@@ -529,6 +529,7 @@ export interface Translations {
     };
   };
   header: {
+    recentSearches: string;
     menuQuickActions: string;
     menuStationApp: string;
     home: string;

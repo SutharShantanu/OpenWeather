@@ -567,7 +567,8 @@
     "switchToDark": "Zum dunklen Modus wechseln",
     "toggleTheme": "Design wechseln",
     "menuQuickActions": "Schnellaktionen",
-    "menuStationApp": "Station & App"
+    "menuStationApp": "Station & App",
+    "recentSearches": "Letzte Suchen"
   },
   "aiAdvisor": {
     "bannerTitle": "KI-Synoptik & Empfehlungen",

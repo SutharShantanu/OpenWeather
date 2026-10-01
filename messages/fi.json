@@ -567,7 +567,8 @@
     "switchToDark": "Vaihda tummaan tilaan",
     "toggleTheme": "Vaihda teemaa",
     "menuQuickActions": "Pikatoiminnot",
-    "menuStationApp": "Asema ja sovellus"
+    "menuStationApp": "Asema ja sovellus",
+    "recentSearches": "Viimeaikaiset haut"
   },
   "aiAdvisor": {
     "bannerTitle": "AI-synoptinen älykkyys ja neuvonta",

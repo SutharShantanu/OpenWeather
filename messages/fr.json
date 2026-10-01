@@ -567,7 +567,8 @@
     "switchToDark": "Passer en mode sombre",
     "toggleTheme": "Changer de thème",
     "menuQuickActions": "Actions rapides",
-    "menuStationApp": "Station et appli"
+    "menuStationApp": "Station et appli",
+    "recentSearches": "Recherches récentes"
   },
   "aiAdvisor": {
     "bannerTitle": "Intelligence synoptique IA et conseils",

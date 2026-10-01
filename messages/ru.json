@@ -567,7 +567,8 @@
     "switchToDark": "Переключить на темную тему",
     "toggleTheme": "Сменить тему",
     "menuQuickActions": "Быстрые действия",
-    "menuStationApp": "Станция и приложение"
+    "menuStationApp": "Станция и приложение",
+    "recentSearches": "Недавние запросы"
   },
   "aiAdvisor": {
     "bannerTitle": "ИИ-синоптика и рекомендации",

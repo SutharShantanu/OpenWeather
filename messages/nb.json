@@ -567,7 +567,8 @@
     "switchToDark": "Bytt til mørk modus",
     "toggleTheme": "Bytt tema",
     "menuQuickActions": "Hurtighandlinger",
-    "menuStationApp": "Stasjon og app"
+    "menuStationApp": "Stasjon og app",
+    "recentSearches": "Nylige søk"
   },
   "aiAdvisor": {
     "bannerTitle": "AI-synoptisk intelligens og rådgivning",

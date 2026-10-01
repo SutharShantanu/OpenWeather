@@ -567,7 +567,8 @@
     "switchToDark": "สลับเป็นโหมดมืด",
     "toggleTheme": "สลับธีม",
     "menuQuickActions": "การทำงานด่วน",
-    "menuStationApp": "สถานีและแอป"
+    "menuStationApp": "สถานีและแอป",
+    "recentSearches": "การค้นหาล่าสุด"
   },
   "aiAdvisor": {
     "bannerTitle": "ปัญญาประดิษฐ์ซินอปติกและคำแนะนำ",

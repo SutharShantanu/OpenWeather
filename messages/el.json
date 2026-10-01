@@ -567,7 +567,8 @@
     "switchToDark": "Εναλλαγή σε σκούρα λειτουργία",
     "toggleTheme": "Εναλλαγή θέματος",
     "menuQuickActions": "Γρήγορες ενέργειες",
-    "menuStationApp": "Σταθμός και εφαρμογή"
+    "menuStationApp": "Σταθμός και εφαρμογή",
+    "recentSearches": "Πρόσφατες αναζητήσεις"
   },
   "aiAdvisor": {
     "bannerTitle": "Συνοπτική νοημοσύνη και συμβουλές AI",
