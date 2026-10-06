@@ -549,7 +549,7 @@
     "home": "Trang chủ OpenWeather",
     "currentStationGps": "Trạm hiện tại (GPS)",
     "detecting": "Đang phát hiện...",
-    "gpsLocked": "Đã khóa GPS",
+    "gpsLocked": "Vị trí hiện tại",
     "clickToLoadStation": "Nhấp để tải trạm",
     "autoDetectStation": "Tự động phát hiện trạm khí tượng từ cảm biến thiết bị",
     "locateAction": "Định vị",
@@ -568,7 +568,10 @@
     "toggleTheme": "Đổi giao diện",
     "menuQuickActions": "Thao tác nhanh",
     "menuStationApp": "Trạm & ứng dụng",
-    "recentSearches": "Tìm kiếm gần đây"
+    "menuSearch": "Tìm tính năng và cài đặt…",
+    "menuNoResults": "Không có kết quả",
+    "recentSearches": "Tìm kiếm gần đây",
+    "networkLocation": "Ước tính, từ mạng của bạn"
   },
   "aiAdvisor": {
     "bannerTitle": "Trí tuệ synop AI và tư vấn",

@@ -60,7 +60,7 @@ const ClimateNormalsCard = dynamic(
   { loading: cardFallback }
 )
 
-const TABS = [
+export const TABS = [
   { value: "overview", icon: LayoutGrid },
   { value: "charts", icon: TrendingUp },
   { value: "radar", icon: CloudRain },
@@ -69,7 +69,7 @@ const TABS = [
   { value: "compare", icon: ArrowRightLeft },
 ] as const
 
-const TAB_LABEL_KEY = {
+export const TAB_LABEL_KEY = {
   overview: "overview",
   charts: "charts",
   radar: "radar",

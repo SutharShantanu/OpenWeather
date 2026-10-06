@@ -549,7 +549,7 @@
     "home": "Beranda OpenWeather",
     "currentStationGps": "Stasiun Saat Ini (GPS)",
     "detecting": "Mendeteksi...",
-    "gpsLocked": "GPS Terkunci",
+    "gpsLocked": "Lokasi Saat Ini",
     "clickToLoadStation": "Klik untuk memuat stasiun",
     "autoDetectStation": "Deteksi otomatis stasiun meteorologi dari sensor perangkat",
     "locateAction": "Temukan",
@@ -568,7 +568,10 @@
     "toggleTheme": "Ganti tema",
     "menuQuickActions": "Tindakan cepat",
     "menuStationApp": "Stasiun & aplikasi",
-    "recentSearches": "Pencarian terbaru"
+    "menuSearch": "Cari fitur & pengaturan…",
+    "menuNoResults": "Tidak ada hasil",
+    "recentSearches": "Pencarian terbaru",
+    "networkLocation": "Perkiraan, dari jaringan Anda"
   },
   "aiAdvisor": {
     "bannerTitle": "Kecerdasan & Saran Sinoptik AI",

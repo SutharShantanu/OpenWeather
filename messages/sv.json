@@ -549,7 +549,7 @@
     "home": "OpenWeather Hem",
     "currentStationGps": "Aktuell station (GPS)",
     "detecting": "Söker...",
-    "gpsLocked": "GPS låst",
+    "gpsLocked": "Nuvarande plats",
     "clickToLoadStation": "Klicka för att läsa in station",
     "autoDetectStation": "Hitta meteorologisk station automatiskt via enhetens sensorer",
     "locateAction": "Hitta",
@@ -568,7 +568,10 @@
     "toggleTheme": "Växla tema",
     "menuQuickActions": "Snabbåtgärder",
     "menuStationApp": "Station och app",
-    "recentSearches": "Senaste sökningar"
+    "menuSearch": "Sök funktioner och inställningar…",
+    "menuNoResults": "Inga träffar",
+    "recentSearches": "Senaste sökningar",
+    "networkLocation": "Ungefärlig, från ditt nätverk"
   },
   "aiAdvisor": {
     "bannerTitle": "AI-synoptisk intelligens och rådgivning",

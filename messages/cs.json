@@ -549,7 +549,7 @@
     "home": "Domovská stránka OpenWeather",
     "currentStationGps": "Aktuální stanice (GPS)",
     "detecting": "Zjišťování...",
-    "gpsLocked": "GPS zaměřeno",
+    "gpsLocked": "Aktuální poloha",
     "clickToLoadStation": "Kliknutím načtete stanici",
     "autoDetectStation": "Automaticky zjistit meteorologickou stanici ze senzorů zařízení",
     "locateAction": "Najít",
@@ -568,7 +568,10 @@
     "toggleTheme": "Přepnout motiv",
     "menuQuickActions": "Rychlé akce",
     "menuStationApp": "Stanice a aplikace",
-    "recentSearches": "Nedávná hledání"
+    "menuSearch": "Hledat funkce a nastavení…",
+    "menuNoResults": "Žádné výsledky",
+    "recentSearches": "Nedávná hledání",
+    "networkLocation": "Přibližně, podle vaší sítě"
   },
   "aiAdvisor": {
     "bannerTitle": "AI synoptická inteligence a poradce",

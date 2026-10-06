@@ -549,7 +549,7 @@
     "home": "Αρχική OpenWeather",
     "currentStationGps": "Τρέχων σταθμός (GPS)",
     "detecting": "Εντοπισμός...",
-    "gpsLocked": "Ο GPS εντοπίστηκε",
+    "gpsLocked": "Τρέχουσα τοποθεσία",
     "clickToLoadStation": "Κάντε κλικ για φόρτωση σταθμού",
     "autoDetectStation": "Αυτόματος εντοπισμός μετεωρολογικού σταθμού από τους αισθητήρες της συσκευής",
     "locateAction": "Εντοπισμός",
@@ -568,7 +568,10 @@
     "toggleTheme": "Εναλλαγή θέματος",
     "menuQuickActions": "Γρήγορες ενέργειες",
     "menuStationApp": "Σταθμός και εφαρμογή",
-    "recentSearches": "Πρόσφατες αναζητήσεις"
+    "menuSearch": "Αναζήτηση λειτουργιών και ρυθμίσεων…",
+    "menuNoResults": "Κανένα αποτέλεσμα",
+    "recentSearches": "Πρόσφατες αναζητήσεις",
+    "networkLocation": "Κατά προσέγγιση, από το δίκτυό σας"
   },
   "aiAdvisor": {
     "bannerTitle": "Συνοπτική νοημοσύνη και συμβουλές AI",

@@ -549,7 +549,7 @@
     "home": "Home ng OpenWeather",
     "currentStationGps": "Kasalukuyang Istasyon (GPS)",
     "detecting": "Nagde-detect...",
-    "gpsLocked": "Naka-lock ang GPS",
+    "gpsLocked": "Kasalukuyang Lokasyon",
     "clickToLoadStation": "I-click para i-load ang istasyon",
     "autoDetectStation": "Awtomatikong tukuyin ang istasyong meteorolohikal mula sa mga sensor ng device",
     "locateAction": "Hanapin",
@@ -568,7 +568,10 @@
     "toggleTheme": "I-toggle ang tema",
     "menuQuickActions": "Mabilisang aksyon",
     "menuStationApp": "Istasyon at app",
-    "recentSearches": "Mga kamakailang hinanap"
+    "menuSearch": "Maghanap ng feature at setting…",
+    "menuNoResults": "Walang resulta",
+    "recentSearches": "Mga kamakailang hinanap",
+    "networkLocation": "Tinatayang lokasyon, mula sa iyong network"
   },
   "aiAdvisor": {
     "bannerTitle": "AI Sinoptikong Katalinuhan at Payo",

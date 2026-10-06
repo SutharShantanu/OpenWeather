@@ -18,10 +18,10 @@ import {
   CardAction,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { IconTile } from "@/components/ui/icon-tile"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useMounted } from "@/hooks/use-mount"
 import { useTranslation } from "@/components/language-provider"
-import { cn } from "@/lib/utils"
 import { THEME_OPTIONS, DEFAULT_THEME_ID } from "../../constants"
 import { SelectionCheckIndicator } from "../widgets/selection-check-indicator"
 import type { AiButtonPosition, TabBaseProps } from "../../types"
@@ -81,12 +81,11 @@ export function AppearanceTabContent({
           <ToggleGroup
             type="single"
             orientation="horizontal"
-            className="grid w-full grid-cols-1 gap-2.5 sm:grid-cols-3"
             value={activeThemeId}
             onValueChange={(val) => {
               if (val) setTheme(val)
             }}
-            spacing={2}
+            spacing={0}
           >
             {THEME_OPTIONS.map((item) => {
               const isSelected = mounted && theme === item.id
@@ -95,26 +94,18 @@ export function AppearanceTabContent({
                 <ToggleGroupItem
                   key={item.id}
                   value={item.id}
-                  className={cn(
-                    "group relative flex h-auto min-h-24 w-full min-w-0 cursor-pointer flex-col justify-between border border-border p-3.5 text-start whitespace-normal transition-all hover:border-primary/50 hover:bg-muted/30",
-                    isSelected &&
-                      "data-[state=on]:border-primary data-[state=on]:bg-primary/5"
-                  )}
+                  className="h-auto w-1/3 flex-col py-3 text-xs data-[state=on]:border-primary data-[state=on]:bg-primary/5"
                 >
                   {/* Card Info */}
                   <span className="block w-full">
                     <span className="flex items-start justify-between gap-2">
                       <span className="flex min-w-0 flex-1 items-center gap-2">
-                        <span
-                          className={cn(
-                            "flex size-7 shrink-0 items-center justify-center border transition-colors",
-                            isSelected
-                              ? "border-primary/40 bg-primary/10 text-primary"
-                              : "border-border bg-muted/60 text-muted-foreground group-hover:border-primary/30 group-hover:text-foreground"
-                          )}
+                        <IconTile
+                          size="sm"
+                          variant={isSelected ? "soft" : "outline"}
                         >
-                          <Icon className="size-3.5" />
-                        </span>
+                          <Icon />
+                        </IconTile>
                         <span className="block min-w-0 flex-1">
                           <span className="block truncate font-heading text-xs font-semibold text-foreground">
                             {themeText[`${item.id}Title`]}
@@ -127,7 +118,7 @@ export function AppearanceTabContent({
                       <SelectionCheckIndicator isSelected={isSelected} />
                     </span>
 
-                    <span className="mt-2 line-clamp-3 block text-tiny leading-relaxed text-muted-foreground">
+                    <span className="mt-2 line-clamp-3 block text-tiny leading-relaxed text-muted-foreground text-truncate">
                       {themeText[`${item.id}Desc`]}
                     </span>
                   </span>
@@ -163,20 +154,19 @@ export function AppearanceTabContent({
           <ToggleGroup
             type="single"
             variant="outline"
-            spacing={2}
+            spacing={0}
             value={aiPosition}
             onValueChange={(val) => {
               if (val)
                 onUpdateSettings({ aiButtonPosition: val as AiButtonPosition })
             }}
             aria-label={assistant.title}
-            className="grid w-full grid-cols-3 gap-2.5"
           >
             {AI_BUTTON_POSITIONS.map(({ id, icon: Icon }) => (
               <ToggleGroupItem
                 key={id}
                 value={id}
-                className="h-auto flex-col gap-1.5 py-3 text-xs data-[state=on]:border-primary data-[state=on]:bg-primary/5"
+                className="h-auto w-1/3 flex-col py-3 text-xs data-[state=on]:border-primary data-[state=on]:bg-primary/5"
               >
                 <Icon className="size-4" />
                 <span className="truncate">

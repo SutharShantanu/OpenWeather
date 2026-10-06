@@ -549,7 +549,7 @@
     "home": "דף הבית של OpenWeather",
     "currentStationGps": "תחנה נוכחית (GPS)",
     "detecting": "מזהה...",
-    "gpsLocked": "GPS נעול",
+    "gpsLocked": "המיקום הנוכחי",
     "clickToLoadStation": "לחצו לטעינת התחנה",
     "autoDetectStation": "זיהוי אוטומטי של תחנה מטאורולוגית מחיישני המכשיר",
     "locateAction": "איתור",
@@ -568,7 +568,10 @@
     "toggleTheme": "החלפת ערכת נושא",
     "menuQuickActions": "פעולות מהירות",
     "menuStationApp": "תחנה ואפליקציה",
-    "recentSearches": "חיפושים אחרונים"
+    "menuSearch": "חיפוש תכונות והגדרות…",
+    "menuNoResults": "אין תוצאות",
+    "recentSearches": "חיפושים אחרונים",
+    "networkLocation": "משוער, לפי הרשת שלך"
   },
   "aiAdvisor": {
     "bannerTitle": "מודיעין סינופטי מבוסס AI והמלצות",

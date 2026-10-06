@@ -549,7 +549,7 @@
     "home": "OpenWeather Início",
     "currentStationGps": "Estação Atual (GPS)",
     "detecting": "Detectando...",
-    "gpsLocked": "GPS Fixado",
+    "gpsLocked": "Localização Atual",
     "clickToLoadStation": "Clique para carregar a estação",
     "autoDetectStation": "Detectar automaticamente a estação meteorológica pelos sensores",
     "locateAction": "Localizar",
@@ -568,7 +568,10 @@
     "toggleTheme": "Alternar tema",
     "menuQuickActions": "Ações rápidas",
     "menuStationApp": "Estação e app",
-    "recentSearches": "Pesquisas recentes"
+    "menuSearch": "Buscar recursos e configurações…",
+    "menuNoResults": "Nenhum resultado",
+    "recentSearches": "Pesquisas recentes",
+    "networkLocation": "Aproximada, pela sua rede"
   },
   "aiAdvisor": {
     "bannerTitle": "Inteligência sinótica de IA e recomendações",

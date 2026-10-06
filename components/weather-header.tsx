@@ -12,6 +12,11 @@ import {
   Radio,
   Menu,
   LocateFixed,
+  MapPin,
+  KeyRound,
+  Globe,
+  Volume2,
+  Palette,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { IconTile } from "@/components/ui/icon-tile"
@@ -28,6 +33,8 @@ import {
   WeatherAlert,
 } from "@/lib/weather"
 import { cn } from "@/lib/utils"
+import type { AppTab } from "@/lib/constants"
+import { TABS, TAB_LABEL_KEY } from "@/components/dashboard/dashboard-tabs"
 import { WeatherTtsButton } from "@/components/weather-tts-button"
 import { NotificationsPopover } from "@/components/notifications-popover"
 import type { ExtendedSettings } from "@/components/settings-dialog"
@@ -39,6 +46,48 @@ import {
   type HeaderMenuItem,
 } from "@/components/header/header-mobile-menu"
 
+// Settings pages reachable from the drawer search ("source" already has its
+// own menu item). Icons match the settings dialog; keywords are English
+// synonyms that don't appear in the translated labels.
+const SETTINGS_PAGES = [
+  {
+    id: "locations",
+    label: "tabLocations",
+    icon: MapPin,
+    keywords: "saved pinned favorites stations cities",
+  },
+  {
+    id: "units",
+    label: "tabUnits",
+    icon: Compass,
+    keywords: "temperature celsius fahrenheit wind pressure metric imperial",
+  },
+  {
+    id: "localization",
+    label: "tabRegional",
+    icon: Globe,
+    keywords: "language locale time clock date format",
+  },
+  {
+    id: "speech",
+    label: "tabSpeech",
+    icon: Volume2,
+    keywords: "voice tts briefing audio volume",
+  },
+  {
+    id: "appearance",
+    label: "tabTheme",
+    icon: Palette,
+    keywords: "theme dark light mode color",
+  },
+  {
+    id: "api",
+    label: "tabApi",
+    icon: KeyRound,
+    keywords: "api key token openweathermap",
+  },
+] as const
+
 interface WeatherHeaderProps {
   onSearch: (city: string) => void
   onLocate: () => void
@@ -46,6 +95,8 @@ interface WeatherHeaderProps {
   onOpenAiAdvisor?: () => void
   onOpenSettings?: (tab?: string) => void
   onChangeStation?: () => void
+  /** Lets the drawer search jump to a dashboard tab. */
+  onTabChange?: (tab: AppTab) => void
   showNotifications?: boolean
   onNotificationsOpenChange?: (open: boolean) => void
   current?: CurrentWeather
@@ -66,6 +117,7 @@ export function WeatherHeader({
   onOpenAiAdvisor,
   onOpenSettings,
   onChangeStation,
+  onTabChange,
   showNotifications,
   onNotificationsOpenChange,
   current,
@@ -141,6 +193,27 @@ export function WeatherHeader({
       icon: Settings,
       onSelect: () => onOpenSettings(),
     },
+    // Search-only: dashboard tabs and individual settings pages
+    ...(onTabChange
+      ? TABS.map(({ value, icon }) => ({
+          id: `tab-${value}`,
+          group: "search",
+          label: t.tabs[TAB_LABEL_KEY[value]],
+          icon,
+          onSelect: () => onTabChange(value),
+        }))
+      : []),
+    ...(onOpenSettings
+      ? SETTINGS_PAGES.map((page) => ({
+          id: `settings-${page.id}`,
+          group: "search",
+          label: t.settingsDialog[page.label],
+          description: t.settingsDialog.tabDescriptions[page.id],
+          keywords: page.keywords,
+          icon: page.icon,
+          onSelect: () => onOpenSettings(page.id),
+        }))
+      : []),
   ].filter(Boolean) as HeaderMenuItem[]
 
   return (
@@ -323,7 +396,6 @@ export function WeatherHeader({
           onOpenChange={setIsMenuOpen}
           items={menuItems}
           mounted={mounted}
-          current={current}
           unit={unit}
           onUnitChange={onUnitChange}
         />

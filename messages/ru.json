@@ -549,7 +549,7 @@
     "home": "OpenWeather Главная",
     "currentStationGps": "Текущая станция (GPS)",
     "detecting": "Определение...",
-    "gpsLocked": "GPS зафиксирован",
+    "gpsLocked": "Текущее местоположение",
     "clickToLoadStation": "Нажмите для загрузки станции",
     "autoDetectStation": "Автоматическое определение метеостанции по датчикам",
     "locateAction": "Определить",
@@ -568,7 +568,10 @@
     "toggleTheme": "Сменить тему",
     "menuQuickActions": "Быстрые действия",
     "menuStationApp": "Станция и приложение",
-    "recentSearches": "Недавние запросы"
+    "menuSearch": "Поиск функций и настроек…",
+    "menuNoResults": "Ничего не найдено",
+    "recentSearches": "Недавние запросы",
+    "networkLocation": "Приблизительно, по вашей сети"
   },
   "aiAdvisor": {
     "bannerTitle": "ИИ-синоптика и рекомендации",

@@ -549,7 +549,7 @@
     "home": "OpenWeather-startpagina",
     "currentStationGps": "Huidig station (GPS)",
     "detecting": "Detecteren...",
-    "gpsLocked": "GPS vergrendeld",
+    "gpsLocked": "Huidige locatie",
     "clickToLoadStation": "Klik om station te laden",
     "autoDetectStation": "Meteorologisch station automatisch detecteren via de sensoren van je apparaat",
     "locateAction": "Lokaliseren",
@@ -568,7 +568,10 @@
     "toggleTheme": "Thema wisselen",
     "menuQuickActions": "Snelle acties",
     "menuStationApp": "Station en app",
-    "recentSearches": "Recente zoekopdrachten"
+    "menuSearch": "Zoek functies en instellingen…",
+    "menuNoResults": "Geen resultaten",
+    "recentSearches": "Recente zoekopdrachten",
+    "networkLocation": "Bij benadering, via je netwerk"
   },
   "aiAdvisor": {
     "bannerTitle": "Synoptische AI-intelligentie en advies",

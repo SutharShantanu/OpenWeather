@@ -549,7 +549,7 @@
     "home": "หน้าแรก OpenWeather",
     "currentStationGps": "สถานีปัจจุบัน (GPS)",
     "detecting": "กำลังตรวจหา...",
-    "gpsLocked": "ล็อก GPS แล้ว",
+    "gpsLocked": "ตำแหน่งปัจจุบัน",
     "clickToLoadStation": "คลิกเพื่อโหลดสถานี",
     "autoDetectStation": "ตรวจหาสถานีอุตุนิยมวิทยาอัตโนมัติจากเซนเซอร์ของอุปกรณ์",
     "locateAction": "ระบุตำแหน่ง",
@@ -568,7 +568,10 @@
     "toggleTheme": "สลับธีม",
     "menuQuickActions": "การทำงานด่วน",
     "menuStationApp": "สถานีและแอป",
-    "recentSearches": "การค้นหาล่าสุด"
+    "menuSearch": "ค้นหาฟีเจอร์และการตั้งค่า…",
+    "menuNoResults": "ไม่พบผลลัพธ์",
+    "recentSearches": "การค้นหาล่าสุด",
+    "networkLocation": "โดยประมาณ จากเครือข่ายของคุณ"
   },
   "aiAdvisor": {
     "bannerTitle": "ปัญญาประดิษฐ์ซินอปติกและคำแนะนำ",

@@ -549,7 +549,7 @@
     "home": "OpenWeather kezdőlap",
     "currentStationGps": "Jelenlegi állomás (GPS)",
     "detecting": "Észlelés...",
-    "gpsLocked": "GPS rögzítve",
+    "gpsLocked": "Jelenlegi hely",
     "clickToLoadStation": "Kattintson az állomás betöltéséhez",
     "autoDetectStation": "Meteorológiai állomás automatikus észlelése az eszköz érzékelőiből",
     "locateAction": "Helymeghatározás",
@@ -568,7 +568,10 @@
     "toggleTheme": "Téma váltása",
     "menuQuickActions": "Gyors műveletek",
     "menuStationApp": "Állomás és alkalmazás",
-    "recentSearches": "Legutóbbi keresések"
+    "menuSearch": "Funkciók és beállítások keresése…",
+    "menuNoResults": "Nincs találat",
+    "recentSearches": "Legutóbbi keresések",
+    "networkLocation": "Hozzávetőleges, a hálózatod alapján"
   },
   "aiAdvisor": {
     "bannerTitle": "MI szinoptikus intelligencia és tanácsadás",

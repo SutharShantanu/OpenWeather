@@ -549,7 +549,7 @@
     "home": "OpenWeather Ana Sayfa",
     "currentStationGps": "Mevcut İstasyon (GPS)",
     "detecting": "Algılanıyor...",
-    "gpsLocked": "GPS Kilitlendi",
+    "gpsLocked": "Mevcut Konum",
     "clickToLoadStation": "İstasyonu yüklemek için tıklayın",
     "autoDetectStation": "Meteoroloji istasyonunu cihaz sensörlerinden otomatik algıla",
     "locateAction": "Konum Bul",
@@ -568,7 +568,10 @@
     "toggleTheme": "Temayı değiştir",
     "menuQuickActions": "Hızlı işlemler",
     "menuStationApp": "İstasyon ve uygulama",
-    "recentSearches": "Son aramalar"
+    "menuSearch": "Özellik ve ayar ara…",
+    "menuNoResults": "Sonuç yok",
+    "recentSearches": "Son aramalar",
+    "networkLocation": "Yaklaşık, ağınızdan"
   },
   "aiAdvisor": {
     "bannerTitle": "YZ Sinoptik Zekâ ve Danışmanlık",

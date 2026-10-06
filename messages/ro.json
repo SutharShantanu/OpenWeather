@@ -549,7 +549,7 @@
     "home": "Acasă OpenWeather",
     "currentStationGps": "Stația curentă (GPS)",
     "detecting": "Se detectează...",
-    "gpsLocked": "GPS blocat",
+    "gpsLocked": "Locația curentă",
     "clickToLoadStation": "Apasă pentru a încărca stația",
     "autoDetectStation": "Detectează automat stația meteorologică pe baza senzorilor dispozitivului",
     "locateAction": "Localizează",
@@ -568,7 +568,10 @@
     "toggleTheme": "Comută tema",
     "menuQuickActions": "Acțiuni rapide",
     "menuStationApp": "Stație și aplicație",
-    "recentSearches": "Căutări recente"
+    "menuSearch": "Caută funcții și setări…",
+    "menuNoResults": "Niciun rezultat",
+    "recentSearches": "Căutări recente",
+    "networkLocation": "Aproximativă, din rețeaua ta"
   },
   "aiAdvisor": {
     "bannerTitle": "Inteligență sinoptică AI și consiliere",

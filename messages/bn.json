@@ -549,7 +549,7 @@
     "home": "OpenWeather হোম",
     "currentStationGps": "বর্তমান স্টেশন (GPS)",
     "detecting": "শনাক্ত করা হচ্ছে...",
-    "gpsLocked": "GPS লক হয়েছে",
+    "gpsLocked": "বর্তমান অবস্থান",
     "clickToLoadStation": "স্টেশন লোড করতে ক্লিক করুন",
     "autoDetectStation": "ডিভাইস সেন্সর থেকে আবহাওয়া স্টেশন স্বয়ংক্রিয়ভাবে শনাক্ত করুন",
     "locateAction": "অবস্থান",
@@ -568,7 +568,10 @@
     "toggleTheme": "থিম পরিবর্তন করুন",
     "menuQuickActions": "দ্রুত কাজ",
     "menuStationApp": "স্টেশন ও অ্যাপ",
-    "recentSearches": "সাম্প্রতিক অনুসন্ধান"
+    "menuSearch": "ফিচার ও সেটিংস খুঁজুন…",
+    "menuNoResults": "কোনো ফলাফল নেই",
+    "recentSearches": "সাম্প্রতিক অনুসন্ধান",
+    "networkLocation": "আনুমানিক, আপনার নেটওয়ার্ক থেকে"
   },
   "aiAdvisor": {
     "bannerTitle": "AI সিনপটিক বুদ্ধিমত্তা ও পরামর্শ",

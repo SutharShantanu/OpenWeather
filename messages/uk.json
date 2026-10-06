@@ -549,7 +549,7 @@
     "home": "OpenWeather — головна",
     "currentStationGps": "Поточна станція (GPS)",
     "detecting": "Визначення...",
-    "gpsLocked": "GPS зафіксовано",
+    "gpsLocked": "Поточне місцезнаходження",
     "clickToLoadStation": "Натисніть, щоб завантажити станцію",
     "autoDetectStation": "Автоматично визначати метеостанцію за датчиками пристрою",
     "locateAction": "Знайти",
@@ -568,7 +568,10 @@
     "toggleTheme": "Перемкнути тему",
     "menuQuickActions": "Швидкі дії",
     "menuStationApp": "Станція та застосунок",
-    "recentSearches": "Нещодавні пошуки"
+    "menuSearch": "Пошук функцій і налаштувань…",
+    "menuNoResults": "Нічого не знайдено",
+    "recentSearches": "Нещодавні пошуки",
+    "networkLocation": "Приблизно, за вашою мережею"
   },
   "aiAdvisor": {
     "bannerTitle": "Синоптична ШІ-аналітика й поради",

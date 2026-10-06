@@ -549,7 +549,7 @@
     "home": "OpenWeather 首页",
     "currentStationGps": "当前台站 (GPS 定位)",
     "detecting": "正在探测...",
-    "gpsLocked": "GPS 已锁定",
+    "gpsLocked": "当前位置",
     "clickToLoadStation": "点击调取此台站数据",
     "autoDetectStation": "通过设备传感器自动探测最近气象站",
     "locateAction": "立即定位",
@@ -568,7 +568,10 @@
     "toggleTheme": "切换外观主题",
     "menuQuickActions": "快捷操作",
     "menuStationApp": "站点与应用",
-    "recentSearches": "最近搜索"
+    "menuSearch": "搜索功能和设置…",
+    "menuNoResults": "无匹配结果",
+    "recentSearches": "最近搜索",
+    "networkLocation": "大致位置（来自您的网络）"
   },
   "aiAdvisor": {
     "bannerTitle": "AI 天气形势智能与建议",

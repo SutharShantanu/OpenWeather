@@ -549,7 +549,7 @@
     "home": "OpenWeather ホーム",
     "currentStationGps": "現在地の観測所 (GPS)",
     "detecting": "検出中...",
-    "gpsLocked": "GPS 測位済み",
+    "gpsLocked": "現在地",
     "clickToLoadStation": "クリックして観測所を読み込む",
     "autoDetectStation": "端末のセンサーから気象観測所を自動検出",
     "locateAction": "現在地へ",
@@ -568,7 +568,10 @@
     "toggleTheme": "テーマを切り替え",
     "menuQuickActions": "クイック操作",
     "menuStationApp": "観測所とアプリ",
-    "recentSearches": "最近の検索"
+    "menuSearch": "機能と設定を検索…",
+    "menuNoResults": "一致する項目はありません",
+    "recentSearches": "最近の検索",
+    "networkLocation": "おおよその位置（ネットワークから）"
   },
   "aiAdvisor": {
     "bannerTitle": "AI総観インテリジェンスとアドバイス",

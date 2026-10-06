@@ -549,7 +549,7 @@
     "home": "OpenWeather 홈",
     "currentStationGps": "현재 관측소(GPS)",
     "detecting": "감지 중...",
-    "gpsLocked": "GPS 연결됨",
+    "gpsLocked": "현재 위치",
     "clickToLoadStation": "클릭하여 관측소 불러오기",
     "autoDetectStation": "기기 센서로 기상 관측소를 자동 감지",
     "locateAction": "위치 찾기",
@@ -568,7 +568,10 @@
     "toggleTheme": "테마 전환",
     "menuQuickActions": "빠른 작업",
     "menuStationApp": "관측소 및 앱",
-    "recentSearches": "최근 검색"
+    "menuSearch": "기능 및 설정 검색…",
+    "menuNoResults": "결과 없음",
+    "recentSearches": "최근 검색",
+    "networkLocation": "대략적인 위치(네트워크 기준)"
   },
   "aiAdvisor": {
     "bannerTitle": "AI 기상 분석 및 조언",

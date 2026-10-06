@@ -549,7 +549,7 @@
     "home": "OpenWeather-etusivu",
     "currentStationGps": "Nykyinen asema (GPS)",
     "detecting": "Tunnistetaan...",
-    "gpsLocked": "GPS lukittu",
+    "gpsLocked": "Nykyinen sijainti",
     "clickToLoadStation": "Lataa asema napsauttamalla",
     "autoDetectStation": "Tunnista meteorologinen asema automaattisesti laitteen antureiden avulla",
     "locateAction": "Paikanna",
@@ -568,7 +568,10 @@
     "toggleTheme": "Vaihda teemaa",
     "menuQuickActions": "Pikatoiminnot",
     "menuStationApp": "Asema ja sovellus",
-    "recentSearches": "Viimeaikaiset haut"
+    "menuSearch": "Hae ominaisuuksia ja asetuksia…",
+    "menuNoResults": "Ei tuloksia",
+    "recentSearches": "Viimeaikaiset haut",
+    "networkLocation": "Likimääräinen, verkkosi perusteella"
   },
   "aiAdvisor": {
     "bannerTitle": "AI-synoptinen älykkyys ja neuvonta",

@@ -549,7 +549,7 @@
     "home": "الصفحة الرئيسية لـ OpenWeather",
     "currentStationGps": "المحطة الحالية (GPS)",
     "detecting": "جارٍ الكشف...",
-    "gpsLocked": "GPS متصل",
+    "gpsLocked": "الموقع الحالي",
     "clickToLoadStation": "انقر لتحميل المحطة",
     "autoDetectStation": "الكشف التلقائي عن محطة الأرصاد من مستشعرات الجهاز",
     "locateAction": "تحديد",
@@ -568,7 +568,10 @@
     "toggleTheme": "تبديل المظهر",
     "menuQuickActions": "إجراءات سريعة",
     "menuStationApp": "المحطة والتطبيق",
-    "recentSearches": "عمليات البحث الأخيرة"
+    "menuSearch": "ابحث في الميزات والإعدادات…",
+    "menuNoResults": "لا توجد نتائج",
+    "recentSearches": "عمليات البحث الأخيرة",
+    "networkLocation": "تقريبي، من شبكتك"
   },
   "aiAdvisor": {
     "bannerTitle": "الذكاء السينوبتيكي والإرشاد بالذكاء الاصطناعي",

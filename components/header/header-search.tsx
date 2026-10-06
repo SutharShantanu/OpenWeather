@@ -1,13 +1,13 @@
 "use client"
 
-import { useId, useRef } from "react"
-import { Search, MapPin, X, ArrowRight, History } from "lucide-react"
+import type React from "react"
+import { useEffect, useId, useRef, useState } from "react"
+import { Search, MapPin, X, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Kbd } from "@/components/ui/kbd"
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { Spinner } from "@/components/ui/spinner"
-import { IconTile } from "@/components/ui/icon-tile"
 import {
   InputGroup,
   InputGroupAddon,
@@ -22,10 +22,8 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command"
-import { cn } from "@/lib/utils"
 import { CONFIG } from "@/lib/config"
 import { useTranslation } from "@/components/language-provider"
-import { useDisplayPreferences } from "@/components/display-preferences-provider"
 import { useScrollLock, type useCitySearch } from "@/hooks"
 
 interface HeaderSearchProps {
@@ -42,7 +40,6 @@ export function HeaderSearch({
   isLoading = false,
 }: HeaderSearchProps) {
   const { t } = useTranslation()
-  const prefs = useDisplayPreferences()
   const searchFormRef = useRef<HTMLFormElement>(null)
   const listId = useId()
   const {
@@ -53,7 +50,6 @@ export function HeaderSearch({
     results,
     clearResults,
     isSearching,
-    detectedCoords,
     isLocating,
     inputRef,
     handleSearchFocus,
@@ -62,6 +58,7 @@ export function HeaderSearch({
     clearSearch,
     recentSearches,
     clearRecentSearches,
+    detectedCoords,
   } = search
 
   // Freeze the page behind the search dropdown while it's open
@@ -70,6 +67,34 @@ export function HeaderSearch({
   const trimmedQuery = query.trim()
   const showPopular = trimmedQuery.length < 2
   const hasSelectableItems = isOpen && (showPopular || results.length > 0)
+
+  // Approximate location from the network (/api/location), fetched the first
+  // time the dropdown opens and kept for the session.
+  const [approxLocation, setApproxLocation] = useState<{
+    city: string
+    region?: string
+  } | null>(null)
+  const approxRequested = useRef(false)
+  useEffect(() => {
+    if (!isOpen || approxRequested.current) return
+    approxRequested.current = true
+    fetch("/api/location")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.city)
+          setApproxLocation({
+            city: data.city,
+            region: data.region || data.country,
+          })
+      })
+      .catch(() => {})
+  }, [isOpen])
+
+  // Popular places not already shown as recent searches
+  const recentKeys = new Set(recentSearches.map((c) => c.toLowerCase()))
+  const popularPlaces = CONFIG.location.popularCities
+    .filter((c) => !recentKeys.has(c.toLowerCase()))
+    .slice(0, 6)
 
   const handleLocateFromSearch = () => {
     onLocate()
@@ -170,77 +195,48 @@ export function HeaderSearch({
             data-lenis-prevent
             className="h-auto max-h-fit"
           >
-            {/* GPS current station: offered while the user hasn't typed a query */}
+            {/* No query yet: locate, recent searches, popular places */}
             {showPopular && (
               <>
-                <CommandGroup>
-                  <CommandItem
-                    value="__locate__"
-                    onSelect={handleLocateFromSearch}
-                    className="gap-2.5 bg-accent font-mono"
-                  >
-                    <IconTile variant="soft" size="xs">
-                      <MapPin className={cn(isLocating && "animate-pulse")} />
-                    </IconTile>
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 font-semibold text-foreground">
-                        <span className="truncate">
-                          {t.header.currentStationGps}
-                        </span>
-                        {isLocating ? (
-                          <Badge
-                            variant="outline"
-                            className="animate-pulse border-primary/30 font-mono text-tiny text-primary"
-                          >
-                            {t.header.detecting}
-                          </Badge>
-                        ) : detectedCoords ? (
-                          <Badge
-                            variant="success-light"
-                            className="font-mono text-tiny"
-                          >
-                            {t.header.gpsLocked}
-                          </Badge>
-                        ) : null}
-                      </span>
-                      <span className="truncate text-mini text-muted-foreground">
-                        {detectedCoords
-                          ? `${prefs.coords(detectedCoords.lat, detectedCoords.lon, 3)} • ${t.header.clickToLoadStation}`
-                          : t.header.autoDetectStation}
-                      </span>
-                    </span>
-                    <Button
-                      size="xs"
-                      variant="default"
+                {/* Your location: the network (IP) estimate until GPS is permitted */}
+                {(detectedCoords || approxLocation) && (
+                  <CommandGroup>
+                    <CommandItem
+                      value="__my-location__"
+                      onSelect={() =>
+                        detectedCoords || !approxLocation
+                          ? handleLocateFromSearch()
+                          : handleSelect(approxLocation.city)
+                      }
                       disabled={isLocating || isLoading}
-                      aria-label={t.header.locateAction}
-                      className="shrink-0 gap-1 font-mono text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleLocateFromSearch()
-                      }}
+                      className="gap-2.5"
                     >
                       {isLocating ? (
-                        <>
-                          <Spinner className="size-3" />
-                          <span>{t.common.locating}</span>
-                        </>
+                        <Spinner className="size-4 text-primary" />
                       ) : (
-                        <>
-                          <MapPin className="size-3" />
-                          <span className="hidden sm:inline">
-                            {t.header.locateAction}
-                          </span>
-                          <ArrowRight className="hidden size-3 sm:block rtl:rotate-180" />
-                        </>
+                        <MapPin className="size-4 text-primary" />
                       )}
-                    </Button>
-                  </CommandItem>
-                </CommandGroup>
-                <CommandSeparator className="mx-0" />
-                {/* Recent searches: rounded-full badges, still keyboard-navigable */}
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate font-medium text-foreground">
+                          {approxLocation
+                            ? [approxLocation.city, approxLocation.region]
+                                .filter(Boolean)
+                                .join(", ")
+                            : t.common.locateMe}
+                        </span>
+                        <span className="truncate text-tiny text-muted-foreground">
+                          {detectedCoords
+                            ? t.header.gpsLocked
+                            : t.header.networkLocation}
+                        </span>
+                      </span>
+                    </CommandItem>
+                  </CommandGroup>
+                )}
+
                 {recentSearches.length > 0 && (
                   <>
+                    <CommandSeparator className="mx-0" />
                     <div className="flex items-center justify-between px-2 pt-1.5">
                       <span className="text-xs font-medium text-muted-foreground">
                         {t.header.recentSearches}
@@ -254,40 +250,41 @@ export function HeaderSearch({
                         {t.common.clear}
                       </Button>
                     </div>
-                    <CommandGroup className="px-2 pb-2 [&_[cmdk-group-items]]:flex [&_[cmdk-group-items]]:flex-wrap [&_[cmdk-group-items]]:gap-1.5">
+                    <CommandGroup className={CHIP_GROUP}>
                       {recentSearches.map((c) => (
-                        <CommandItem
+                        <PlaceChip
                           key={c}
                           value={`recent:${c}`}
+                          icon={History}
                           onSelect={() => handleSelect(c)}
-                          className="group/recent w-auto bg-transparent p-0 data-[selected=true]:bg-transparent"
                         >
-                          <Badge
-                            variant="outline"
-                            className="gap-1 rounded-full px-2.5 py-0.5 text-xs group-data-[selected=true]/recent:border-primary group-data-[selected=true]/recent:text-primary"
-                          >
-                            <History className="size-3" />
-                            {c}
-                          </Badge>
-                        </CommandItem>
+                          {c}
+                        </PlaceChip>
                       ))}
                     </CommandGroup>
-                    <CommandSeparator className="mx-0" />
                   </>
                 )}
-                <CommandGroup heading={t.header.popularHubs}>
-                  {CONFIG.location.popularCities.slice(0, 8).map((c) => (
-                    <CommandItem
-                      key={c}
-                      value={`popular:${c}`}
-                      onSelect={() => handleSelect(c)}
-                      className="font-mono"
+
+                {popularPlaces.length > 0 && (
+                  <>
+                    <CommandSeparator className="mx-0" />
+                    <CommandGroup
+                      heading={t.header.popularHubs}
+                      className={CHIP_GROUP}
                     >
-                      <MapPin className="size-3 text-primary" />
-                      {c}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                      {popularPlaces.map((c) => (
+                        <PlaceChip
+                          key={c}
+                          value={`popular:${c}`}
+                          icon={MapPin}
+                          onSelect={() => handleSelect(c)}
+                        >
+                          {c}
+                        </PlaceChip>
+                      ))}
+                    </CommandGroup>
+                  </>
+                )}
               </>
             )}
 
@@ -301,7 +298,6 @@ export function HeaderSearch({
                     key={`${r.name}-${r.lat}-${r.lon}-${i}`}
                     value={`result:${r.name}:${r.lat}:${r.lon}:${i}`}
                     onSelect={() => handleSelect(r.name)}
-                    className="justify-between"
                   >
                     <span className="flex min-w-0 items-center gap-2">
                       <MapPin className="size-3 text-primary" />
@@ -312,9 +308,6 @@ export function HeaderSearch({
                         {r.state ? `${r.state}, ` : ""}
                         {r.country}
                       </span>
-                    </span>
-                    <span className="shrink-0 font-mono text-tiny text-muted-foreground">
-                      {prefs.coords(r.lat, r.lon, 2)}
                     </span>
                   </CommandItem>
                 ))}
@@ -337,5 +330,37 @@ export function HeaderSearch({
         </PopoverContent>
       </Popover>
     </Command>
+  )
+}
+
+/** Lays out a cmdk group's items as wrapping chips. */
+const CHIP_GROUP =
+  "flex flex-col [&_[cmdk-group-items]]:p-2 [&_[cmdk-group-items]]:pt-0 [&_[cmdk-group-items]]:flex [&_[cmdk-group-items]]:flex-wrap [&_[cmdk-group-items]]:gap-1.5"
+
+/** A place shown as a rounded badge; still a cmdk item, so arrow keys reach it. */
+function PlaceChip({
+  value,
+  icon: Icon,
+  onSelect,
+  children,
+}: {
+  value: string
+  icon: React.ElementType
+  onSelect: () => void
+  children: React.ReactNode
+}) {
+  return (
+    // `[&>svg]:hidden` drops CommandItem's invisible trailing check icon,
+    // which otherwise reserves 24px after the badge.
+    <CommandItem
+      value={value}
+      onSelect={onSelect}
+      className="m-0 w-fit p-0 [&>svg]:hidden"
+    >
+      <Badge variant="invert-light">
+        <Icon />
+        {children}
+      </Badge>
+    </CommandItem>
   )
 }

@@ -529,9 +529,12 @@ export interface Translations {
     };
   };
   header: {
+    networkLocation: string;
     recentSearches: string;
     menuQuickActions: string;
     menuStationApp: string;
+    menuSearch: string;
+    menuNoResults: string;
     home: string;
     currentStationGps: string;
     detecting: string;

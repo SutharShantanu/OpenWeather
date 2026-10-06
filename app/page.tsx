@@ -262,6 +262,7 @@ export default function WeatherDashboardPage() {
             onOpenAiAdvisor={handleOpenAiAdvisor}
             onChangeStation={() => handleOpenSettings("source")}
             onOpenSettings={handleOpenSettings}
+            onTabChange={handleTabChange}
             showNotifications={showNotifications}
             onNotificationsOpenChange={handleNotificationsOpenChange}
             current={weather?.current}

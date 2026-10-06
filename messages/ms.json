@@ -549,7 +549,7 @@
     "home": "Laman Utama OpenWeather",
     "currentStationGps": "Stesen Semasa (GPS)",
     "detecting": "Mengesan...",
-    "gpsLocked": "GPS Dikunci",
+    "gpsLocked": "Lokasi Semasa",
     "clickToLoadStation": "Klik untuk memuatkan stesen",
     "autoDetectStation": "Kesan stesen meteorologi secara automatik daripada penderia peranti",
     "locateAction": "Cari",
@@ -568,7 +568,10 @@
     "toggleTheme": "Togol tema",
     "menuQuickActions": "Tindakan pantas",
     "menuStationApp": "Stesen & aplikasi",
-    "recentSearches": "Carian terkini"
+    "menuSearch": "Cari ciri & tetapan…",
+    "menuNoResults": "Tiada hasil",
+    "recentSearches": "Carian terkini",
+    "networkLocation": "Anggaran, daripada rangkaian anda"
   },
   "aiAdvisor": {
     "bannerTitle": "Kecerdasan & Nasihat Sinoptik AI",

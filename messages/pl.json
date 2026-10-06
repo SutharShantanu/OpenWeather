@@ -549,7 +549,7 @@
     "home": "OpenWeather – strona główna",
     "currentStationGps": "Bieżąca stacja (GPS)",
     "detecting": "Wykrywanie...",
-    "gpsLocked": "GPS zablokowany",
+    "gpsLocked": "Bieżąca lokalizacja",
     "clickToLoadStation": "Kliknij, aby wczytać stację",
     "autoDetectStation": "Automatycznie wykryj stację meteorologiczną z czujników urządzenia",
     "locateAction": "Zlokalizuj",
@@ -568,7 +568,10 @@
     "toggleTheme": "Przełącz motyw",
     "menuQuickActions": "Szybkie akcje",
     "menuStationApp": "Stacja i aplikacja",
-    "recentSearches": "Ostatnie wyszukiwania"
+    "menuSearch": "Szukaj funkcji i ustawień…",
+    "menuNoResults": "Brak wyników",
+    "recentSearches": "Ostatnie wyszukiwania",
+    "networkLocation": "Przybliżona, na podstawie sieci"
   },
   "aiAdvisor": {
     "bannerTitle": "Synoptyczna inteligencja i doradztwo AI",

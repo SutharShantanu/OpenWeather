@@ -549,7 +549,7 @@
     "home": "OpenWeather होम",
     "currentStationGps": "वर्तमान स्टेशन (GPS)",
     "detecting": "पता लगाया जा रहा है...",
-    "gpsLocked": "GPS लॉक",
+    "gpsLocked": "वर्तमान स्थान",
     "clickToLoadStation": "स्टेशन लोड करने के लिए क्लिक करें",
     "autoDetectStation": "डिवाइस सेंसर से मौसम स्टेशन का स्वतः पता लगाएँ",
     "locateAction": "स्थान खोजें",
@@ -568,7 +568,10 @@
     "toggleTheme": "थीम बदलें",
     "menuQuickActions": "त्वरित क्रियाएँ",
     "menuStationApp": "स्टेशन और ऐप",
-    "recentSearches": "हाल की खोजें"
+    "menuSearch": "फ़ीचर और सेटिंग खोजें…",
+    "menuNoResults": "कोई परिणाम नहीं",
+    "recentSearches": "हाल की खोजें",
+    "networkLocation": "अनुमानित, आपके नेटवर्क से"
   },
   "aiAdvisor": {
     "bannerTitle": "एआई सिनॉप्टिक इंटेलिजेंस और परामर्श",
