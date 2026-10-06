@@ -766,7 +766,6 @@
     "bulletinTitle": "Meteorológiai figyelmeztető közlemény",
     "activeAlerts": "{count} aktív riasztás",
     "bulletinDesc": "Hivatalos súlyos időjárási figyelmeztetések és közbiztonsági utasítások ehhez: {cityName}",
-    "soundChime": "Hangjelzés",
     "collapse": "Összecsukás",
     "expand": "Utasítások kibontása",
     "expires": "Lejár:",

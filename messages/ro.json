@@ -766,7 +766,6 @@
     "bulletinTitle": "Buletin de avertizare meteorologică",
     "activeAlerts": "{count} alerte active",
     "bulletinDesc": "Avertizări oficiale de vreme severă și directive de siguranță publică pentru {cityName}",
-    "soundChime": "Redă semnal sonor",
     "collapse": "Restrânge",
     "expand": "Extinde directivele",
     "expires": "Expiră:",

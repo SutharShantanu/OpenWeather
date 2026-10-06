@@ -766,7 +766,6 @@
     "bulletinTitle": "Meteorologiskt varningsmeddelande",
     "activeAlerts": "{count} aktiva varningar",
     "bulletinDesc": "Officiella varningar för svårt väder och säkerhetsanvisningar för {cityName}",
-    "soundChime": "Spela upp klockljud",
     "collapse": "Dölj",
     "expand": "Visa anvisningar",
     "expires": "Går ut:",

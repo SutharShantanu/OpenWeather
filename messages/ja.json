@@ -766,7 +766,6 @@
     "bulletinTitle": "気象警報速報",
     "activeAlerts": "有効な警報 {count}件",
     "bulletinDesc": "{cityName}の公式な悪天候警報と公共安全の指示",
-    "soundChime": "チャイムを鳴らす",
     "collapse": "折りたたむ",
     "expand": "指示を展開",
     "expires": "期限:",

@@ -766,7 +766,6 @@
     "bulletinTitle": "Meteorologisk varslingsmelding",
     "activeAlerts": "{count} aktive varsler",
     "bulletinDesc": "Offisielle varsler om ekstremvær og sikkerhetsdirektiver for {cityName}",
-    "soundChime": "Spill av klokkelyd",
     "collapse": "Skjul",
     "expand": "Vis anvisninger",
     "expires": "Utløper:",

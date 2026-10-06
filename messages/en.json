@@ -766,7 +766,6 @@
     "bulletinTitle": "Meteorological Advisory Bulletin",
     "activeAlerts": "{count, plural, one {# Active Alert} other {# Active Alerts}}",
     "bulletinDesc": "Official severe weather warning & public safety directives for {cityName}",
-    "soundChime": "Sound Chime",
     "collapse": "Collapse",
     "expand": "Expand Directives",
     "expires": "Expires:",

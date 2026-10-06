@@ -766,7 +766,6 @@
     "bulletinTitle": "Bulletin d'alerte météorologique",
     "activeAlerts": "{count} alertes actives",
     "bulletinDesc": "Avis officiels de temps violent et consignes de sécurité publique pour {cityName}",
-    "soundChime": "Signal sonore",
     "collapse": "Réduire",
     "expand": "Développer les consignes",
     "expires": "Expire :",

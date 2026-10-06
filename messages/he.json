@@ -766,7 +766,6 @@
     "bulletinTitle": "עלון התרעה מטאורולוגי",
     "activeAlerts": "{count} התרעות פעילות",
     "bulletinDesc": "אזהרות רשמיות על מזג אוויר קיצוני והנחיות בטיחות לציבור עבור {cityName}",
-    "soundChime": "השמעת צלצול",
     "collapse": "צמצום",
     "expand": "הרחבת הנחיות",
     "expires": "פג תוקף:",

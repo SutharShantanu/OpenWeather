@@ -766,7 +766,6 @@
     "bulletinTitle": "Bulletin ng Abisong Meteorolohikal",
     "activeAlerts": "{count} Aktibong Babala",
     "bulletinDesc": "Opisyal na babala sa matinding panahon at direktiba sa kaligtasan ng publiko para sa {cityName}",
-    "soundChime": "Patunugin ang Chime",
     "collapse": "Itiklop",
     "expand": "Palawakin ang mga Direktiba",
     "expires": "Mag-e-expire:",

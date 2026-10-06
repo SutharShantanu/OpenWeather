@@ -766,7 +766,6 @@
     "bulletinTitle": "Boletim de alertas meteorológicos",
     "activeAlerts": "{count} alertas ativos",
     "bulletinDesc": "Avisos oficiais de tempo severo e diretrizes de segurança pública para {cityName}",
-    "soundChime": "Som de alerta",
     "collapse": "Recolher",
     "expand": "Expandir diretrizes",
     "expires": "Expira:",

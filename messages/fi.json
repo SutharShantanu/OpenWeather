@@ -766,7 +766,6 @@
     "bulletinTitle": "Meteorologinen varoitustiedote",
     "activeAlerts": "{count} aktiivista varoitusta",
     "bulletinDesc": "Viralliset ankaran sään varoitukset ja turvallisuusohjeet kohteelle {cityName}",
-    "soundChime": "Soita merkkiääni",
     "collapse": "Piilota",
     "expand": "Näytä ohjeet",
     "expires": "Päättyy:",

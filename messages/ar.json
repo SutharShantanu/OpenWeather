@@ -766,7 +766,6 @@
     "bulletinTitle": "نشرة الإرشادات الجوية",
     "activeAlerts": "{count} تنبيهات نشطة",
     "bulletinDesc": "تحذيرات رسمية من الطقس القاسي وتوجيهات السلامة العامة لـ {cityName}",
-    "soundChime": "تشغيل النغمة",
     "collapse": "طيّ",
     "expand": "عرض التوجيهات",
     "expires": "تنتهي:",

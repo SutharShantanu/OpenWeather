@@ -766,7 +766,6 @@
     "bulletinTitle": "Meteorologická výstražná zpráva",
     "activeAlerts": "Aktivní výstrahy: {count}",
     "bulletinDesc": "Oficiální varování před nebezpečným počasím a pokyny pro bezpečnost veřejnosti pro {cityName}",
-    "soundChime": "Zvukový signál",
     "collapse": "Sbalit",
     "expand": "Rozbalit pokyny",
     "expires": "Platnost do:",

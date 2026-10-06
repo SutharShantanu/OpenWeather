@@ -766,7 +766,6 @@
     "bulletinTitle": "기상 특보",
     "activeAlerts": "활성 경보 {count}건",
     "bulletinDesc": "{cityName}의 공식 악기상 경보 및 공공 안전 지침",
-    "soundChime": "알림음 재생",
     "collapse": "접기",
     "expand": "지침 펼치기",
     "expires": "만료:",

@@ -25,14 +25,18 @@ import {
 import {
   AlertTriangle,
   ShieldCheck,
-  Volume2,
-  CheckCircle2,
-  Circle,
-  ChevronDown,
-  ChevronUp,
   Clock,
   Building2,
+  ChevronUp,
 } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item"
 import { CurrentWeather, WeatherAlert } from "@/lib/weather"
 import { useTranslation } from "@/components/language-provider"
 import { useDisplayPreferences } from "@/components/display-preferences-provider"
@@ -48,7 +52,6 @@ export function InlineAlertBanner({
 }: InlineAlertBannerProps) {
   const { t } = useTranslation()
   const prefs = useDisplayPreferences()
-  const [isPlaying, setIsPlaying] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   const [checkedProtocols, setCheckedProtocols] = useState<
     Record<string, boolean>
@@ -111,42 +114,6 @@ export function InlineAlertBanner({
     (a) => a.severity === "Extreme" || a.severity === "Severe"
   )
 
-  // Web Audio Synthesizer Chime
-  const playChime = () => {
-    try {
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext?: typeof AudioContext })
-          .webkitAudioContext
-      if (!AudioCtx) return
-      const ctx = new AudioCtx()
-      setIsPlaying(true)
-
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-
-      osc.type = "sine"
-      osc.frequency.setValueAtTime(hasCritical ? 880 : 587.33, ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(
-        hasCritical ? 440 : 440,
-        ctx.currentTime + 0.35
-      )
-
-      gain.gain.setValueAtTime(0.2, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35)
-
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-
-      osc.start()
-      osc.stop(ctx.currentTime + 0.35)
-
-      setTimeout(() => setIsPlaying(false), 400)
-    } catch {
-      setIsPlaying(false)
-    }
-  }
-
   const toggleProtocol = (id: string) => {
     setCheckedProtocols((prev) => ({
       ...prev,
@@ -160,7 +127,7 @@ export function InlineAlertBanner({
         variant="default"
         className="border-border bg-card py-2.5 shadow-2xs"
       >
-        <ShieldCheck className="size-4 text-emerald-700 dark:text-emerald-500" />
+        <ShieldCheck className="size-4 text-success-foreground dark:text-success" />
         <AlertTitle className="text-xs font-semibold tracking-tight">
           {t.common.advisorySystem}
         </AlertTitle>
@@ -168,10 +135,7 @@ export function InlineAlertBanner({
           {t.common.noActiveAlerts}
         </AlertDescription>
         <AlertAction>
-          <Badge
-            variant="outline"
-            className="border-emerald-500/30 bg-emerald-500/10 font-mono text-tiny text-emerald-600 dark:text-emerald-400"
-          >
+          <Badge variant="success-light" className="font-mono text-tiny">
             {t.alerts.nominal}
           </Badge>
         </AlertAction>
@@ -181,12 +145,12 @@ export function InlineAlertBanner({
 
   return (
     <Card
-      className={`w-full border-s-4 ${hasCritical ? "border-border border-s-destructive" : "border-border border-s-amber-500"}`}
+      className={`w-full gap-0 border-s-4 py-0 ${hasCritical ? "border-border border-s-destructive" : "border-border border-s-warning"}`}
     >
       <CardHeader className="flex flex-col justify-between gap-2 p-3 sm:flex-row sm:items-center sm:p-4">
         <div className="flex items-center gap-2.5">
           <div
-            className={`shrink-0 border border-border p-1.5 ${hasCritical ? "bg-destructive/10 text-destructive" : "bg-amber-500/10 text-amber-700 dark:text-amber-500"}`}
+            className={`shrink-0 border border-border p-1.5 ${hasCritical ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning-foreground dark:text-warning"}`}
           >
             <AlertTriangle className="size-4" />
           </div>
@@ -211,29 +175,15 @@ export function InlineAlertBanner({
 
         <CardAction className="flex items-center gap-1.5">
           <Button
-            variant="outline"
-            size="xs"
-            onClick={playChime}
-            disabled={isPlaying}
-            className="h-6 gap-1 px-2 font-mono text-tiny"
-          >
-            <Volume2 className="size-3 text-primary" />
-            <span>{t.alerts.soundChime}</span>
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="xs"
+            variant="accent"
+            size="icon-xs"
             onClick={() => setIsExpanded(!isExpanded)}
             aria-expanded={isExpanded}
-            className="h-6 gap-1 px-2 font-mono text-tiny text-muted-foreground hover:text-foreground"
           >
-            <span>{isExpanded ? t.alerts.collapse : t.alerts.expand}</span>
-            {isExpanded ? (
-              <ChevronUp className="size-3" />
-            ) : (
-              <ChevronDown className="size-3" />
-            )}
+            {/* <span>{isExpanded ? t.alerts.collapse : t.alerts.expand}</span> */}
+            <ChevronUp
+              className={`size-3 transition-all duration-200 ease-in-out ${isExpanded ? "rotate-180" : "rotate-0"}`}
+            />
           </Button>
         </CardAction>
       </CardHeader>
@@ -290,34 +240,38 @@ export function InlineAlertBanner({
                     </p>
 
                     {/* Safety Protocol Checklist */}
-                    <button
-                      type="button"
-                      role="checkbox"
-                      aria-checked={isChecked}
-                      onClick={() => toggleProtocol(alert.id)}
-                      className={`flex w-full cursor-pointer items-start gap-2.5 border p-2.5 text-start font-mono text-xs transition-colors ${
+                    <Item
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className={`cursor-pointer items-start font-mono transition-colors ${
                         isChecked
-                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-500"
-                          : "border-border bg-muted/20 text-foreground hover:bg-muted/40"
+                          ? "border-success/15 bg-success/10 dark:border-success/25 dark:bg-success/15"
+                          : "bg-muted/20 hover:bg-muted/40"
                       }`}
                     >
-                      {isChecked ? (
-                        <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-700 dark:text-emerald-500" />
-                      ) : (
-                        <Circle className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
-                      )}
-                      <div className="flex-1">
-                        <span className="mb-0.5 block text-mini font-semibold">
-                          {t.alerts.safetyProtocol}{" "}
-                          {isChecked
-                            ? t.alerts.acknowledged
-                            : t.alerts.actionRequired}
-                        </span>
-                        <span className="text-mini leading-relaxed text-muted-foreground">
-                          {alert.instruction}
-                        </span>
-                      </div>
-                    </button>
+                      <label htmlFor={`protocol-${alert.id}`}>
+                        <ItemMedia>
+                          <Checkbox
+                            id={`protocol-${alert.id}`}
+                            checked={isChecked}
+                            onCheckedChange={() => toggleProtocol(alert.id)}
+                            className="data-[state=checked]:border-success data-[state=checked]:bg-success data-[state=checked]:text-white"
+                          />
+                        </ItemMedia>
+                        <ItemContent className="min-w-0">
+                          <ItemTitle className="text-mini font-semibold">
+                            {t.alerts.safetyProtocol}{" "}
+                            {isChecked
+                              ? t.alerts.acknowledged
+                              : t.alerts.actionRequired}
+                          </ItemTitle>
+                          <ItemDescription className="text-mini leading-relaxed">
+                            {alert.instruction}
+                          </ItemDescription>
+                        </ItemContent>
+                      </label>
+                    </Item>
                   </div>
                 )
               })}

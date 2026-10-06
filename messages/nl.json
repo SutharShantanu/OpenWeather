@@ -766,7 +766,6 @@
     "bulletinTitle": "Meteorologisch waarschuwingsbericht",
     "activeAlerts": "{count} actieve waarschuwingen",
     "bulletinDesc": "Officiële waarschuwingen voor zwaar weer en veiligheidsinstructies voor {cityName}",
-    "soundChime": "Geluidssignaal",
     "collapse": "Inklappen",
     "expand": "Instructies uitklappen",
     "expires": "Verloopt:",

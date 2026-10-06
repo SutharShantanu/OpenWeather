@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   ShieldCheck,
   Trash2,
+  X,
 } from "lucide-react"
 import {
   Popover,
@@ -18,6 +19,10 @@ import { Badge } from "@/components/ui/badge"
 import { EmptyState } from "@/components/empty-state"
 import { WeatherAlert, CurrentWeather } from "@/lib/weather"
 import { useTranslation } from "@/components/language-provider"
+import { useAlertChime, playDismissSound } from "@/hooks/use-alert-chime"
+
+/** Swipe-out duration; keep in sync with the `duration-200` classes below. */
+const SWIPE_MS = 200
 
 interface NotificationsPopoverProps {
   alerts?: WeatherAlert[]
@@ -34,17 +39,32 @@ export function NotificationsPopover({
 }: NotificationsPopoverProps) {
   const { t } = useTranslation()
   const [dismissedIds, setDismissedIds] = useState<string[]>([])
+  useAlertChime(alerts)
 
   const activeAlerts = alerts.filter((a) => !dismissedIds.includes(a.id))
   const unreadCount = activeAlerts.length
 
-  const handleDismissAlert = (id: string) => {
-    setDismissedIds((prev) => [...prev, id])
+  // Ids mid-swipe: they slide out and collapse, then move to `dismissedIds`.
+  const [leavingIds, setLeavingIds] = useState<string[]>([])
+
+  const dismiss = (ids: string[]) => {
+    playDismissSound()
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches
+    setLeavingIds((prev) => [...prev, ...ids])
+    setTimeout(
+      () => {
+        setDismissedIds((prev) => [...prev, ...ids])
+        setLeavingIds((prev) => prev.filter((id) => !ids.includes(id)))
+      },
+      reduceMotion ? 0 : SWIPE_MS
+    )
   }
 
-  const handleClearAll = () => {
-    setDismissedIds(alerts.map((a) => a.id))
-  }
+  const handleDismissAlert = (id: string) => dismiss([id])
+
+  const handleClearAll = () => dismiss(activeAlerts.map((a) => a.id))
 
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
@@ -89,13 +109,13 @@ export function NotificationsPopover({
 
           {activeAlerts.length > 0 && (
             <Button
-              variant="ghost"
-              size="xs"
+              variant="destructive"
+              size="icon-xs"
               onClick={handleClearAll}
-              className="px-1.5 text-tiny text-muted-foreground hover:text-foreground"
+              aria-label={t.common.clear}
+              title={t.common.clear}
             >
-              <Trash2 className="me-1 size-2.5" />
-              {t.common.clear}
+              <Trash2 />
             </Button>
           )}
         </div>
@@ -107,41 +127,56 @@ export function NotificationsPopover({
           </div>
 
           {activeAlerts.length > 0 ? (
-            <div className="max-h-64 space-y-2 overflow-y-auto pe-0.5">
-              {activeAlerts.map((alert) => (
-                <div
-                  key={alert.id}
-                  className="space-y-1.5 border border-border bg-muted/20 p-2.5"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <AlertTriangle className="size-3 shrink-0 text-amber-700 dark:text-amber-500" />
-                      <span className="text-mini font-bold text-foreground">
-                        {alert.event}
-                      </span>
+            <div className="max-h-64 overflow-x-hidden overflow-y-auto pe-0.5">
+              {activeAlerts.map((alert) => {
+                const isLeaving = leavingIds.includes(alert.id)
+                return (
+                  <div
+                    key={alert.id}
+                    className={`group/row grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none ${isLeaving ? "grid-rows-[0fr]" : "grid-rows-[1fr]"}`}
+                  >
+                    <div className="min-h-0 overflow-hidden">
+                      <div className="pb-2 group-last/row:pb-0">
+                        <div
+                          className={`space-y-1.5 border border-border bg-muted/20 p-2.5 transition-[transform,opacity] duration-200 ease-in motion-reduce:transition-none ${isLeaving ? "translate-x-full opacity-0 rtl:-translate-x-full" : ""}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <AlertTriangle className="size-3 shrink-0 text-amber-700 dark:text-amber-500" />
+                              <span className="text-mini font-bold text-foreground">
+                                {alert.event}
+                              </span>
+                            </div>
+                            <Badge
+                              variant="outline"
+                              className="font-mono text-nano"
+                            >
+                              {alert.severity}
+                            </Badge>
+                          </div>
+
+                          <p className="text-mini leading-snug text-muted-foreground">
+                            {alert.headline}
+                          </p>
+
+                          <div className="flex items-center justify-between border-t border-border/40 pt-1 text-micro text-muted-foreground">
+                            <span>{alert.source}</span>
+                            <Button
+                              variant="warning"
+                              size="icon-xs"
+                              onClick={() => handleDismissAlert(alert.id)}
+                              aria-label={t.notifications.dismiss}
+                              title={t.notifications.dismiss}
+                            >
+                              <X />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <Badge variant="outline" className="font-mono text-nano">
-                      {alert.severity}
-                    </Badge>
                   </div>
-
-                  <p className="text-mini leading-snug text-muted-foreground">
-                    {alert.headline}
-                  </p>
-
-                  <div className="flex items-center justify-between border-t border-border/40 pt-1 text-micro text-muted-foreground">
-                    <span>{alert.source}</span>
-                    <Button
-                      variant="link"
-                      size="xs"
-                      onClick={() => handleDismissAlert(alert.id)}
-                      className="h-6 px-1 text-micro text-muted-foreground hover:text-foreground"
-                    >
-                      {t.notifications.dismiss}
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <EmptyState

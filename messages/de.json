@@ -766,7 +766,6 @@
     "bulletinTitle": "Meteorologische Warnmeldung",
     "activeAlerts": "{count} aktive Warnungen",
     "bulletinDesc": "Offizielle Unwetterwarnungen & Sicherheitshinweise für {cityName}",
-    "soundChime": "Signalton",
     "collapse": "Einklappen",
     "expand": "Hinweise ausklappen",
     "expires": "Läuft ab:",

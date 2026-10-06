@@ -766,7 +766,6 @@
     "bulletinTitle": "气象预警公告",
     "activeAlerts": "{count} 条活跃预警",
     "bulletinDesc": "{cityName}的官方恶劣天气预警与公共安全指令",
-    "soundChime": "提示音",
     "collapse": "收起",
     "expand": "展开指令",
     "expires": "到期：",

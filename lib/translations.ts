@@ -749,7 +749,6 @@ export interface Translations {
     bulletinTitle: string;
     activeAlerts: (count: number) => string;
     bulletinDesc: (cityName: string) => string;
-    soundChime: string;
     collapse: string;
     expand: string;
     expires: string;

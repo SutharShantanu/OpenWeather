@@ -766,7 +766,6 @@
     "bulletinTitle": "Bản tin cảnh báo khí tượng",
     "activeAlerts": "{count} cảnh báo đang hiệu lực",
     "bulletinDesc": "Cảnh báo thời tiết nghiêm trọng chính thức và chỉ dẫn an toàn công cộng cho {cityName}",
-    "soundChime": "Phát chuông",
     "collapse": "Thu gọn",
     "expand": "Mở rộng chỉ dẫn",
     "expires": "Hết hạn:",

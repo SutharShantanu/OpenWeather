@@ -766,7 +766,6 @@
     "bulletinTitle": "Meteorolojik Uyarı Bülteni",
     "activeAlerts": "{count} Etkin Uyarı",
     "bulletinDesc": "{cityName} için resmi şiddetli hava uyarısı ve kamu güvenliği yönergeleri",
-    "soundChime": "Zil Sesi Çal",
     "collapse": "Daralt",
     "expand": "Yönergeleri Genişlet",
     "expires": "Bitiş:",

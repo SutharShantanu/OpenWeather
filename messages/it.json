@@ -766,7 +766,6 @@
     "bulletinTitle": "Bollettino di allerta meteorologica",
     "activeAlerts": "{count} allerte attive",
     "bulletinDesc": "Avvisi ufficiali di maltempo e direttive di sicurezza pubblica per {cityName}",
-    "soundChime": "Suono di avviso",
     "collapse": "Comprimi",
     "expand": "Espandi direttive",
     "expires": "Scade:",

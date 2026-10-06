@@ -766,7 +766,6 @@
     "bulletinTitle": "Buletin Nasihat Meteorologi",
     "activeAlerts": "{count} Amaran Aktif",
     "bulletinDesc": "Amaran cuaca buruk rasmi & arahan keselamatan awam untuk {cityName}",
-    "soundChime": "Bunyikan Loceng",
     "collapse": "Runtuh",
     "expand": "Kembangkan Arahan",
     "expires": "Tamat:",

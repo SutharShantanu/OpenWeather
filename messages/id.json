@@ -766,7 +766,6 @@
     "bulletinTitle": "Buletin Peringatan Meteorologi",
     "activeAlerts": "{count} Peringatan Aktif",
     "bulletinDesc": "Peringatan cuaca ekstrem resmi & arahan keselamatan publik untuk {cityName}",
-    "soundChime": "Bunyikan Lonceng",
     "collapse": "Ciutkan",
     "expand": "Perluas Arahan",
     "expires": "Berakhir:",

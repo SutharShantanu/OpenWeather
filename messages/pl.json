@@ -766,7 +766,6 @@
     "bulletinTitle": "Meteorologiczny komunikat ostrzegawczy",
     "activeAlerts": "Aktywne ostrzeżenia: {count}",
     "bulletinDesc": "Oficjalne ostrzeżenia o groźnych zjawiskach pogodowych i wytyczne bezpieczeństwa publicznego dla: {cityName}",
-    "soundChime": "Dźwięk powiadomienia",
     "collapse": "Zwiń",
     "expand": "Rozwiń wytyczne",
     "expires": "Wygasa:",
