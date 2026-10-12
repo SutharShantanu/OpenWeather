@@ -15,9 +15,11 @@ import {
   SunMedium,
   Cloud,
   Thermometer,
-  Share2,
-  Check,
+  Compass,
+  WavesVertical,
+  Clock,
 } from "lucide-react"
+import { StationShareButton } from "@/components/station-share-button"
 import {
   CurrentWeather,
   formatTemperature,
@@ -66,15 +68,6 @@ export function WeatherHero({
   const uvClass =
     current.uvIndex !== undefined ? getUvClassification(current.uvIndex) : null
 
-  const [copied, setCopied] = React.useState(false)
-
-  const handleShare = () => {
-    if (typeof window === "undefined") return
-    navigator.clipboard.writeText(window.location.href)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   const localTime = prefs.time(current.dt)
 
   return (
@@ -85,22 +78,29 @@ export function WeatherHero({
         isNight={current.condition.icon?.includes("n")}
         windSpeed={current.windSpeed}
       />
-      <CardHeader className="relative z-10 border-b border-border pb-4 backdrop-blur-[0.5px]">
-        <div className="flex flex-col gap-1.5">
+      <CardHeader className="relative z-10 border-b border-border pb-4 backdrop-blur-xs">
+        <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="gap-1 font-mono text-tiny">
-              <MapPin className="size-2.5 text-primary" />
+            <Badge variant="outline" className="gap-1 font-mono text-xs">
+              <Compass className="size-2.5" />
               <span>{prefs.coords(current.lat, current.lon)}</span>
             </Badge>
-            <Badge variant="secondary" className="font-mono text-tiny">
+            <Badge variant="outline" className="font-mono text-xs">
+              <MapPin className="size-2.5" />
               {current.country || t.common.stationTelemetry}
             </Badge>
             {uvClass && current.uvIndex !== undefined && (
               <Badge
                 variant="outline"
-                className={`font-mono text-tiny ${uvClass.color}`}
+                className={`font-mono text-xs ${uvClass.color}`}
               >
-                UV {current.uvIndex} •{" "}
+                <WavesVertical className="size-2.5" />
+                UV{" "}
+                <NumberFlow
+                  value={current.uvIndex}
+                  format={{ maximumFractionDigits: 1 }}
+                />{" "}
+                •{" "}
                 {current.uvIndex < 3
                   ? t.widgets.uv.low
                   : current.uvIndex < 6
@@ -112,9 +112,15 @@ export function WeatherHero({
                         : t.widgets.uv.extreme}
               </Badge>
             )}
-            <span className="hidden font-mono text-tiny text-muted-foreground sm:inline">
-              {t.common.synopticTime}: {localTime}
-            </span>
+            <Badge
+              variant="outline"
+              className="hidden gap-1 font-mono text-xs sm:inline-flex"
+            >
+              <Clock className="size-2.5" />
+              <span>
+                {t.common.synopticTime}: {localTime}
+              </span>
+            </Badge>
           </div>
 
           <CardTitle
@@ -137,30 +143,7 @@ export function WeatherHero({
         </div>
 
         <CardAction className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleShare}
-            className="gap-1.5 font-mono text-xs"
-            title={t.common.shareStation}
-            aria-label={t.common.shareStation}
-          >
-            {copied ? (
-              <>
-                <Check className="size-3.5 text-emerald-700 dark:text-emerald-500" />
-                <span className="hidden text-emerald-700 sm:inline dark:text-emerald-500">
-                  {t.common.copied}
-                </span>
-              </>
-            ) : (
-              <>
-                <Share2 className="size-3.5 text-muted-foreground" />
-                <span className="hidden uppercase sm:inline">
-                  {t.common.shareStation}
-                </span>
-              </>
-            )}
-          </Button>
+          <StationShareButton current={current} unit={unit} />
           <Button
             variant={isPinned ? "secondary" : "outline"}
             size="sm"
@@ -300,7 +283,13 @@ export function WeatherHero({
                 <span className="uppercase">{t.hero.uvIndex}</span>
               </div>
               <span className="font-bold text-foreground">
-                {current.uvIndex.toFixed(1)}
+                <NumberFlow
+                  value={current.uvIndex}
+                  format={{
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  }}
+                />
               </span>
             </div>
           )}
@@ -312,7 +301,7 @@ export function WeatherHero({
                 <span className="uppercase">{t.hero.dewPoint}</span>
               </div>
               <span className="font-bold text-foreground">
-                {displayDewPoint}°{unit}
+                <NumberFlow value={displayDewPoint} />°{unit}
               </span>
             </div>
           )}
@@ -322,7 +311,9 @@ export function WeatherHero({
               <Cloud className="size-3 text-muted-foreground" />
               <span className="uppercase">{t.hero.clouds}</span>
             </div>
-            <span className="font-bold text-foreground">{current.clouds}%</span>
+            <span className="font-bold text-foreground">
+              <NumberFlow value={current.clouds} />%
+            </span>
           </div>
 
           {current.windGusts !== undefined && (
@@ -332,7 +323,8 @@ export function WeatherHero({
                 <span className="uppercase">{t.widgets.wind.gusts}</span>
               </div>
               <span className="font-bold text-foreground">
-                {prefs.windText(current.windGusts)}
+                <NumberFlow value={prefs.wind(current.windGusts).val} />{" "}
+                {prefs.wind(0).unitStr}
               </span>
             </div>
           )}

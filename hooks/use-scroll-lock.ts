@@ -5,24 +5,19 @@ import { useLenis } from "@/components/lenis-provider"
 
 // Shared across every caller: the page only unlocks once no dialog/popover still needs the lock
 let lockCount = 0
-let savedStyles: { bodyOverflow: string; htmlOverflow: string; bodyPaddingRight: string } | null = null
+let savedStyles: { htmlOverflow: string } | null = null
 
 function acquire() {
   lockCount++
   if (lockCount > 1) return
 
-  const { body, documentElement: html } = document
+  const html = document.documentElement
   savedStyles = {
-    bodyOverflow: body.style.overflow,
     htmlOverflow: html.style.overflow,
-    bodyPaddingRight: body.style.paddingRight,
   }
-  // Keep layout stable when the scrollbar disappears
-  const scrollbarWidth = window.innerWidth - html.clientWidth
-  if (scrollbarWidth > 0) {
-    body.style.paddingRight = `${scrollbarWidth}px`
-  }
-  body.style.overflow = "hidden"
+  // No scrollbar compensation needed: html reserves its gutter (scrollbar-gutter: stable in globals.css)
+  // html only: with overflow hidden on both, body becomes its own scroll
+  // container and the sticky header scrolls out of view.
   html.style.overflow = "hidden"
 }
 
@@ -30,10 +25,7 @@ function release() {
   lockCount = Math.max(0, lockCount - 1)
   if (lockCount > 0 || !savedStyles) return
 
-  const { body, documentElement: html } = document
-  body.style.overflow = savedStyles.bodyOverflow
-  html.style.overflow = savedStyles.htmlOverflow
-  body.style.paddingRight = savedStyles.bodyPaddingRight
+  document.documentElement.style.overflow = savedStyles.htmlOverflow
   savedStyles = null
 }
 

@@ -16,15 +16,18 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useTranslation } from "@/components/language-provider"
 import { useDisplayPreferences } from "@/components/display-preferences-provider"
 
 interface HourlyForecastProps {
   hourly: HourlyForecastItem[]
   unit: "C" | "F"
+  /** Rendered in the header, e.g. a tab switch shared with another card. */
+  tabs?: React.ReactNode
 }
 
-export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
+export function HourlyForecast({ hourly, unit, tabs }: HourlyForecastProps) {
   const { t } = useTranslation()
   const prefs = useDisplayPreferences()
   const [showChart, setShowChart] = useState(false)
@@ -32,7 +35,8 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
 
   const displayedHourly = hourly.slice(0, hoursLimit)
 
-  const chartData = displayedHourly.map((item) => ({
+  const chartData = displayedHourly.map((item, idx) => ({
+    idx,
     time: prefs.clock(item.time),
     temp: formatTemperature(item.temp, unit),
     feelsLike: formatTemperature(item.feelsLike, unit),
@@ -52,45 +56,40 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
             <CardTitle className="font-heading text-sm font-semibold tracking-tight">
               {t.forecast.hourlyTitle}
             </CardTitle>
-            <Badge
-              variant="outline"
-              className="hidden shrink-0 font-mono text-tiny sm:inline-flex"
-            >
-              {t.forecast.oneHourPrecision}
-            </Badge>
           </div>
           <CardDescription className="text-xs">
             {t.forecast.hourlyDesc}
           </CardDescription>
         </div>
 
-        <CardAction className="flex items-center gap-2">
+        <CardAction className="flex flex-wrap items-center gap-2">
+          {tabs}
           {hourly.length > 24 && (
-            <div className="flex items-center border border-border p-0.5 font-mono text-xs">
-              <Button
-                variant={hoursLimit === 24 ? "default" : "ghost"}
-                size="xs"
-                onClick={() => setHoursLimit(24)}
-                className="h-6 px-2 font-mono text-tiny"
-              >
+            <ToggleGroup
+              type="single"
+              variant="subtle"
+              size="sm"
+              spacing={0}
+              value={String(hoursLimit)}
+              // Radix reports "" when the active item is clicked again; keep the current range.
+              onValueChange={(v) => v && setHoursLimit(v === "48" ? 48 : 24)}
+              aria-label={t.forecast.hourlyTitle}
+              className="w-auto"
+            >
+              <ToggleGroupItem value="24">
                 24H
-              </Button>
-              <Button
-                variant={hoursLimit === 48 ? "default" : "ghost"}
-                size="xs"
-                onClick={() => setHoursLimit(48)}
-                className="h-6 px-2 font-mono text-tiny"
-              >
+              </ToggleGroupItem>
+              <ToggleGroupItem value="48">
                 48H
-              </Button>
-            </div>
+              </ToggleGroupItem>
+            </ToggleGroup>
           )}
 
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowChart(!showChart)}
-            className="h-7 gap-1.5 font-mono text-xs"
+            className="gap-1.5 font-mono text-xs"
           >
             <TrendingUp className="size-3" />
             <span>{showChart ? t.forecast.cards : t.forecast.curve}</span>
@@ -121,7 +120,13 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                   </linearGradient>
                 </defs>
                 <XAxis
-                  dataKey="time"
+                  // Index key: clock times repeat across 48h and would merge points
+                  dataKey="idx"
+                  tickFormatter={(i: number) => chartData[i]?.time ?? ""}
+                  // About eight evenly spaced labels, never overlapping or clipped
+                  interval={Math.max(0, Math.ceil(chartData.length / 8) - 1)}
+                  padding={{ left: 32, right: 32 }}
+                  tickMargin={6}
                   stroke="currentColor"
                   className="font-mono text-tiny text-muted-foreground"
                   tickLine={false}
@@ -201,7 +206,9 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                   {popPercent > 10 ? (
                     <div className="flex flex-wrap items-center justify-center gap-x-0.5 font-mono text-tiny font-semibold text-sky-700 dark:text-sky-500">
                       <CloudRain className="size-2.5" />
-                      <span>{popPercent}%</span>
+                      <span>
+                        <NumberFlow value={popPercent} />%
+                      </span>
                       {(item.precipitation ?? 0) > 0 && (
                         <span className="font-normal text-muted-foreground">
                           {prefs.precipText(item.precipitation!)}
@@ -217,7 +224,9 @@ export function HourlyForecast({ hourly, unit }: HourlyForecastProps) {
                   <div className="flex w-full items-center justify-center gap-1 border-t border-border/40 pt-1 font-mono text-micro text-muted-foreground">
                     <Wind className="size-2.5 text-muted-foreground" />
                     <span>
-                      {Math.round(prefs.wind(item.windSpeed).val)}
+                      <NumberFlow
+                        value={Math.round(prefs.wind(item.windSpeed).val)}
+                      />
                       {prefs.wind(0).unitStr}
                     </span>
                   </div>

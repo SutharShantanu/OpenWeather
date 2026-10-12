@@ -18,6 +18,16 @@ const nextConfig: NextConfig = {
   headers() {
     return [{ source: "/:path*", headers: securityHeaders }]
   },
+  images: {
+    dangerouslyAllowSVG: true,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "thesvg.org",
+        pathname: "/icons/**",
+      },
+    ],
+  },
 }
 
 export default withNextIntl(nextConfig)

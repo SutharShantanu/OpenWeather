@@ -31,6 +31,7 @@ import {
   AlertDescription,
   AlertAction,
 } from "@/components/ui/alert"
+import { ConsoleFooter } from "@/components/console-footer"
 
 // Code-split: the dialogs are large and not needed for first paint.
 const SettingsDialog = dynamic(() =>
@@ -310,7 +311,7 @@ export default function WeatherDashboardPage() {
                 </AlertDescription>
                 <AlertAction>
                   <Button
-                    variant="ghost"
+                    variant="destructive"
                     size="icon-xs"
                     onClick={clearLocationError}
                     aria-label={t.notifications.dismiss}
@@ -410,10 +411,8 @@ export default function WeatherDashboardPage() {
             }
           />
 
-          {/* Footer */}
-          <footer className="space-y-1 border-t border-border px-4 pt-6 pb-20 text-center font-mono text-xs text-muted-foreground">
-            <p>{t.common.consoleFooter}</p>
-          </footer>
+          {/* Improved Console Footer */}
+          <ConsoleFooter footerText={t.common.consoleFooter} />
         </div>
       </DisplayPreferencesProvider>
     </LanguageProvider>

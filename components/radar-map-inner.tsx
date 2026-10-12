@@ -90,8 +90,28 @@ export function RadarMapInner({
       zoom: 7,
       zoomControl: true,
       attributionControl: true,
+      scrollWheelZoom: false, // Prevents Leaflet from hijacking mouse wheel / page vertical scroll
+      touchZoom: false, // Prevents Leaflet from hijacking touch / trackpad scroll gestures
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
     })
     map.attributionControl.setPrefix(false)
+
+    // Allow zooming with mouse wheel only when user holds Ctrl / Cmd key;
+    // Keep Leaflet's scrollWheelZoom disabled so regular mouse wheel events bubble seamlessly to the page.
+    const container = containerRef.current
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault()
+        if (e.deltaY < 0) {
+          map.zoomIn(1)
+        } else if (e.deltaY > 0) {
+          map.zoomOut(1)
+        }
+      }
+    }
+    container.addEventListener("wheel", handleWheel, { passive: false })
 
     const baseTile = L.tileLayer(getBaseTileUrl(mapStyle), {
       maxZoom: 19,
@@ -115,6 +135,7 @@ export function RadarMapInner({
     markerRef.current = marker
 
     return () => {
+      container.removeEventListener("wheel", handleWheel)
       map.remove()
       mapRef.current = null
     }

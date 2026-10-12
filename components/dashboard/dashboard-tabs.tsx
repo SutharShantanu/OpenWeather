@@ -13,11 +13,10 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { WeatherHero } from "@/components/weather-hero"
-import { DailyForecast } from "@/components/daily-forecast"
 import { WindWidget } from "@/components/widgets/wind-widget"
 import { HumidityWidget } from "@/components/widgets/humidity-widget"
 import { AirQualityWidget } from "@/components/widgets/air-quality-widget"
-import { SolarWidget } from "@/components/widgets/solar-widget"
+import { SunMoonCard } from "@/components/widgets/sun-moon-card"
 import { UvWidget } from "@/components/widgets/uv-widget"
 import { PinnedLocations } from "@/components/pinned-locations"
 import { EmbeddedRadarCard } from "@/components/embedded-radar-card"
@@ -29,8 +28,8 @@ import type { AppTab } from "@/lib/constants"
 // Code-split: recharts (charts, hourly, climate) and the secondary tabs are
 // large and not needed for first paint; weather data takes longer than these chunks.
 const cardFallback = () => <Skeleton className="h-64 w-full" />
-const HourlyForecast = dynamic(
-  () => import("@/components/hourly-forecast").then((m) => m.HourlyForecast),
+const ForecastTabs = dynamic(
+  () => import("@/components/forecast-tabs").then((m) => m.ForecastTabs),
   { loading: cardFallback }
 )
 const WeatherChartsCard = dynamic(
@@ -166,20 +165,23 @@ export function DashboardTabs({
         ))}
         {section(
           (w) => (
-            <HourlyForecast hourly={w.hourly} unit={unit} />
+            <ForecastTabs hourly={w.hourly} daily={w.daily} unit={unit} />
           ),
           "h-44"
         )}
-        {section((w) => (
-          <EmbeddedRadarCard
-            lat={w.current.lat}
-            lon={w.current.lon}
-            cityName={w.current.cityName}
-            heightClass="h-[340px]"
-            onExpand={() => onTabChange("radar")}
-            customCartoApiKey={customCartoApiKey}
-          />
-        ))}
+        {section(
+          (w) => (
+            <EmbeddedRadarCard
+              lat={w.current.lat}
+              lon={w.current.lon}
+              cityName={w.current.cityName}
+              heightClass="h-[340px]"
+              onExpand={() => onTabChange("radar")}
+              customCartoApiKey={customCartoApiKey}
+            />
+          ),
+          "h-[340px]"
+        )}
         {section(
           (w) => (
             <WeatherChartsCard hourly={w.hourly} unit={unit} />
@@ -187,46 +189,24 @@ export function DashboardTabs({
           "h-64"
         )}
 
-        {/* Bento grid: 10-day outlook + atmospheric sensors */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            {section(
-              (w) => (
-                <DailyForecast daily={w.daily} unit={unit} />
-              ),
-              "h-96"
-            )}
-          </div>
-          <div className="space-y-4">
-            {section(
-              (w) => (
-                <>
-                  <UvWidget
-                    uvIndex={w.current.uvIndex}
-                    uvMax={w.daily[0]?.uvIndexMax}
-                  />
-                  <WindWidget
-                    speed={w.current.windSpeed}
-                    deg={w.current.windDeg}
-                  />
-                  <HumidityWidget
-                    humidity={w.current.humidity}
-                    tempC={w.current.temp}
-                    unit={unit}
-                  />
-                  <AirQualityWidget airQuality={w.current.airQuality} />
-                  <SolarWidget
-                    sunrise={w.current.sunrise}
-                    sunset={w.current.sunset}
-                    currentDt={w.current.dt}
-                    moon={w.current.moon}
-                  />
-                </>
-              ),
-              "h-96"
-            )}
-          </div>
-        </div>
+        {section(
+          (w) => (
+            <SunMoonCard current={w.current}>
+              <UvWidget
+                uvIndex={w.current.uvIndex}
+                uvMax={w.daily[0]?.uvIndexMax}
+              />
+              <WindWidget speed={w.current.windSpeed} deg={w.current.windDeg} />
+              <HumidityWidget
+                humidity={w.current.humidity}
+                tempC={w.current.temp}
+                unit={unit}
+              />
+              <AirQualityWidget airQuality={w.current.airQuality} />
+            </SunMoonCard>
+          ),
+          "h-96"
+        )}
 
         {pinned}
       </TabsContent>
@@ -239,14 +219,13 @@ export function DashboardTabs({
           (w) => (
             <>
               <WeatherChartsCard hourly={w.hourly} unit={unit} />
-              <HourlyForecast hourly={w.hourly} unit={unit} />
+              <ForecastTabs hourly={w.hourly} daily={w.daily} unit={unit} />
               <ClimateNormalsCard
                 lat={w.current.lat}
                 lon={w.current.lon}
                 currentTemp={w.current.temp}
                 unit={unit}
               />
-              <DailyForecast daily={w.daily} unit={unit} />
             </>
           ),
           "h-96"
@@ -309,7 +288,6 @@ export function DashboardTabs({
                 currentTemp={w.current.temp}
                 unit={unit}
               />
-              <DailyForecast daily={w.daily} unit={unit} />
             </>
           ),
           "h-96"

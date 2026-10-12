@@ -171,19 +171,47 @@ export interface Translations {
       sunset: string;
       dayLength: string;
       solarNoon: string;
-      dawn: string;
-      dusk: string;
-      lunarSubtitle: string;
-      sunTab: string;
-      moonTab: string;
       sunAboveHorizon: string;
       nightCycle: string;
       lunarPhase: string;
       illumination: (percent: number) => string;
-      cyclePhase: string;
-      skyVisibility: string;
-      brightSky: string;
-      darkSky: string;
+      groupSun: string;
+      groupLight: string;
+      groupMoon: string;
+      groupNext: string;
+      morning: string;
+      evening: string;
+      astronomical: string;
+      nautical: string;
+      civil: string;
+      goldenHour: string;
+      moonAge: (days: string) => string;
+      moonrise: string;
+      moonset: string;
+      nextNewMoon: string;
+      nextFullMoon: string;
+      sunNeverSets: string;
+      sunNeverRises: string;
+      moonAlwaysUp: string;
+      moonAlwaysDown: string;
+      daylightLonger: (time: string) => string;
+      daylightShorter: (time: string) => string;
+      groupCalendar: string;
+      today: string;
+      prevMonth: string;
+      nextMonth: string;
+      showingDate: (date: string) => string;
+      backToToday: string;
+      phases: {
+        newMoon: string;
+        waxingCrescent: string;
+        firstQuarter: string;
+        waxingGibbous: string;
+        fullMoon: string;
+        waningGibbous: string;
+        lastQuarter: string;
+        waningCrescent: string;
+      };
     };
     uv: {
       title: string;
@@ -266,7 +294,6 @@ export interface Translations {
       noLanguageFound: string;
       voiceOnly: string;
       uiFallbackNotice: (languageName: string) => string;
-      dateFormats: { iso: string; intl: string; us: string };
       coordFormats: { decimal: string; dms: string };
     };
     units: {
@@ -589,8 +616,6 @@ export interface Translations {
     shortRangeDisturbances: string;
     guidanceLabel: string;
     stabilityHigh: string;
-    plannedShiftsTitle: string;
-    precipRiskLabel: string;
     quickConsultationTitle: string;
     quickQuestionUmbrella: string;
     quickQuestionWear: string;
@@ -757,6 +782,22 @@ export interface Translations {
     actionRequired: string;
     nominal: string;
   };
+  footer: {
+    description: string;
+    online: string;
+    github: string;
+    githubProfile: string;
+    repos: string;
+    followers: string;
+    profile: string;
+    links: string;
+    githubRepo: string;
+    portfolio: string;
+    telemetrySync: string;
+    consoleBrand: string;
+    dataSource: string;
+    allRightsReserved: string;
+  };
 }
 
 import { createTranslator } from "next-intl";
@@ -858,6 +899,10 @@ const FUNCTION_PARAM_MAP: Record<string, string[]> = {
   "alerts.bulletinDesc": ["cityName"],
   "widgets.wind.forceScale": ["scale"],
   "widgets.solar.illumination": ["percent"],
+  "widgets.solar.moonAge": ["days"],
+  "widgets.solar.daylightLonger": ["time"],
+  "widgets.solar.daylightShorter": ["time"],
+  "widgets.solar.showingDate": ["date"],
 };
 
 /**

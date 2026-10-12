@@ -36,13 +36,6 @@ import {
 } from "@/components/ui/input-group"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemGroup,
-  ItemTitle,
-} from "@/components/ui/item"
 import { Bubble, BubbleContent, BubbleReactions } from "@/components/ui/bubble"
 import {
   Message,
@@ -238,7 +231,6 @@ export function AiAdvisorDialog({
       ? null
       : analyzeWeatherWithAi(current, hourly, daily, unit, t)
   const shortRangeAlerts = briefing ? briefing.alerts : ruleBased!.suddenAlerts
-  const outlook = briefing ? briefing.outlook : ruleBased!.plannedShifts
 
   const answerQuery = (q: string) => {
     void ask(q, replyTo?.id)
@@ -314,15 +306,15 @@ export function AiAdvisorDialog({
                 initial={
                   reduceMotion
                     ? { opacity: 0 }
-                    : { opacity: 0, scale: 0.5, rotate: -90 }
+                    : { opacity: 0, scale: 0.6, rotate: -60 }
                 }
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
                 exit={
                   reduceMotion
                     ? { opacity: 0 }
-                    : { opacity: 0, scale: 0.5, rotate: 90 }
+                    : { opacity: 0, scale: 0.6, rotate: 60 }
                 }
-                transition={ICON_SPRING}
+                transition={ICON_TWEEN}
                 className="flex"
               >
                 {open ? <X className="size-6" /> : <Bot className="size-6" />}
@@ -343,17 +335,22 @@ export function AiAdvisorDialog({
             aria-labelledby={titleId}
             tabIndex={-1}
             initial={reduceMotion ? { opacity: 0 } : PANEL_HIDDEN}
-            animate={PANEL_SHOWN}
-            exit={reduceMotion ? { opacity: 0 } : PANEL_HIDDEN}
-            transition={reduceMotion ? { duration: 0.15 } : PANEL_SPRING}
+            animate={{
+              ...PANEL_SHOWN,
+              transition: reduceMotion ? { duration: 0.15 } : PANEL_ENTER,
+            }}
+            exit={{
+              ...(reduceMotion ? { opacity: 0 } : PANEL_HIDDEN),
+              transition: reduceMotion ? { duration: 0.15 } : PANEL_EXIT,
+            }}
             style={{ transformOrigin: isLeft ? "bottom left" : "bottom right" }}
-            className={`fixed z-45 overflow-hidden bg-popover font-mono text-popover-foreground shadow-2xl ring-1 ring-foreground/10 outline-none ${buttonPosition === "hidden" ? "bottom-4" : "bottom-20"} ${isLeft ? "left-4" : "right-4"}`}
+            className={`fixed z-45 overflow-hidden border bg-popover font-mono text-popover-foreground shadow-2xl will-change-transform ${buttonPosition === "hidden" ? "bottom-4" : "bottom-20"} ${isLeft ? "left-4" : "right-4"}`}
           >
             {/* Card layout (per shadcn's chat example): the provider wraps the whole
                 card so the composer can drive the scroller (jump to message). */}
             <MessageScrollerProvider autoScroll defaultScrollPosition="end">
               {/* Fixed size here so content never reflows while the panel animates width/height */}
-              <Card className="h-[min(38rem,calc(100dvh-8rem))] w-[min(28rem,calc(100vw-2rem))] gap-0 py-0 ring-0">
+              <Card className="h-[min(80svh,calc(100svh-7rem))] w-[min(28rem,calc(100vw-2rem))] gap-0 py-0 ring-0">
                 <CardHeader className="gap-1 border-b border-border py-3">
                   <CardTitle
                     id={titleId}
@@ -368,6 +365,7 @@ export function AiAdvisorDialog({
                   <CardAction>
                     <ActionButton
                       label={t.settingsDialog.assistant.close}
+                      variant="destructive"
                       onClick={() => onOpenChange(false)}
                     >
                       <X />
@@ -485,46 +483,6 @@ export function AiAdvisorDialog({
                                 {ai.stabilityHigh}
                               </p>
                             )}
-                          </section>
-
-                          {/* Tomorrow / weekend: two compact items side by side */}
-                          <section className="space-y-1.5">
-                            <h3 className="font-mono text-nano font-bold tracking-wider text-muted-foreground uppercase">
-                              {ai.plannedShiftsTitle}
-                            </h3>
-                            <ItemGroup className="grid grid-cols-2 gap-1.5">
-                              {outlook.map((shift, idx) => (
-                                <Item
-                                  key={idx}
-                                  variant="outline"
-                                  size="xs"
-                                  className="items-start"
-                                >
-                                  <ItemContent className="min-w-0 gap-1">
-                                    <ItemTitle className="flex w-full items-center justify-between gap-1.5">
-                                      <span className="truncate">
-                                        {shift.period}
-                                      </span>
-                                      <Badge
-                                        variant="outline"
-                                        className="shrink-0 border-primary/30 font-mono text-nano text-primary"
-                                      >
-                                        {shift.temperatureShift}
-                                      </Badge>
-                                    </ItemTitle>
-                                    <ItemDescription className="line-clamp-2 text-mini text-foreground">
-                                      {shift.summary}
-                                    </ItemDescription>
-                                    <p className="truncate text-nano text-muted-foreground">
-                                      {ai.precipRiskLabel}{" "}
-                                      <span className="text-foreground">
-                                        {shift.precipitationRisk}
-                                      </span>
-                                    </p>
-                                  </ItemContent>
-                                </Item>
-                              ))}
-                            </ItemGroup>
                           </section>
                         </div>
                       </motion.div>
@@ -867,35 +825,21 @@ export function AiAdvisorDialog({
   )
 }
 
-// Panel grows out of the button's corner: width/height 0 -> auto plus a spring
-// on scale/opacity with a slight rise and blur. Reduced motion falls back to a short fade.
-const PANEL_HIDDEN = {
-  opacity: 0,
-  scale: 0.9,
-  y: 16,
-  width: 0,
-  height: 0,
-  filter: "blur(4px)",
-}
-const PANEL_SHOWN = {
-  opacity: 1,
-  scale: 1,
-  y: 0,
-  width: "auto",
-  height: "auto",
-  filter: "blur(0px)",
-}
+// Panel eases out of the button's corner using only compositor-friendly
+// properties (opacity + transform): no width/height/blur animation, so nothing
+// reflows or repaints mid-flight. Exit is shorter than enter. Reduced motion
+// falls back to a short fade.
+const PANEL_HIDDEN = { opacity: 0, scale: 0.92, y: 12 }
+const PANEL_SHOWN = { opacity: 1, scale: 1, y: 0 }
+const EASE_OUT = [0.22, 1, 0.36, 1] as const
+const EASE_IN = [0.4, 0, 1, 1] as const
 // Briefing details: height 0 -> auto with scale/opacity.
 const COLLAPSED = { height: 0, opacity: 0, scale: 0.97 }
 const EXPANDED = { height: "auto", opacity: 1, scale: 1 }
 const HEIGHT_SPRING = { type: "spring", stiffness: 420, damping: 36 } as const
-const PANEL_SPRING = {
-  type: "spring",
-  stiffness: 380,
-  damping: 30,
-  mass: 0.8,
-} as const
-const ICON_SPRING = { type: "spring", stiffness: 500, damping: 28 } as const
+const PANEL_ENTER = { duration: 0.38, ease: EASE_OUT } as const
+const PANEL_EXIT = { duration: 0.2, ease: EASE_IN } as const
+const ICON_TWEEN = { duration: 0.24, ease: EASE_OUT } as const
 
 /** Floating button: pops in on mount, lifts on hover, presses on click. */
 const FAB_MOTION =

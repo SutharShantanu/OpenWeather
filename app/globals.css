@@ -182,6 +182,10 @@
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
+  /* Keep the scrollbar gutter when scroll is locked so fixed elements never shift */
+  html {
+    scrollbar-gutter: stable;
+  }
   html, body {
     font-family: "Helvetica Neue", Helvetica, Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     @apply bg-background text-foreground;
@@ -198,7 +202,19 @@
     font-feature-settings: "tnum" 1, "cv01" 1, "cv02" 1;
   }
 
-  /* Leaflet map containment & z-index isolation */
+  /* Lenis smooth scroll auto-height enforcement */
+  html.lenis,
+  html.lenis body {
+    height: auto !important;
+  }
+
+  /* Leaflet map containment & z-index isolation, and vertical touch/trackpad pass-through */
+  .leaflet-container,
+  .leaflet-container *,
+  .leaflet-pane,
+  .leaflet-tile-container {
+    touch-action: pan-y !important;
+  }
   .leaflet-container {
     isolation: isolate !important;
     z-index: 0 !important;

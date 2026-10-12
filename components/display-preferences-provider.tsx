@@ -65,7 +65,7 @@ export const DEFAULT_DISPLAY_PREFERENCES: DisplayPreferences = {
   pressureUnit: "hPa",
   precipUnit: "mm",
   timeFormat: "24h",
-  dateFormat: "iso",
+  dateFormat: "long",
   coordinateFormat: "decimal",
   language: "en",
 }

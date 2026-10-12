@@ -81,7 +81,7 @@ export function formatClockString(
 }
 
 /** Formats a calendar date using the pattern of the selected DATE_FORMAT_OPTIONS entry. */
-export function formatDate(input: DateInput, dateFormat: DateFormatOption = "iso"): string {
+export function formatDate(input: DateInput, dateFormat: DateFormatOption = "long"): string {
   const date = toDate(input)
   if (!isValid(date)) return typeof input === "string" ? input : ""
   const pattern =
@@ -91,17 +91,23 @@ export function formatDate(input: DateInput, dateFormat: DateFormatOption = "iso
 }
 
 /** Short day+month label (for compact axes), ordered according to the date format. */
-export function formatShortDate(input: DateInput, dateFormat: DateFormatOption = "iso"): string {
+export function formatShortDate(input: DateInput, dateFormat: DateFormatOption = "long"): string {
   const date = toDate(input)
   if (!isValid(date)) return typeof input === "string" ? input : ""
   switch (dateFormat) {
     case "us":
       return formatDateFns(date, "MM/dd")
+    case "mdy":
+      return formatDateFns(date, "MMM d")
+    case "dmy":
+      return formatDateFns(date, "d MMM")
     case "intl":
       return formatDateFns(date, "dd/MM")
     case "iso":
-    default:
       return formatDateFns(date, "MM-dd")
+    case "long":
+    default:
+      return formatDateFns(date, "do MMM")
   }
 }
 

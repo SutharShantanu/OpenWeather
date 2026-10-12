@@ -6,14 +6,26 @@ import { EmptyState } from "@/components/empty-state"
 
 export default function Error({
   error,
-  unstable_retry,
+  retry,
+  reset,
 }: {
   error: Error & { digest?: string }
-  unstable_retry: () => void
+  retry?: () => void
+  reset?: () => void
 }) {
   useEffect(() => {
     console.error(error)
   }, [error])
+
+  const handleRetry = () => {
+    if (typeof retry === "function") {
+      retry()
+    } else if (typeof reset === "function") {
+      reset()
+    } else if (typeof window !== "undefined") {
+      window.location.reload()
+    }
+  }
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-xl items-center px-4">
@@ -25,7 +37,7 @@ export default function Error({
         primaryAction={{
           label: "Try again",
           icon: RefreshCw,
-          onClick: () => unstable_retry(),
+          onClick: handleRetry,
         }}
       />
     </main>

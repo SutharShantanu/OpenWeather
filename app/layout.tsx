@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { JetBrains_Mono } from "next/font/google"
+import "lenis/dist/lenis.css"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { LenisProvider } from "@/components/lenis-provider"
@@ -38,7 +39,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("h-full font-sans antialiased", fontMono.variable)}
+      className={cn("min-h-full font-sans antialiased", fontMono.variable)}
     >
       <body className="flex min-h-full flex-col bg-background text-foreground antialiased selection:bg-primary/20 selection:text-foreground">
         <ThemeProvider

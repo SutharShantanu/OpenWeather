@@ -5,6 +5,25 @@ import { DEFAULT_EXTENDED_SETTINGS } from "@/components/settings/constants"
 import type { ExtendedSettings } from "@/components/settings/types"
 import { STORAGE_KEYS } from "@/lib/constants"
 
+const DATE_DEFAULT_MIGRATED_KEY = "openweather_date_default_long_v1"
+
+/**
+ * One-off: "iso" was the old default date format and is saved in every existing
+ * profile, so it would mask the new default forever. Move it once; a later
+ * explicit choice of ISO is kept because the flag stays set.
+ */
+function migrateOldDateDefault(settings: Record<string, unknown>) {
+  try {
+    if (localStorage.getItem(DATE_DEFAULT_MIGRATED_KEY)) return
+    localStorage.setItem(DATE_DEFAULT_MIGRATED_KEY, "1")
+    if (settings.dateFormat === "iso") {
+      settings.dateFormat = DEFAULT_EXTENDED_SETTINGS.dateFormat
+    }
+  } catch {
+    // storage blocked: keep whatever was saved
+  }
+}
+
 /**
  * Merges persisted settings over the defaults, dropping unknown keys and any
  * value whose type doesn't match the default (guards against stale or corrupt storage).
@@ -24,6 +43,7 @@ function parseStoredSettings(raw: string | null): ExtendedSettings {
         merged[key] = value
       }
     }
+    migrateOldDateDefault(merged)
     return merged as unknown as ExtendedSettings
   } catch {
     return DEFAULT_EXTENDED_SETTINGS

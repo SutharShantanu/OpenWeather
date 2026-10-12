@@ -41,10 +41,7 @@ import {
   getGoogleLanguage,
 } from "@/lib/google-languages"
 import { TimeFormat } from "@/lib/weather"
-import {
-  DATE_FORMAT_OPTIONS,
-  COORDINATE_FORMAT_OPTIONS,
-} from "../../constants"
+import { DATE_FORMAT_OPTIONS, COORDINATE_FORMAT_OPTIONS } from "../../constants"
 import type {
   TabBaseProps,
   DateFormatOption,
@@ -54,7 +51,14 @@ import { useLiveTime, useRegionalSettings } from "../../hooks"
 
 const SAMPLE_COORDS = { lat: 51.5074, lon: -0.1278 }
 
-export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBaseProps) {
+/** Unambiguous sample so day/month order is obvious in every option. */
+const SAMPLE_DATE = new Date(2026, 11, 25)
+
+export function RegionalTabContent({
+  settings,
+  onUpdateSettings,
+  coords,
+}: TabBaseProps) {
   const { t } = useTranslation()
   const regional = t.settingsDialog.regional
   // null until mounted, so server and client render the same placeholder
@@ -63,7 +67,10 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
   const isUiTranslated = resolveUiLanguage(settings.language) !== null
 
   const liveClock = currentTime
-    ? format(currentTime, settings.timeFormat === "24h" ? "HH:mm:ss" : "hh:mm:ss a")
+    ? format(
+        currentTime,
+        settings.timeFormat === "24h" ? "HH:mm:ss" : "hh:mm:ss a"
+      )
     : "--:--:--"
 
   const activeDateFormat =
@@ -73,9 +80,14 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
     ? format(currentTime, activeDateFormat.dateFnsPattern)
     : activeDateFormat.format
 
-  const coordinateFormat = settings.coordinateFormat || COORDINATE_FORMAT_OPTIONS[0].id
+  const coordinateFormat =
+    settings.coordinateFormat || COORDINATE_FORMAT_OPTIONS[0].id
   const sampleCoords = coords ?? SAMPLE_COORDS
-  const coordinateSample = formatCoords(sampleCoords.lat, sampleCoords.lon, coordinateFormat)
+  const coordinateSample = formatCoords(
+    sampleCoords.lat,
+    sampleCoords.lon,
+    coordinateFormat
+  )
 
   const { availableLanguages, handleSelectLanguage } = useRegionalSettings({
     onUpdateSettings,
@@ -128,7 +140,9 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                 a: RegionalLanguageOption | null,
                 b: RegionalLanguageOption | null
               ) => a?.code === b?.code}
-              itemToStringValue={(lang: RegionalLanguageOption) => lang?.code ?? ""}
+              itemToStringValue={(lang: RegionalLanguageOption) =>
+                lang?.code ?? ""
+              }
               itemToStringLabel={(lang: RegionalLanguageOption) =>
                 lang
                   ? `${lang.label} ${lang.englishName} ${lang.code} ${lang.region}`
@@ -140,19 +154,19 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                 render={
                   <Button
                     variant="outline"
-                    className="w-full justify-between font-mono text-xs h-auto min-h-9 py-2"
+                    className="h-auto min-h-9 w-full justify-between py-2 font-mono text-xs"
                   />
                 }
               >
                 <ComboboxValue>
                   {(lang: RegionalLanguageOption) =>
                     lang ? (
-                      <span className="flex min-w-0 flex-1 items-center gap-2 text-start font-mono truncate">
+                      <span className="flex min-w-0 flex-1 items-center gap-2 truncate text-start font-mono">
                         <span>{lang.flag}</span>
-                        <span className="font-semibold text-foreground truncate">
+                        <span className="truncate font-semibold text-foreground">
                           {lang.label}
                         </span>
-                        <span className="text-tiny text-muted-foreground truncate">
+                        <span className="truncate text-tiny text-muted-foreground">
                           ({lang.englishName} • {lang.region})
                         </span>
                       </span>
@@ -164,7 +178,7 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                   }
                 </ComboboxValue>
               </ComboboxTrigger>
-              <ComboboxContent className="min-w-(--anchor-width) max-w-[var(--available-width)] h-auto max-h-[var(--available-height)]">
+              <ComboboxContent className="h-auto max-h-[var(--available-height)] max-w-[var(--available-width)] min-w-(--anchor-width)">
                 <ComboboxInput
                   showTrigger={false}
                   showSearchIcon
@@ -175,7 +189,11 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                 <ScrollArea className="h-72 max-h-[min(calc(var(--available-height)-4rem),32rem)]">
                   <ComboboxList className="mt-1 max-h-none overflow-visible pe-2">
                     {(lang: RegionalLanguageOption) => (
-                      <ComboboxItem key={lang.code} value={lang} className="py-1">
+                      <ComboboxItem
+                        key={lang.code}
+                        value={lang}
+                        className="py-1"
+                      >
                         <span className="flex min-w-0 flex-1 items-center gap-2 font-mono">
                           <span className="shrink-0">{lang.flag}</span>
                           <span className="flex min-w-0 flex-1 flex-col leading-tight">
@@ -244,7 +262,10 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                 if (val) onUpdateSettings({ timeFormat: val as TimeFormat })
               }}
             >
-              <SelectTrigger aria-label={regional.timeTitle} className="w-full justify-between border-border bg-background/60 font-mono text-xs">
+              <SelectTrigger
+                aria-label={regional.timeTitle}
+                className="w-full justify-between border-border bg-background/60 font-mono text-xs"
+              >
                 <SelectValue placeholder={regional.timeTitle} />
               </SelectTrigger>
               <SelectContent position="popper">
@@ -271,7 +292,10 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
               >
                 <span>
                   {regional.clock}:{" "}
-                  <strong className="font-bold tracking-wider text-foreground" suppressHydrationWarning>
+                  <strong
+                    className="font-bold tracking-wider text-foreground"
+                    suppressHydrationWarning
+                  >
                     {liveClock}
                   </strong>
                 </span>
@@ -295,7 +319,7 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                 variant="primary-outline"
                 className="font-mono text-xs uppercase"
               >
-                {settings.dateFormat?.toUpperCase()}
+                {liveDate}
               </Badge>
             </CardAction>
           </CardHeader>
@@ -309,7 +333,10 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                   })
               }}
             >
-              <SelectTrigger aria-label={regional.dateTitle} className="w-full justify-between border-border bg-background/60 font-mono text-xs">
+              <SelectTrigger
+                aria-label={regional.dateTitle}
+                className="w-full justify-between border-border bg-background/60 font-mono text-xs"
+              >
                 <SelectValue placeholder={regional.dateTitle} />
               </SelectTrigger>
               <SelectContent position="popper">
@@ -317,7 +344,7 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                   <SelectItem key={opt.id} value={opt.id}>
                     <span className="flex items-center gap-2 font-mono">
                       <span className="font-semibold text-foreground">
-                        {regional.dateFormats[opt.id]}
+                        {format(SAMPLE_DATE, opt.dateFnsPattern)}
                       </span>
                     </span>
                   </SelectItem>
@@ -370,7 +397,10 @@ export function RegionalTabContent({ settings, onUpdateSettings, coords }: TabBa
                   })
               }}
             >
-              <SelectTrigger aria-label={regional.coordTitle} className="w-full justify-between border-border bg-background/60 font-mono text-xs">
+              <SelectTrigger
+                aria-label={regional.coordTitle}
+                className="w-full justify-between border-border bg-background/60 font-mono text-xs"
+              >
                 <SelectValue placeholder={regional.coordTitle} />
               </SelectTrigger>
               <SelectContent position="popper">

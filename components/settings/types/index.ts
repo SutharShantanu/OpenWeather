@@ -28,7 +28,7 @@ export interface UnitPresetConfig {
   }
 }
 
-export type DateFormatOption = "iso" | "intl" | "us"
+export type DateFormatOption = "long" | "dmy" | "mdy" | "iso" | "intl" | "us"
 export type CoordinateFormatOption = "decimal" | "dms"
 export type ThemeOptionId = "dark" | "light" | "system"
 

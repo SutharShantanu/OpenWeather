@@ -71,3 +71,27 @@ export const SETTINGS_TABS = [
 ] as const;
 export type SettingsTab = (typeof SETTINGS_TABS)[number];
 
+// Console Footer & Author Metadata
+export const CONSOLE_AUTHOR = {
+  name: "Shantanu Suthar",
+  shortName: "Shantanu",
+  handle: "@SutharShantanu",
+  role: "SDE",
+  bio: "Software Development Engineer @WhizHack-Tech. Building Next.js applications and scalable UI systems.",
+  location: "Gurugram, India",
+  avatarUrl: "https://avatars.githubusercontent.com/u/110021464?v=4",
+  avatarFallback: "SS",
+  githubUrl: "https://github.com/SutharShantanu",
+  portfolioUrl: "https://sutharshantanu.github.io",
+  portfolioDisplay: "sutharshantanu.github.io",
+  stats: {
+    repos: 32,
+    followers: 125,
+  },
+} as const;
+
+export const CONSOLE_LINKS = {
+  githubRepoUrl: "https://github.com/SutharShantanu/OpenWeather",
+  githubIconSvgUrl: "https://thesvg.org/icons/github/light.svg",
+} as const;
+

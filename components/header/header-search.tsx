@@ -48,7 +48,8 @@ export function HeaderSearch({
     isOpen,
     setIsOpen,
     results,
-    clearResults,
+    clearQuery,
+    isCommitted,
     isSearching,
     isLocating,
     inputRef,
@@ -64,7 +65,7 @@ export function HeaderSearch({
   // Freeze the page behind the search dropdown while it's open
   useScrollLock(isOpen)
 
-  const trimmedQuery = query.trim()
+  const trimmedQuery = isCommitted ? "" : query.trim()
   const showPopular = trimmedQuery.length < 2
   const hasSelectableItems = isOpen && (showPopular || results.length > 0)
 
@@ -147,10 +148,7 @@ export function HeaderSearch({
                   <InputGroupButton
                     size="icon-xs"
                     variant="warning"
-                    onClick={() => {
-                      setQuery("")
-                      clearResults()
-                    }}
+                    onClick={clearQuery}
                     aria-label={t.common.clear}
                   >
                     <X />

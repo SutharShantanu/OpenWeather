@@ -43,6 +43,8 @@ export function useCitySearch({
   onLocate,
 }: UseCitySearchOptions) {
   const [query, setQuery] = useState("")
+  // City last picked: stays in the input until the user clears or edits it.
+  const [committed, setCommitted] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const [detectedCoords, setDetectedCoords] = useState<{
     lat: number
@@ -100,7 +102,7 @@ export function useCitySearch({
     results,
     isSearching,
     clear: clearResults,
-  } = useGeocodeSearch(query, { lang: language })
+  } = useGeocodeSearch(query === committed ? "" : query, { lang: language })
 
   // Most recent first, no duplicates (case-insensitive). The dropdown that shows
   // them only renders on the client, so reading storage up front is safe.
@@ -126,7 +128,8 @@ export function useCitySearch({
     (cityName: string) => {
       rememberSearch(cityName)
       onSearch(cityName)
-      setQuery("")
+      setQuery(cityName)
+      setCommitted(cityName)
       clearResults()
       setIsOpen(false)
     },
@@ -150,12 +153,23 @@ export function useCitySearch({
 
   const clearSearch = useCallback(() => {
     setQuery("")
+    setCommitted("")
     clearResults()
     setIsOpen(false)
   }, [clearResults])
 
+  /** Empties the field but leaves the dropdown as it is. */
+  const clearQuery = useCallback(() => {
+    setQuery("")
+    setCommitted("")
+    clearResults()
+  }, [clearResults])
+
   return {
     query,
+    /** True while the field only echoes the picked city (nothing typed since). */
+    isCommitted: query !== "" && query === committed,
+    clearQuery,
     setQuery,
     isOpen,
     setIsOpen,

@@ -25,10 +25,30 @@ export function isValid(date: unknown): boolean {
   return false
 }
 
-export function format(
-  date: Date | number,
-  formatStr: string
-): string {
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+]
+
+/** English ordinal suffix: 1st, 2nd, 3rd, 4th ... 11th, 12th, 13th, 21st. */
+function ordinalSuffix(n: number): string {
+  if (n % 100 >= 11 && n % 100 <= 13) return "th"
+  return (
+    ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th"
+  )
+}
+
+export function format(date: Date | number, formatStr: string): string {
   const d = toDate(date)
   if (isNaN(d.getTime())) {
     throw new RangeError("Invalid time value")
@@ -44,7 +64,7 @@ export function format(
   const ampm = hours24 < 12 ? "AM" : "PM"
 
   return formatStr.replace(
-    /'([^']*)'|yyyy|yy|MM|M|dd|d|HH|H|hh|h|mm|m|ss|s|a|aaa/g,
+    /'([^']*)'|yyyy|yy|MMMM|MMM|MM|M|dd|do|d|HH|H|hh|h|mm|m|ss|s|a|aaa/g,
     (match, literal) => {
       if (literal !== undefined) {
         return literal
@@ -54,6 +74,12 @@ export function format(
           return String(year).padStart(4, "0")
         case "yy":
           return String(year).slice(-2)
+        case "MMMM":
+          return MONTHS[month - 1]
+        case "MMM":
+          return MONTHS[month - 1].slice(0, 3)
+        case "do":
+          return `${day}${ordinalSuffix(day)}`
         case "MM":
           return String(month).padStart(2, "0")
         case "M":

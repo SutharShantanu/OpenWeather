@@ -43,7 +43,7 @@ export interface SettingsDefaultsConfig {
   defaultPrecipUnit: PrecipitationUnit;
   defaultLanguage: string;
   defaultTimeFormat: TimeFormat;
-  defaultDateFormat: "iso" | "intl" | "us";
+  defaultDateFormat: "long" | "dmy" | "mdy" | "iso" | "intl" | "us";
   defaultCoordinateFormat: "decimal" | "dms";
   defaultTtsSpeed: number;
   defaultTtsPitch: number;
@@ -149,7 +149,7 @@ export const CONFIG: AppConfig = {
     defaultTimeFormat:
       (process.env.NEXT_PUBLIC_DEFAULT_TIME_FORMAT as TimeFormat) || "24h",
     defaultDateFormat:
-      (process.env.NEXT_PUBLIC_DEFAULT_DATE_FORMAT as "iso" | "intl" | "us") || "iso",
+      (process.env.NEXT_PUBLIC_DEFAULT_DATE_FORMAT as "long" | "dmy" | "mdy" | "iso" | "intl" | "us") || "long",
     defaultCoordinateFormat:
       (process.env.NEXT_PUBLIC_DEFAULT_COORDINATE_FORMAT as "decimal" | "dms") || "decimal",
     defaultTtsSpeed: process.env.NEXT_PUBLIC_DEFAULT_TTS_SPEED
